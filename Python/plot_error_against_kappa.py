@@ -14,14 +14,10 @@ from docopt import docopt
 import numpy as np
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
 
-    # Get the command line arguments
-    args = docopt(__doc__)
+def plot(arguments):
 
-    labels = ["FEM", "FDM", "FVM", "FET"]
-
-    for name in args["<file_name>"]:
+    for name in arguments["<file_name>"]:
         plt.figure(name)
         d = np.loadtxt(name)
         assert d.shape[0] == 5
@@ -32,5 +28,15 @@ if __name__ == '__main__':
         plt.ylabel(r"Error")
         plt.xlabel(r"$\kappa$")
         plt.tight_layout()
+
+
+if __name__ == '__main__':
+
+    # Get the command line arguments
+    args = docopt(__doc__)
+
+    labels = ["FEM", "FDM", "FVM", "FET"]
+
+    plot(args)
 
     plt.show()

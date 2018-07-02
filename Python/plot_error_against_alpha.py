@@ -14,12 +14,10 @@ from docopt import docopt
 import numpy as np
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
 
-    # Get the command line arguments
-    args = docopt(__doc__)
+def plot(arguments):
 
-    for name in args["<file_name>"]:
+    for name in arguments["<file_name>"]:
         d = np.loadtxt(name)
         assert d.shape[0] == 2
         plt.plot(d[0], d[1])
@@ -27,4 +25,13 @@ if __name__ == '__main__':
     plt.ylabel(r"Error")
     plt.xlabel(r"$\alpha$")
     plt.tight_layout()
+
+
+if __name__ == '__main__':
+
+    # Get the command line arguments
+    args = docopt(__doc__)
+
+    plot(args)
+
     plt.show()

@@ -17,51 +17,60 @@ from docopt import docopt
 import numpy as np
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
 
-    # Get the command line arguments
-    args = docopt(__doc__)
-    if args["--get_error"]:
-        args["--get_error"] = [float(x) for x in args["--get_error"].split(",")]
-        if len(args["--get_error"]) == 1:
-            args["--get_error"].append(args["--get_error"][0])
+def get_data(file_name):
+    num_points = None
 
-    for name in args["<file_name>"]:
-        # Get the size of square grid of errors
+    f = open(file_name, "r")
+    for line in f:
+        if "#" not in line:
+            break
+        if "num_points" in line and "command" not in line.lower():
+            num_points = int(line.split(" ")[-1])
+            break
+    f.close()
 
-        num_points = None
+    data = np.loadtxt(file_name)
+    if num_points is None:
+        num_points = np.sqrt(data.shape[1])
+    data = data.reshape([3, num_points, num_points]).transpose([0, 2, 1])
 
-        f = open(name, "r")
-        for line in f:
-            if "#" not in line:
-                break
-            if "num_points" in line and "command" not in line.lower():
-                num_points = int(line.split(" ")[-1])
-                break
-        f.close()
+    return data
 
-        d = np.loadtxt(name)
-        if num_points is None:
-            num_points = np.sqrt(d.shape[1])
-        d = d.reshape([3, num_points, num_points]).transpose([0, 2, 1])
-        min_index = np.unravel_index(np.argmin(d[2]), d[2].shape)
+
+def get_min(data):
+    return np.unravel_index(np.argmin(data), data.shape)
+
+
+def get_index(mesh_x, mesh_y, value):
+    """Returns the index of point in the mesh closest to the parameter value"""
+
+    idx_0 = (np.abs(mesh_x - value[0])).argmin()
+    idx_1 = (np.abs(mesh_y - value[1])).argmin()
+    idx = np.unravel_index([idx_0, idx_1], mesh_x.shape)
+    idx = (idx[0][1], idx[1][0])
+
+    return idx
+
+
+def plot(arguments):
+    for name in arguments["<file_name>"]:
+
+        d = get_data(name)
 
         plt.figure(name)
 
-        if args["--get_min"]:
-            s = r"Cooridinates of the minimum for {} = ({}, {})"
+        if arguments["--get_min"]:
+            s = r"Coordinates of the minimum for {} = ({}, {})"
+            min_index = get_min(d[2])
             print(s.format(name, d[0][min_index], d[1][min_index]))
 
-        if args["--get_error"]:
+        if arguments["--get_error"]:
             s = r"Value of error at ({}, {}) = {}"
-            idx_0 = (np.abs(d[0] - args["--get_error"][0])).argmin()
-            idx_1 = (np.abs(d[1] - args["--get_error"][1])).argmin()
-            idx = np.unravel_index([idx_0, idx_1], [num_points, num_points])
-            idx = (idx[0][1], idx[1][0])
-            error = d[2][idx]
-            print(s.format(d[0][idx], d[1][idx], error))
+            index = get_index(d[0], d[1], arguments["--ger_error"])
+            print(s.format(d[0][index], d[1][index], d[2][index]))
 
-        if args["--1d"]:
+        if arguments["--1d"]:
             plt.plot(d[1][d[0] == d[1]], d[2][d[0] == d[1]], color="black")
             plt.xlabel(r"$\beta$")
             plt.ylabel("e")
@@ -72,7 +81,20 @@ if __name__ == '__main__':
             plt.xlabel(r"$\beta_x$")
             plt.gca().set_aspect('equal')
 
+            min_index = get_min(d[2])
             plt.scatter(d[0][min_index], d[1][min_index], label="Min.")
             plt.legend()
+
+
+if __name__ == '__main__':
+
+    # Get the command line arguments
+    args = docopt(__doc__)
+    if args["--get_error"]:
+        args["--get_error"] = [float(x) for x in args["--get_error"].split(",")]
+        if len(args["--get_error"]) == 1:
+            args["--get_error"].append(args["--get_error"][0])
+
+    plot(args)
 
     plt.show()

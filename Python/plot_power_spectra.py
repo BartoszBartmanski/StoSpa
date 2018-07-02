@@ -16,6 +16,46 @@ from docopt import docopt
 import numpy as np
 import matplotlib.pyplot as plt
 
+
+def get_data(file_name):
+    original_data_shape = None
+
+    f = open(file_name, "r")
+    for line in f:
+        if "#" not in line:
+            break
+        if "original_data_shape" in line:
+            original_data_shape = line.split(" ")[-1].split(",")
+            original_data_shape = [int(x) for x in original_data_shape]
+    f.close()
+
+    data = np.loadtxt(file_name).reshape(original_data_shape)
+
+    return data
+
+
+def plot(arguments):
+
+    for name in arguments["<file_name>"]:
+        # Get the size of square grid of errors
+
+        d = get_data(name)
+        num_dims = len(d[0, 0].shape)
+        d = d[arguments["--species"], arguments["--time"]]
+
+        plt.figure(name)
+
+        if num_dims == 1:
+            plt.bar(np.arange(len(d)), d)
+            plt.xlabel(r"$m$")
+            plt.ylabel(r"$P_s$")
+        else:
+            im = plt.imshow(d, origin="lower", aspect="auto", cmap="Greys")
+            plt.ylabel(r"$m_y$")
+            plt.xlabel(r"$m_x$")
+            plt.colorbar(im)
+
+
 if __name__ == '__main__':
 
     # Get the command line arguments
@@ -23,35 +63,6 @@ if __name__ == '__main__':
     args["--time"] = int(args["--time"])
     args["--species"] = int(args["--species"])
 
-    for name in args["<file_name>"]:
-        # Get the size of square grid of errors
-
-        original_data_shape = None
-        num_dims = None
-
-        f = open(name, "r")
-        for line in f:
-            if "#" not in line:
-                break
-            if "original_data_shape" in line:
-                original_data_shape = line.split(" ")[-1].split(",")
-                original_data_shape = [int(x) for x in original_data_shape]
-            if "num_dims" in line and "command" not in line.lower():
-                num_dims = int(line.split(" ")[-1])
-        f.close()
-        d = np.loadtxt(name).reshape(original_data_shape)
-
-        plt.figure(name)
-
-        data = d[args["--species"], args["--time"]]
-        if num_dims == 1:
-            plt.bar(np.arange(len(data)), data)
-            plt.xlabel(r"$m$")
-            plt.ylabel(r"$P_s$")
-        else:
-            im = plt.imshow(data, origin="lower", aspect="auto")
-            plt.ylabel(r"$m_y$")
-            plt.xlabel(r"$m_x$")
-            plt.colorbar(im)
+    plot(args)
 
     plt.show()

@@ -14,12 +14,10 @@ from docopt import docopt
 import numpy as np
 import matplotlib.pyplot as plt
 
-if __name__ == '__main__':
 
-    # Get the command line arguments
-    args = docopt(__doc__)
+def plot(arguments):
 
-    for name in args["<file_name>"]:
+    for name in arguments["<file_name>"]:
         f = open(name)
         lines = f.readlines()
         times = []
@@ -32,4 +30,13 @@ if __name__ == '__main__':
 
     plt.xlabel("Run")
     plt.ylabel("Time [s]")
+
+
+if __name__ == '__main__':
+
+    # Get the command line arguments
+    args = docopt(__doc__)
+
+    plot(args)
+
     plt.show()
