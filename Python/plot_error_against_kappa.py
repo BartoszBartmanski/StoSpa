@@ -16,6 +16,7 @@ import matplotlib.pyplot as plt
 
 
 def plot(arguments):
+    labels = ["FEM", "FDM", "FVM", "FET"]
 
     for name in arguments["<file_name>"]:
         plt.figure(name)
@@ -34,8 +35,6 @@ if __name__ == '__main__':
 
     # Get the command line arguments
     args = docopt(__doc__)
-
-    labels = ["FEM", "FDM", "FVM", "FET"]
 
     plot(args)
 
