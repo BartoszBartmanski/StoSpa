@@ -30,6 +30,10 @@ def get_mean(file_name):
             break
     f.close()
 
+    if not mean:
+        data = np.loadtxt(file_name)
+        mean = np.argmax(data)
+
     return mean
 
 

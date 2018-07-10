@@ -93,22 +93,19 @@ if __name__ == '__main__':
               "file_type"]
 
     # Get the saved settings
-    params = Parameters(".sto_plot.p", os.path.expanduser("~"), needed)
+    q = Parameters(".sto_plot.json", os.path.expanduser("~"), needed)
     plot = None
 
     # Display the saved settings
     if args["--info"]:
-        params.display()
+        q.display()
     # Change one of the saved settings
     elif args["--set"]:
-        params.change(args["<name>"], args["<value>"])
+        q.change(args["<name>"], args["<value>"])
     # Otherwise, work with simulations data
     else:
         # Change the directory
         os.chdir(args["-d"])
-
-        # Get the parameters stored in the dictionary
-        q = params.get_parameters()
 
         # Open the data
         if ".p" in args["<sim_name>"]:

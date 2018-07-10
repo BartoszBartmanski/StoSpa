@@ -5,9 +5,9 @@
 
 Usage:
     parameters.py -h | --help
-    parameters.py display <filename>...
-    parameters.py <filename> change <key> <value>
-    parameters.py <filename> add <key> <value>
+    parameters.py <filename>
+    parameters.py <filename> change <key> <value> [<type>]
+    parameters.py <filename> add <key> <value> [<type>]
     parameters.py <filename> delete <key>
 
 Options:
@@ -15,20 +15,58 @@ Options:
     change                          Changes the specified entry.
     add                             Adds an entry to the class stored in the file.
     delete                          Deletes an entry in the file.
+    -t --type=<type>                Type of the value [default: str]
 """
 
-import pickle
+import json
 from os import path
 from docopt import docopt
+
+
+def _change_type(value, t):
+
+    if t == "int" or t == "i":
+        value = int(value)
+    elif t == "float" or t == "f":
+        value = float(value)
+    else:
+        value = str(value)
+
+    return value
+
+
+def change_type(value, t):
+    assert isinstance(value, str), type(value)
+    value = value.split(",")
+
+    for i in range(len(value)):
+        value[i] = _change_type(value[i], t)
+
+    if len(value) == 1:
+        value = value[0]
+
+    return value
+
+
+def get_dict_values(a_dict, keys):
+    for key in keys:
+        if key not in a_dict:
+            val = input("{} [<input_type>] = ".format(key))
+            if " " in val:
+                val, t = val.split(" ")[:2]
+            else:
+                t = "str"
+            a_dict[key] = change_type(val, t)
+    return a_dict
 
 
 class Parameters(object):
     """Class to store, change and get parameters in pickled dictionaries."""
 
     def __init__(self, file_name, save_dir="./", keys=None, params=None):
-        assert isinstance(file_name, str)
-        assert isinstance(save_dir, str)
-        assert path.isdir(save_dir)
+        assert isinstance(file_name, str), type(file_name)
+        assert isinstance(save_dir, str), type(save_dir)
+        assert path.isdir(save_dir), "{} not a valid directory!".format(save_dir)
         if keys is None:
             keys = []
         if params is None:
@@ -36,80 +74,85 @@ class Parameters(object):
         assert isinstance(params, dict)
         assert isinstance(keys, (list, tuple))
 
-        self.file_name = file_name
-        self.save_dir = save_dir
-        self.keys = keys
-        self.params = params
+        self.__file_name__ = file_name
+        self.__save_dir__ = save_dir
+        self.__keys__ = keys
+        self.__params__ = params
 
         try:
-            f = open(self.save_dir + "/" + self.file_name, "rb")
+            f = open(self.__save_dir__ + "/" + self.__file_name__, "r")
         except IOError:
             # Ask for the parameters
-            for key in keys:
-                if key not in self.params:
-                    val = input("{} = ".format(key))
-                    self.params[key] = val
+            self.__params__ = get_dict_values(self.__params__, self.__keys__)
 
             # Save the parameters
-            pickle.dump(self.params, open(self.save_dir + "/" + self.file_name, "wb"))
+            with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+                json.dump(self.__params__, outfile, indent=4, sort_keys=True)
         else:
             # Unpickle the dictionary
-            self.params = pickle.load(f)
+            self.__params__ = json.load(f)
             f.close()
 
-            if len(self.keys) == 0:
-                self.keys = self.params.keys()
+            if len(self.__keys__) == 0:
+                self.__keys__ = list(self.__params__.keys())
 
             # Check that all the necessary parameters are present in this dictionary
-            for key in self.keys:
-                if key not in self.params.keys():
-                    self.params[key] = input("Value for {} not found!\n{} = ".format(key, key))
+            self.__params__ = get_dict_values(self.__params__, self.__keys__)
 
-            pickle.dump(self.params, open(self.save_dir + "/" + self.file_name, "wb"))
+            # Save the parameters
+            with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+                json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+
+    def __getitem__(self, item):
+        return self.__params__[item]
+
+    def __setitem__(self, item, value):
+        self.__params__[item] = value
+
+    def get_dict(self):
+        return self.__params__
 
     def display(self):
-        for parameter in self.keys:
-            print("{} - {}".format(parameter, self.params[parameter]))
-
-    def get_parameters(self):
-        return self.params
+        self.__keys__.sort()
+        for parameter in self.__keys__:
+            print("  {} - {}".format(parameter, self.__params__[parameter]))
 
     def change(self, name, val):
-        assert name in self.params.keys(), "Parameter {} not found!".format(name)
-        self.params[name] = str(val)
+        assert name in self.__params__.keys(), "Parameter {} not found!".format(name)
+        self.__params__[name] = val
+
         # Save the parameters
-        pickle.dump(self.params, open(self.save_dir + "/" + self.file_name, "wb"))
+        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def add(self, name, val):
-        assert name not in self.params.keys(), "Parameter {} already in the dictionary!".format(name)
-        self.params[name] = str(val)
+        assert name not in self.__params__.keys(), "Parameter {} already in the dictionary!".format(name)
+        self.__params__[name] = val
+
         # Save the parameters
-        pickle.dump(self.params, open(self.save_dir + "/" + self.file_name, "wb"))
+        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def delete(self, name):
-        if name not in self.params.keys():
+        if name not in self.__params__.keys():
             print("No such entry!")
         else:
-            del self.params[name]
+            del self.__params__[name]
+
         # Save the parameters
-        pickle.dump(self.params, open(self.save_dir + "/" + self.file_name, "wb"))
+        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':
     args = docopt(__doc__)
 
-    parameters = Parameters(args["<filename>"][0], "./")
+    parameters = Parameters(args["<filename>"], "./")
     if args["change"]:
-        parameters.change(args["<key>"], args["<val>"])
+        parameters.change(args["<key>"], change_type(args["<value>"], args["<type>"]))
     elif args["add"]:
-        parameters.add(args["<key>"], args["<val>"])
-        parameters = Parameters(args["<filename>"], "./")
+        parameters.add(args["<key>"], change_type(args["<value>"], args["<type>"]))
     elif args["delete"]:
         parameters.delete(args["<key>"])
-    elif args["display"]:
-        green = "\033[1;32m"
-        nc = "\033[0m"
-        for arg in args["<filename>"]:
-            parameters = Parameters(arg, "./")
-            print(green + arg + nc)
-            parameters.display()
+    else:
+        parameters.display()
