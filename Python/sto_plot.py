@@ -93,7 +93,7 @@ if __name__ == '__main__':
               "file_type"]
 
     # Get the saved settings
-    q = Parameters(".sto_plot.json", os.path.expanduser("~"), needed)
+    q = Parameters(os.path.expanduser("~") + "/.sto_plot.json", needed)
     plot = None
 
     # Display the saved settings
