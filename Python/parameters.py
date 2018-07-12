@@ -64,7 +64,7 @@ class Parameters(object):
 
     def __init__(self, path_to_file, keys=None, params=None):
 
-        assert isinstance(path_to_file, str), type(file_name)
+        assert isinstance(path_to_file, str), type(path_to_file)
         assert path.exists(path_to_file), "{} file does not exist!".format(path_to_file)
         if keys is None:
             keys = []
