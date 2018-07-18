@@ -74,26 +74,19 @@ from plot import *
 from docopt import docopt
 from scipy import misc
 
+
 if __name__ == '__main__':
 
     # Get the command line arguments
     args = docopt(__doc__)
 
-    needed = ["primary_colormap",
-              "secondary_colormap",
-              "tertiary_colormap",
-              "primary_color",
-              "secondary_color",
-              "tertiary_color",
-              "rep",
-              "fig_size",
-              "aspect",
-              "font_size",
-              "dpi",
-              "file_type"]
-
     # Get the saved settings
-    q = Parameters(os.path.expanduser("~") + "/.sto_plot.json", needed)
+    needed = ["rep",
+              "primary_colormap", "secondary_colormap", "tertiary_colormap",
+              "primary_color", "secondary_color", "tertiary_color",
+              "fig_size", "aspect", "font_size", "dpi", "file_type"]
+    path_to_settings = os.path.join(os.path.dirname(__file__), "settings.json")
+    q = Parameters(path_to_settings, needed)
     plot = None
 
     # Display the saved settings
