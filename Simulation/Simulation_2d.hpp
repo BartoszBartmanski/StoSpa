@@ -49,6 +49,9 @@ public:
     /** Empty constructor */
     Simulation_2d() = default;
 
+    /** Default destructor. */
+    ~Simulation_2d() override = default;
+
     /**
      * Calculates the total propensity for a single molecule associated with diffusion according to the FET method.
      * @return value of lambda_0 in FET

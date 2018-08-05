@@ -38,6 +38,7 @@ int GrayScott_I::UpdateGrid(Grid& grid, const int& voxel_index)
 {
     grid.voxels[0][voxel_index] -= 1;
     grid.voxels[1][voxel_index] += 1;
+    return voxel_index;
 }
 
 GrayScott_II::GrayScott_II(double reaction_rate)

@@ -175,7 +175,6 @@ vector<double> AbstractSimulation::GetAverageNumMolecules(unsigned int species)
     return molecules;
 }
 
-
 vector<unsigned> AbstractSimulation::GetNumMolecules(unsigned species, unsigned run)
 {
     assert(species < mNumSpecies);

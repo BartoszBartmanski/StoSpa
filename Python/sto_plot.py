@@ -151,7 +151,7 @@ if __name__ == '__main__':
         else:
             args["--time"] = [int(x) for x in args["--time"].split(",")]
         if args["--mode"] is None:
-            args["--mode"] = []
+            args["--mode"] = [0, 0][:data.num_dims]
         else:
             args["--mode"] = ([int(x) for x in args["--mode"].split(",")] + [0, 0])[:data.num_dims]
         mode_str = "_".join(map(str, args["--mode"]))

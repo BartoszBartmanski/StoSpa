@@ -58,10 +58,10 @@ void Run(const unique_ptr<AbstractSimulation>& sim, const string& path_to_file, 
     unique_ptr<ofstream> output = make_unique<ofstream>(path_to_file, ios::app);
 
     // Initialise progress object
-    Progress p(num_steps+1);
+    Progress p(num_steps);
 
     // Run the SSA
-    for (unsigned i=0; i <= num_steps; i++)
+    for (unsigned i=0; i < num_steps; i++)
     {
         // Move to the next time step
         sim->Advance(time_step, i);
