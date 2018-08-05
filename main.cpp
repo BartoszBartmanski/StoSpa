@@ -73,7 +73,7 @@ void Run(const unique_ptr<AbstractSimulation>& sim, const string& path_to_file, 
         }
 
         // Print the progress of the simulation
-        p.Show(i);
+        p.Show();
     }
 
     cout << "Data saved in " << path_to_file << endl;

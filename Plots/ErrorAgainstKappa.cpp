@@ -174,7 +174,7 @@ int main(int argc, const char** argv)
         }
 
         // Show progress of the simulation
-        p.Show(i);
+        p.Show();
     }
 
     // Check that the directory exists and that the no file is being over-written.

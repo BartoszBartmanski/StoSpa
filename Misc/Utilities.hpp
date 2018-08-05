@@ -119,6 +119,8 @@ private:
     /** Total number of steps that need to be taken to finish the simulation. */
     unsigned mNumSteps;
 
+    unsigned mCurrentStep=0;
+
 public:
     /**
      * Constructor.
@@ -135,7 +137,7 @@ public:
      * Displays the progress of the simulation.
      * @param step - the index of the current step.
      */
-    void Show(unsigned step);
+    void Show();
 
 };
 
