@@ -57,7 +57,7 @@ public:
         unsigned check = 0;
         for (unsigned i=0; i < 2; i++)
         {
-            check += (mUnflattenedIndex[i] < 0 or mUnflattenedIndex[i] >= grid.numVoxels[i]);
+            check += (mUnflattenedIndex[i] < 0 or mUnflattenedIndex[i] >= int(grid.numVoxels[i]));
         }
 
         if (check == 0)

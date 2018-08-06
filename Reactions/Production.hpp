@@ -35,6 +35,7 @@ public:
 
     double GetPropensity(Grid& grid, const int& voxel_index) override
     {
+        (void)voxel_index;
         return mRateConstant * grid.voxelSize;
     }
 
