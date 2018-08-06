@@ -13,15 +13,37 @@ private:
     unsigned mSpeciesIndex;
 
 public:
-    Production(double reaction_rate, unsigned species);
+    Production(double reaction_rate, unsigned species)
+    {
+        assert(reaction_rate >= 0);
 
-    void SetRateConstant(double rate_constant) override;
+        mRateConstant = reaction_rate;
+        mSpeciesIndex = species;
+        mReactionName = "Production";
+    }
 
-    void CheckNumSpecies(unsigned num_species) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species > 0);
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        (void)voxel_index;
+        return mRateConstant * grid.voxelSize;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[mSpeciesIndex][voxel_index] += 1;
+        return voxel_index;
+    }
 };
 
 

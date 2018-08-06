@@ -31,6 +31,9 @@ public:
     /** Empty constructor */
     Simulation_1d() = default;
 
+    /** Default destructor. */
+    ~Simulation_1d() override = default;
+
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diffusion

@@ -74,26 +74,19 @@ from plot import *
 from docopt import docopt
 from scipy import misc
 
+
 if __name__ == '__main__':
 
     # Get the command line arguments
     args = docopt(__doc__)
 
-    needed = ["primary_colormap",
-              "secondary_colormap",
-              "tertiary_colormap",
-              "primary_color",
-              "secondary_color",
-              "tertiary_color",
-              "rep",
-              "fig_size",
-              "aspect",
-              "font_size",
-              "dpi",
-              "file_type"]
-
     # Get the saved settings
-    q = Parameters(".sto_plot.json", os.path.expanduser("~"), needed)
+    needed = ["rep",
+              "primary_colormap", "secondary_colormap", "tertiary_colormap",
+              "primary_color", "secondary_color", "tertiary_color",
+              "fig_size", "aspect", "font_size", "dpi", "file_type"]
+    path_to_settings = os.path.join(os.path.dirname(__file__), "settings.json")
+    q = Parameters(path_to_settings, needed)
     plot = None
 
     # Display the saved settings
@@ -158,7 +151,7 @@ if __name__ == '__main__':
         else:
             args["--time"] = [int(x) for x in args["--time"].split(",")]
         if args["--mode"] is None:
-            args["--mode"] = []
+            args["--mode"] = [0, 0][:data.num_dims]
         else:
             args["--mode"] = ([int(x) for x in args["--mode"].split(",")] + [0, 0])[:data.num_dims]
         mode_str = "_".join(map(str, args["--mode"]))

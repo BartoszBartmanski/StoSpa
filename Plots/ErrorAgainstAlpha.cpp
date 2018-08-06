@@ -170,7 +170,7 @@ int main(int argc, const char** argv)
             error[k] = futures[i].get();
 
             // Show progress of the simulation
-            p.Show(k);
+            p.Show();
         }
     }
 

@@ -15,15 +15,42 @@ protected:
 
 public:
 
-    Dimerisation(double reaction_rate, unsigned int species_index);
+    Dimerisation(double reaction_rate, unsigned int species_index)
+    {
+        // Dimerisation kinetics 2A -> 0
 
-    void SetRateConstant(double rate_constant) override ;
+        assert(reaction_rate >= 0);
 
-    void CheckNumSpecies(unsigned num_species) override;
+        mRateConstant = reaction_rate;
+        mSpeciesIndex = species_index;
+        mReactionName = "Dimerisation";
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        mRateConstant = rate_constant;
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species > 0);
+    }
+
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] * (grid.voxels[mSpeciesIndex][voxel_index] - 1) / grid.voxelSize;
+
+        return propensity;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        if (grid.voxels[mSpeciesIndex][voxel_index] >= 2)
+        {
+            grid.voxels[mSpeciesIndex][voxel_index] -= 2;
+        }
+        return voxel_index;
+    }
 
 };
 

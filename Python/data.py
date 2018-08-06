@@ -234,11 +234,19 @@ class Sim(object):
 
                 self.info += line.replace("# ", "").replace("#\t ", "\t")
 
+        if not hasattr(self, "diffusion_constants"):
+            self.diffusion_constants = np.zeros(self.num_species)
+        if not hasattr(self, "decay_constants"):
+            self.decay_constants = np.zeros(self.num_species)
+        if not hasattr(self, "prod_constants"):
+            self.prod_constants = np.zeros(self.num_species)
+
         if self.kappa is not None:
             assert self.num_voxels * self.kappa == np.floor(self.num_voxels * self.kappa)  # check kappa is correct
 
         # Get the stochastic simulation data
         stochastic = np.loadtxt(self.file_name)
+        self.num_time_steps = int(stochastic.shape[0]/self.num_species)
         if self.num_dims == 1:
             self.num_voxels = [self.num_voxels, self.num_voxels]
         else:  # self.num_dims == 2
@@ -253,12 +261,11 @@ class Sim(object):
         # 0th index - species
         # 1st index - time point
         # rest - spatial indices
-        self.stochastic = np.array(self.stochastic)
+        new_shape = [self.num_species, self.num_time_steps] + self.num_voxels[:self.num_dims]
+        self.stochastic = np.array(self.stochastic).reshape(new_shape)
 
         if self.h is None:
             self.h = (self.domain_bounds[1] - self.domain_bounds[0]) / self.num_voxels[-1]
-
-        self.num_time_steps = self.stochastic.shape[1]
 
     def __eq__(self, other):
         ignored = ("info", "stochastic", "file_name")
@@ -368,7 +375,7 @@ class Data(object):
         self.stochastic = self.__stochastic__[0]  # first sim stochastic data
         self.analytic = np.zeros(self.stochastic.shape)
 
-        self.t_values = np.arange(0, self.end_time + self.time_step, self.time_step)
+        self.t_values = np.arange(0, self.end_time, self.time_step)
         self.total_num_molecules = np.sum(self.stochastic[:, 0], axis=(1, 2)[:self.num_dims])
         self.min_value = np.zeros(self.num_species)
         self.max_value = np.ones(self.num_species)

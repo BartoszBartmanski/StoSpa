@@ -15,7 +15,6 @@ Options:
     change                          Changes the specified entry.
     add                             Adds an entry to the class stored in the file.
     delete                          Deletes an entry in the file.
-    -t --type=<type>                Type of the value [default: str]
 """
 
 import json
@@ -63,10 +62,10 @@ def get_dict_values(a_dict, keys):
 class Parameters(object):
     """Class to store, change and get parameters in pickled dictionaries."""
 
-    def __init__(self, file_name, save_dir="./", keys=None, params=None):
-        assert isinstance(file_name, str), type(file_name)
-        assert isinstance(save_dir, str), type(save_dir)
-        assert path.isdir(save_dir), "{} not a valid directory!".format(save_dir)
+    def __init__(self, path_to_file, keys=None, params=None):
+
+        assert isinstance(path_to_file, str), type(path_to_file)
+        assert path.exists(path_to_file), "{} file does not exist!".format(path_to_file)
         if keys is None:
             keys = []
         if params is None:
@@ -74,19 +73,18 @@ class Parameters(object):
         assert isinstance(params, dict)
         assert isinstance(keys, (list, tuple))
 
-        self.__file_name__ = file_name
-        self.__save_dir__ = save_dir
+        self.__path_to_file__ = path_to_file
         self.__keys__ = keys
         self.__params__ = params
 
         try:
-            f = open(self.__save_dir__ + "/" + self.__file_name__, "r")
+            f = open(self.__path_to_file__, "r")
         except IOError:
             # Ask for the parameters
             self.__params__ = get_dict_values(self.__params__, self.__keys__)
 
             # Save the parameters
-            with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+            with open(self.__path_to_file__, "w") as outfile:
                 json.dump(self.__params__, outfile, indent=4, sort_keys=True)
         else:
             # Unpickle the dictionary
@@ -100,7 +98,7 @@ class Parameters(object):
             self.__params__ = get_dict_values(self.__params__, self.__keys__)
 
             # Save the parameters
-            with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+            with open(self.__path_to_file__, "w") as outfile:
                 json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def __getitem__(self, item):
@@ -122,7 +120,7 @@ class Parameters(object):
         self.__params__[name] = val
 
         # Save the parameters
-        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+        with open(self.__path_to_file__, "w") as outfile:
             json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def add(self, name, val):
@@ -130,7 +128,7 @@ class Parameters(object):
         self.__params__[name] = val
 
         # Save the parameters
-        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+        with open(self.__path_to_file__, "w") as outfile:
             json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def delete(self, name):
@@ -140,14 +138,14 @@ class Parameters(object):
             del self.__params__[name]
 
         # Save the parameters
-        with open(self.__save_dir__ + "/" + self.__file_name__, "w") as outfile:
+        with open(self.__path_to_file__, "w") as outfile:
             json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
 
 if __name__ == '__main__':
     args = docopt(__doc__)
 
-    parameters = Parameters(args["<filename>"], "./")
+    parameters = Parameters(args["<filename>"])
     if args["change"]:
         parameters.change(args["<key>"], change_type(args["<value>"], args["<type>"]))
     elif args["add"]:

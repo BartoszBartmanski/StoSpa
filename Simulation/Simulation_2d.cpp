@@ -49,6 +49,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[1]);
     mVoxelSize = pow(m_h, 2) * mRatio;
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
+    mDiffusionCoefficients.resize(mNumSpecies);
 
     mGrids.resize(mNumRuns);
     for (unsigned run=0; run < mNumRuns; run++)

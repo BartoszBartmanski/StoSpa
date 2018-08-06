@@ -248,11 +248,11 @@ Progress::Progress(unsigned num_steps)
     cout << setprecision(2) << fixed << "\rProgress: " << 0.0 << "%" << flush;
 }
 
-void Progress::Show(unsigned step)
+void Progress::Show()
 {
-    step++;
-    cout << setprecision(2) << fixed << "\rProgress: " << 100.0 * step / double(mNumSteps) << "%" << flush;
-    if (step >= mNumSteps)
+    mCurrentStep++;
+    cout << setprecision(2) << fixed << "\rProgress: " << 100.0 * mCurrentStep / double(mNumSteps) << "%" << flush;
+    if (mCurrentStep >= mNumSteps)
     {
         cout << endl;
     }
