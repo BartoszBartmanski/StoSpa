@@ -7,6 +7,8 @@
 #include "Production.hpp"
 #include "Dimerisation.hpp"
 #include "GrayScott.hpp"
+#include "MichaelisMentin.hpp"
+#include "MichaelisMentinReduced.hpp"
 #include "Schnakenberg.hpp"
 #include "TwoSpeciesDecay.hpp"
 
@@ -302,6 +304,177 @@ TEST_CASE("Test GrayScott_II class")
         REQUIRE(g.voxels[2][voxel_index] == 2);
     }
 
+}
+
+TEST_CASE("Test MichaelisMentin_I class")
+{
+    double reaction_rate = 1.0;
+    double voxel_size = 0.1;
+    int voxel_index = 0;
+    Grid g = Grid(4, voxel_size, 5);
+    g.voxels[0] = {1, 5, 2, 3, 4};
+    g.voxels[1] = {4, 2, 7, 1, 2};
+    g.voxels[2] = {1, 2, 3, 8, 9};
+    g.voxels[3] = {6, 2, 13, 1, 0};
+    auto test = MichaelisMentin_I(reaction_rate);
+
+    SECTION("Check the constructor")
+    {
+        REQUIRE(test.GetRateConstant() == reaction_rate);
+        REQUIRE(test.GetReactionName() == "MichaelisMentin_I");
+    }
+
+    SECTION("Check Set* functions")
+    {
+        test.SetRateConstant(2.0);
+        REQUIRE(test.GetRateConstant() == 2.0);
+        test.SetReactionName("DifferentName");
+        REQUIRE(test.GetReactionName() == "DifferentName");
+    }
+
+    SECTION("Check GetPropensity function")
+    {
+        for (unsigned i=0; i < g.voxels[0].size(); i++)
+        {
+            REQUIRE(test.GetPropensity(g, i) == 1.0 * g.voxels[0][i] * g.voxels[1][i] / g.voxelSize);
+        }
+    }
+
+    SECTION("Check UpdateGrid function")
+    {
+        test.UpdateGrid(g, voxel_index);
+        REQUIRE(g.voxels[0][voxel_index] == 0);
+        REQUIRE(g.voxels[1][voxel_index] == 3);
+        REQUIRE(g.voxels[2][voxel_index] == 2);
+    }
+}
+
+TEST_CASE("Test MichaelisMentin_II class")
+{
+    double reaction_rate = 1.0;
+    double voxel_size = 0.1;
+    int voxel_index = 0;
+    Grid g = Grid(4, voxel_size, 5);
+    g.voxels[0] = {1, 5, 2, 3, 4};
+    g.voxels[1] = {4, 2, 7, 1, 2};
+    g.voxels[2] = {1, 2, 3, 8, 9};
+    g.voxels[3] = {6, 2, 13, 1, 0};
+    auto test = MichaelisMentin_II(reaction_rate);
+
+    SECTION("Check the constructor")
+    {
+        REQUIRE(test.GetRateConstant() == reaction_rate);
+        REQUIRE(test.GetReactionName() == "MichaelisMentin_II");
+    }
+
+    SECTION("Check Set* functions")
+    {
+        test.SetRateConstant(2.0);
+        REQUIRE(test.GetRateConstant() == 2.0);
+        test.SetReactionName("DifferentName");
+        REQUIRE(test.GetReactionName() == "DifferentName");
+    }
+
+    SECTION("Check GetPropensity function")
+    {
+        for (unsigned i=0; i < g.voxels[0].size(); i++)
+        {
+            REQUIRE(test.GetPropensity(g, i) == 1.0 * g.voxels[2][i]);
+        }
+    }
+
+    SECTION("Check UpdateGrid function")
+    {
+        test.UpdateGrid(g, voxel_index);
+        REQUIRE(g.voxels[0][voxel_index] == 2);
+        REQUIRE(g.voxels[1][voxel_index] == 5);
+        REQUIRE(g.voxels[2][voxel_index] == 0);
+    }
+}
+
+TEST_CASE("Test MichaelisMentin_III class")
+{
+    double reaction_rate = 1.0;
+    double voxel_size = 0.1;
+    int voxel_index = 0;
+    Grid g = Grid(4, voxel_size, 5);
+    g.voxels[0] = {1, 5, 2, 3, 4};
+    g.voxels[1] = {4, 2, 7, 1, 2};
+    g.voxels[2] = {1, 2, 3, 8, 9};
+    g.voxels[3] = {6, 2, 13, 1, 0};
+    auto test = MichaelisMentin_III(reaction_rate);
+
+    SECTION("Check the constructor")
+    {
+        REQUIRE(test.GetRateConstant() == reaction_rate);
+        REQUIRE(test.GetReactionName() == "MichaelisMentin_III");
+    }
+
+    SECTION("Check Set* functions")
+    {
+        test.SetRateConstant(2.0);
+        REQUIRE(test.GetRateConstant() == 2.0);
+        test.SetReactionName("DifferentName");
+        REQUIRE(test.GetReactionName() == "DifferentName");
+    }
+
+    SECTION("Check GetPropensity function")
+    {
+        for (unsigned i=0; i < g.voxels[0].size(); i++)
+        {
+            REQUIRE(test.GetPropensity(g, i) == 1.0 * g.voxels[2][i]);
+        }
+    }
+
+    SECTION("Check UpdateGrid function")
+    {
+        test.UpdateGrid(g, voxel_index);
+        REQUIRE(g.voxels[2][voxel_index] == 0);
+        REQUIRE(g.voxels[0][voxel_index] == 2);
+        REQUIRE(g.voxels[3][voxel_index] == 7);
+    }
+}
+
+TEST_CASE("Test MichaelisMentinReduced class")
+{
+    double reaction_rate = 1.0;
+    double voxel_size = 0.1;
+    double enzyme = 1.0;
+    double k_m = 1.0;
+    int voxel_index = 0;
+    Grid g = Grid(4, voxel_size, 5);
+    g.voxels[0] = {1, 5, 2, 3, 4};
+    g.voxels[1] = {4, 2, 7, 1, 2};
+    auto test = MichaelisMentinReduced(reaction_rate, enzyme, k_m);
+
+    SECTION("Check the constructor")
+    {
+        REQUIRE(test.GetRateConstant() == reaction_rate);
+        REQUIRE(test.GetReactionName() == "MichaelisMentinReduced");
+    }
+
+    SECTION("Check Set* functions")
+    {
+        test.SetRateConstant(2.0);
+        REQUIRE(test.GetRateConstant() == 2.0);
+        test.SetReactionName("DifferentName");
+        REQUIRE(test.GetReactionName() == "DifferentName");
+    }
+
+    SECTION("Check GetPropensity function")
+    {
+        for (unsigned i=0; i < g.voxels[0].size(); i++)
+        {
+            REQUIRE(test.GetPropensity(g, i) == 1.0 * enzyme * g.voxels[0][i] / (g.voxels[0][i] + g.voxelSize * k_m));
+        }
+    }
+
+    SECTION("Check UpdateGrid function")
+    {
+        test.UpdateGrid(g, voxel_index);
+        REQUIRE(g.voxels[0][voxel_index] == 0);
+        REQUIRE(g.voxels[1][voxel_index] == 5);
+    }
 }
 
 TEST_CASE("Test Schnakenberg class")

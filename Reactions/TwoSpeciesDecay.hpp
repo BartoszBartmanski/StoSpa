@@ -10,15 +10,39 @@
 class TwoSpeciesDecay : public AbstractReaction
 {
 public:
-    explicit TwoSpeciesDecay(double reaction_rate);
+    explicit TwoSpeciesDecay(double reaction_rate)
+    {
+        // Schnakenberg kinetics: A + B -> B
+        // Species A - index 0
+        // Species B - index 1
 
-    void SetRateConstant(double rate_constant) override;
+        assert(reaction_rate >= 0);
 
-    void CheckNumSpecies(unsigned num_species) override;
+        mRateConstant = reaction_rate;
+        mReactionName = "TwoSpeciesDecay";
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species == 2);
+    }
+
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        return mRateConstant * grid.voxels[0][voxel_index] * grid.voxels[1][voxel_index] / grid.voxelSize;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[0][voxel_index] -= 1;
+        return voxel_index;
+    }
 
 };
 

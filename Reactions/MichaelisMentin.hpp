@@ -16,44 +16,121 @@
 class MichaelisMentin_I : public AbstractReaction
 {
 public:
-    explicit MichaelisMentin_I(double reaction_rate);
+    explicit MichaelisMentin_I(double reaction_rate)
+    {
+        // Michaelis-Mentin kinetics: E + S -> C
+        assert(reaction_rate >= 0);
 
-    void SetRateConstant(double rate_constant) override;
+        mRateConstant = reaction_rate;
+        mReactionName = "MichaelisMentin_I";
+    }
 
-    void CheckNumSpecies(unsigned num_species) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species == 4);
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * grid.voxels[0][voxel_index] * grid.voxels[1][voxel_index] / grid.voxelSize;
+
+        return propensity;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[0][voxel_index] -= 1;
+        grid.voxels[1][voxel_index] -= 1;
+        grid.voxels[2][voxel_index] += 1;
+        return voxel_index;
+    }
 };
 
 class MichaelisMentin_II : public AbstractReaction
 {
 public:
-    explicit MichaelisMentin_II(double reaction_rate);
+    explicit MichaelisMentin_II(double reaction_rate)
+    {
+        // Michaelis-Mentin kinetics: E + S <- C
 
-    void SetRateConstant(double rate_constant) override;
+        assert(reaction_rate >= 0);
 
-    void CheckNumSpecies(unsigned num_species) override;
+        mRateConstant = reaction_rate;
+        mReactionName = "MichaelisMentin_II";
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species == 4);
+    }
+
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * grid.voxels[2][voxel_index];
+
+        return propensity;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[0][voxel_index] += 1;
+        grid.voxels[1][voxel_index] += 1;
+        grid.voxels[2][voxel_index] -= 1;
+        return voxel_index;
+    }
 
 };
 
 class MichaelisMentin_III : public AbstractReaction
 {
 public:
-    explicit MichaelisMentin_III(double reaction_rate);
+    explicit MichaelisMentin_III(double reaction_rate)
+    {
+        // Michaelis-Mentin kinetics: C -> E + P
 
-    void SetRateConstant(double rate_constant) override;
+        assert(reaction_rate >= 0);
 
-    void CheckNumSpecies(unsigned num_species) override;
+        mRateConstant = reaction_rate;
+        mReactionName = "MichaelisMentin_III";
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species == 4);
+    }
+
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * grid.voxels[2][voxel_index];
+
+        return propensity;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[2][voxel_index] -= 1;
+        grid.voxels[0][voxel_index] += 1;
+        grid.voxels[3][voxel_index] += 1;
+        return voxel_index;
+    }
 
 };
 

@@ -29,13 +29,22 @@ public:
     virtual ~AbstractReaction()= default;
 
     /** Get the rate constant. */
-    virtual double GetRateConstant();
+    virtual double GetRateConstant()
+    {
+        return mRateConstant;
+    }
 
     /** Set the reaction name. */
-    virtual void SetReactionName(string reaction_name);
+    virtual void SetReactionName(string reaction_name)
+    {
+        mReactionName = move(reaction_name);
+    }
 
     /** Get the reaction name. */
-    virtual string GetReactionName();
+    virtual string GetReactionName()
+    {
+        return mReactionName;
+    }
 
     /** Set the rate constant for this reaction. */
     virtual void SetRateConstant(double rate_constant)=0;

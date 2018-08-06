@@ -19,15 +19,43 @@ protected:
     double mKm;
 
 public:
-    explicit MichaelisMentinReduced(double reaction_rate, double e_t, double k_m);
+    explicit MichaelisMentinReduced(double reaction_rate, double e_t, double k_m)
+    {
+        // Michaelis-Mentin kinetics: S -> P
+        assert(reaction_rate >= 0);
+        assert(e_t >= 0);
+        assert(k_m > 0);
 
-    void SetRateConstant(double rate_constant) override;
+        mRateConstant = reaction_rate;
+        mTotalEnzyme = e_t;
+        mKm = k_m;
+        mReactionName = "MichaelisMentinReduced";
+    }
 
-    void CheckNumSpecies(unsigned num_species) override;
+    void SetRateConstant(double rate_constant) override
+    {
+        assert(rate_constant > 0);
+        mRateConstant = rate_constant;
+    }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override;
+    void CheckNumSpecies(unsigned num_species) override
+    {
+        assert(num_species == 2);
+    }
 
-    int UpdateGrid(Grid& grid, const int& voxel_index) override;
+    double GetPropensity(Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * mTotalEnzyme * grid.voxels[0][voxel_index] / (grid.voxels[0][voxel_index] + grid.voxelSize * mKm);
+
+        return propensity;
+    }
+
+    int UpdateGrid(Grid& grid, const int& voxel_index) override
+    {
+        grid.voxels[0][voxel_index] -= 1;
+        grid.voxels[1][voxel_index] += 1;
+        return voxel_index;
+    }
 };
 
 
