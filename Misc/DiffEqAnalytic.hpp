@@ -5,8 +5,8 @@
 #ifndef STOSPA_DIFFEQANALYTIC_HPP
 #define STOSPA_DIFFEQANALYTIC_HPP
 
-#include <vector>
 #include "VectorFunctions.hpp"
+#include <cmath>
 
 using namespace std;
 
