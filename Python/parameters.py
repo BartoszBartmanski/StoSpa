@@ -1,14 +1,13 @@
 #!/usr/bin/python3
 
-
 """Visualising the data from stochastic simulations.
 
 Usage:
     parameters.py -h | --help
     parameters.py <filename>
-    parameters.py <filename> change <key> <value> [<type>]
-    parameters.py <filename> add <key> <value> [<type>]
-    parameters.py <filename> delete <key>
+    parameters.py <filename> change [--] <key> <value> [<type>]
+    parameters.py <filename> add [--] <key> <value> [<type>]
+    parameters.py <filename> delete [--] <key>
 
 Options:
     -h --help                       Show this screen
