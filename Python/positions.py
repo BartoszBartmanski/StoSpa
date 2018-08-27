@@ -24,7 +24,7 @@ def flip_array(vec, new_shape):
 
 
 class Positions(object):
-    def __init__(self, num_axes, fig_params):
+    def __init__(self, num_axes, fig_params, from_top=False):
 
         # Check that fig_params contains all the necessary info
         needed = ["fig_width", "fig_height", "free_width", "free_height",
@@ -47,6 +47,8 @@ class Positions(object):
         self.__free_h__ = fig_params["free_height"] / fig_params["fig_height"]
 
         self.__positions__ = []
+        self.__rows__ = []
+        self.__cols__ = []
         pos0 = np.array([fig_params["left"]/fig_params["fig_width"],
                          fig_params["bottom"]/fig_params["fig_height"],
                          fig_params["width"]/fig_params["fig_width"],
@@ -56,15 +58,21 @@ class Positions(object):
         h_space = fig_params["height"] + fig_params["free_height"]
         add_x = np.array([w_space / fig_params["fig_width"], 0, 0, 0])
         add_y = np.array([0, h_space / fig_params["fig_height"], 0, 0])
-        for i in range(num_axes[0]):
-            for j in range(num_axes[1]):
-                self.__positions__.append(pos0 + j*add_x + i*add_y)
 
-    def get_positions(self, from_top=False):
+        for i in range(self.__num_axes__[0]):
+            for j in range(self.__num_axes__[1]):
+                self.__positions__.append(pos0 + j*add_x + i*add_y)
+                self.__rows__.append(i)
+                self.__cols__.append(j)
+
         if from_top:
-            return flip_array(self.__positions__, self.__num_axes__)
-        else:
-            return self.__positions__
+            self.__positions__ = flip_array(self.__positions__,
+                                            self.__num_axes__)
+            self.__rows__ = flip_array(self.__rows__, self.__num_axes__)
+            self.__cols__ = flip_array(self.__cols__, self.__num_axes__)
+
+    def get_position(self, idx):
+        return self.__positions__[idx]
 
     def get_width(self):
         return np.array([self.__w__, 0, 0, 0])
@@ -77,3 +85,12 @@ class Positions(object):
 
     def get_free_height(self):
         return np.array([0, self.__free_h__, 0, 0])
+
+    def get_row(self, idx):
+        return self.__rows__[idx]
+
+    def get_col(self, idx):
+        return self.__cols__[idx]
+
+    def get_num_axes(self):
+        return np.prod(self.__num_axes__)
