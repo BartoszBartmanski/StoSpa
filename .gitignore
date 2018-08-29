@@ -28,13 +28,20 @@ build/*
 *.out
 *.app
 
-# Misc
+# Dropbox files
+*dropbox.attr
+
+# Python related
+*__pycache__
 *.pyc
-*__pycache__*
-.idea/*
-Python/.idea/*
-*.dropbox.attr*
+
+# Jetbrains IDEs related
+*.idea
+
+# Doxygen documentation
 Documentation/*
+
+# Version (there is hpp.in file that is verison controlled)
 Misc/Version.hpp
 
 # Benchmarking data
