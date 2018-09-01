@@ -6,6 +6,8 @@ import numpy as np
 def flip_array(vec, new_shape):
     if isinstance(new_shape, int):
         new_shape = [1, new_shape]
+    else:
+        new_shape = list(new_shape)
 
     # Turn vec into numpy array and get its shape
     vec = np.array(vec)
@@ -34,6 +36,7 @@ class Positions(object):
             assert x in fig_params, "{} is missing!".format(x)
 
         # Make sure that num_axes is a tuple
+        # self.__num_axes__ = [num_rows, num_cols]
         if isinstance(num_axes, int):
             self.__num_axes__ = [1, num_axes]
         else:
@@ -45,6 +48,8 @@ class Positions(object):
         self.__w__ = fig_params["width"] / fig_params["fig_width"]
         self.__free_w__ = fig_params["free_width"] / fig_params["fig_width"]
         self.__free_h__ = fig_params["free_height"] / fig_params["fig_height"]
+        self.__fig_w__ = fig_params["fig_width"]  # in inches
+        self.__fig_h__ = fig_params["fig_height"]  # in inches
 
         self.__positions__ = []
         self.__rows__ = []
@@ -68,6 +73,7 @@ class Positions(object):
         if from_top:
             self.__positions__ = flip_array(self.__positions__,
                                             self.__num_axes__)
+        else:
             self.__rows__ = flip_array(self.__rows__, self.__num_axes__)
             self.__cols__ = flip_array(self.__cols__, self.__num_axes__)
 
@@ -94,3 +100,47 @@ class Positions(object):
 
     def get_num_axes(self):
         return np.prod(self.__num_axes__)
+
+    def shift_pos_x(self, value, cols):
+        """Value in inches"""
+        if isinstance(cols, int):
+            cols = [cols]
+        assert isinstance(cols, (tuple, list))
+        shift = np.array([value/self.__fig_w__, 0, 0, 0])
+
+        for i in range(self.get_num_axes()):
+            if self.__cols__[i] in cols:
+                self.__positions__[i] += shift
+
+    def shift_pos_y(self, value, rows):
+        """Value in inches"""
+        if isinstance(rows, int):
+            rows = [rows]
+        assert isinstance(rows, (tuple, list))
+        shift = np.array([0, value/self.__fig_h__, 0, 0])
+
+        for i in range(self.get_num_axes()):
+            if self.__rows__[i] in rows:
+                self.__positions__[i] += shift
+
+    def get_adj_position(self, idx, width, height, shift_x=0.0, shift_y=0.0):
+        new_position = self.__positions__[idx].copy()
+
+        shift_x /= self.__fig_w__
+        shift_y /= self.__fig_h__
+        width /= self.__fig_w__
+        height /= self.__fig_h__
+        new_position[2] = width
+        new_position[3] = height
+
+        if shift_x > 0.0:
+            new_position[0] += (self.__w__ + abs(shift_x))
+        elif shift_x < 0.0:
+            new_position[0] -= (abs(shift_x) + width)
+
+        if shift_y > 0.0:
+            new_position[1] += (self.__h__ + abs(shift_y))
+        elif shift_y < 0.0:
+            new_position[1] -= (abs(shift_y) + height)
+
+        return new_position
