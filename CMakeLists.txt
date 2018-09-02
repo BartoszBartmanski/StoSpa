@@ -65,14 +65,14 @@ file(GLOB SOURCE_FILES_UNIT_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*pp")
 set(SOURCE_FILES ${SOURCE_FILES_SIMULATION} ${SOURCE_FILES_REACTIONS} ${SOURCE_FILES_MISC})
 
 # Add an executable for Benchmarking
-add_executable(Benchmarking ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarking/benchmarking.cpp ${SOURCE_FILES})
+add_executable(benchmarking ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarking/benchmarking.cpp ${SOURCE_FILES})
 
 # Add an executable for Unit Testing
-add_executable(UnitTest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
+add_executable(unittest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
 
 # Add an executable for running simulations and link docopt to it
-add_executable(StoSpa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
-target_link_libraries(StoSpa docopt)
+add_executable(stospa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
+target_link_libraries(stospa docopt)
 
 # Generate a list of source files in Plots directory
 file(GLOB PLOTS_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Plots/" "${CMAKE_CURRENT_SOURCE_DIR}/Plots/*")
