@@ -1,5 +1,5 @@
-gallifrey /home/bartosz/Dropbox/My_Files/DPhil/Data/Sim_output/
-loopy-de-loop.maths.ox.ac.uk /scratch/bartmanski/Data/Unsorted/
+gallifrey /home/bartosz/Dropbox/DPhil/Data/
+loopy-de-loop.maths.ox.ac.uk /scratch/bartmanski/Data/
 action-man.maths.ox.ac.uk /scratch/bartmanski/Data/
 cyclops.maths.ox.ac.uk /scratch/bartmanski/Data/
 forge.maths.ox.ac.uk /scratch/bartmanski/Data/
