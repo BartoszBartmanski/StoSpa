@@ -12,12 +12,11 @@ Usage:
 Options:
     -h --help                       Show this screen
     change                          Changes the specified entry.
-    add                             Adds an entry to the class stored in the file.
+    add                             Adds an entry to the file.
     delete                          Deletes an entry in the file.
 """
 
 import json
-from os import path
 from docopt import docopt
 
 
@@ -46,25 +45,12 @@ def change_type(value, t):
     return value
 
 
-def get_dict_values(a_dict, keys):
-    for key in keys:
-        if key not in a_dict:
-            val = input("{} [<input_type>] = ".format(key))
-            if " " in val:
-                val, t = val.split(" ")[:2]
-            else:
-                t = "str"
-            a_dict[key] = change_type(val, t)
-    return a_dict
-
-
 class Parameters(object):
-    """Class to store, change and get parameters in pickled dictionaries."""
+    """Class to store, change and get parameters in json'd dictionaries."""
 
     def __init__(self, path_to_file, keys=None, params=None):
 
         assert isinstance(path_to_file, str), type(path_to_file)
-        assert path.exists(path_to_file), "{} file does not exist!".format(path_to_file)
         if keys is None:
             keys = []
         if params is None:
@@ -80,31 +66,49 @@ class Parameters(object):
             f = open(self.__path_to_file__, "r")
         except IOError:
             # Ask for the parameters
-            self.__params__ = get_dict_values(self.__params__, self.__keys__)
+            self.__check_keys__()
 
             # Save the parameters
-            with open(self.__path_to_file__, "w") as outfile:
-                json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+            self.__save__()
         else:
-            # Unpickle the dictionary
+            # Open the dictionary
             self.__params__ = json.load(f)
             f.close()
 
+            # Check that all the necessary keys are present
             if len(self.__keys__) == 0:
                 self.__keys__ = list(self.__params__.keys())
-
-            # Check that all the necessary parameters are present in this dictionary
-            self.__params__ = get_dict_values(self.__params__, self.__keys__)
+            else:
+                self.__check_keys__()
 
             # Save the parameters
-            with open(self.__path_to_file__, "w") as outfile:
-                json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+            self.__save__()
 
     def __getitem__(self, item):
+        if item not in self.__params__.keys():
+            self.__get_value__(item)
+            self.__save__()
         return self.__params__[item]
 
     def __setitem__(self, item, value):
         self.__params__[item] = value
+
+    def __get_value__(self, key):
+        val = input("{} [<input_type>] = ".format(key))
+        if " " in val:
+            val, t = val.split(" ")[:2]
+        else:
+            t = "str"
+        self.__params__[key] = change_type(val, t)
+
+    def __check_keys__(self):
+        for key in self.__keys__:
+            if key not in self.__params__.keys():
+                self.__get_value__(key)
+
+    def __save__(self):
+        with open(self.__path_to_file__, "w") as outfile:
+            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
 
     def get_dict(self):
         return self.__params__
@@ -115,20 +119,20 @@ class Parameters(object):
             print("  {} - {}".format(parameter, self.__params__[parameter]))
 
     def change(self, name, val):
-        assert name in self.__params__.keys(), "Parameter {} not found!".format(name)
+        m = "Parameter {} not found!".format(name)
+        assert name in self.__params__.keys(), m
         self.__params__[name] = val
 
         # Save the parameters
-        with open(self.__path_to_file__, "w") as outfile:
-            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+        self.__save__()
 
     def add(self, name, val):
-        assert name not in self.__params__.keys(), "Parameter {} already in the dictionary!".format(name)
+        m = "Parameter {} already in the dictionary!".format(name)
+        assert name not in self.__params__.keys(), m
         self.__params__[name] = val
 
         # Save the parameters
-        with open(self.__path_to_file__, "w") as outfile:
-            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+        self.__save__()
 
     def delete(self, name):
         if name not in self.__params__.keys():
@@ -137,18 +141,18 @@ class Parameters(object):
             del self.__params__[name]
 
         # Save the parameters
-        with open(self.__path_to_file__, "w") as outfile:
-            json.dump(self.__params__, outfile, indent=4, sort_keys=True)
+        self.__save__()
 
 
 if __name__ == '__main__':
     args = docopt(__doc__)
+    args["<value>"] = change_type(args["<value>"], args["<type>"])
 
     parameters = Parameters(args["<filename>"])
     if args["change"]:
-        parameters.change(args["<key>"], change_type(args["<value>"], args["<type>"]))
+        parameters.change(args["<key>"], args["<value>"])
     elif args["add"]:
-        parameters.add(args["<key>"], change_type(args["<value>"], args["<type>"]))
+        parameters.add(args["<key>"], args["<value>"])
     elif args["delete"]:
         parameters.delete(args["<key>"])
     else:
