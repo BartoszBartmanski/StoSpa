@@ -7,9 +7,9 @@ Usage:
     plot_stationary_dist.py <file_name>... [options]
 
 Options:
-    -h --help                           Show this screen
-    --x_lim=<x_lim>                     Change the x-axis limits.
-    --separate                          Whether to use a separate figure for each file.
+    -h --help                 Show this screen
+    --x_lim=<x_lim>           Change the x-axis limits.
+    --sep                     Whether to use a separate figure for each file.
 """
 
 from docopt import docopt
@@ -58,33 +58,22 @@ def get_analytic(mean, x_lim):
     return x, y
 
 
-def plot(arguments):
-
-    analytic = True
-    for name in arguments["<file_name>"]:
-        if arguments["--separate"]:
-            plt.figure(name)
-            analytic = True
-
-        d = get_data(name)
-        limits = get_range(len(d[0]), arguments["--x_lim"])
-
-        if analytic:
-            m = get_mean(name)
-            d_a = get_analytic(m, limits)
-            plt.plot(d_a[0], d_a[1], label="Analytical", color="black")
-            analytic = False
-
+def plot(d, name, lim, sep_figs=False):
+    if sep_figs:
+        plt.figure(name)
         plt.bar(d[0], d[1][0] / np.sum(d[1][0]), label="Stochastic")
-        for i in range(1, len(d[1])):
-            plt.plot(d[0], d[1][i]/np.sum(d[1][i]))
+    else:
+        plt.bar(d[0], d[1][0] / np.sum(d[1][0]), label=name)
 
-        plt.xlim(limits[0]-0.5, limits[1]+0.5)
-        plt.gca().set_xticks(np.arange(limits[0], limits[1]+1, limits[2]))
-        plt.title("Stationary dist.")
-        plt.xlabel("# of molecules")
-        plt.ylabel("Probability")
-        plt.legend()
+    for i in range(1, len(d[1])):
+        plt.plot(d[0], d[1][i]/np.sum(d[1][i]))
+
+    plt.xlim(lim[0]-0.5, lim[1]+0.5)
+    plt.gca().set_xticks(np.arange(lim[0], lim[1]+1, lim[2]))
+    plt.title("Stationary dist.")
+    plt.xlabel("# of molecules")
+    plt.ylabel("Probability")
+    plt.legend()
 
 
 if __name__ == '__main__':
@@ -96,6 +85,18 @@ if __name__ == '__main__':
     else:
         args["--x_lim"] = []
 
-    plot(args)
+    redraw = True
+    for name in args["<file_name>"]:
+        data = get_data(name)
+        limits = get_range(len(data[0]), args["--x_lim"])
+        plot(data, name, limits, args["--sep"])
+
+        if redraw:
+            d_a = get_analytic(get_mean(name), limits)
+            plt.plot(d_a[0], d_a[1], label="Analytical", color="black")
+            if args["--sep"]:
+                redraw = True
+            else:
+                redraw = False
 
     plt.show()
