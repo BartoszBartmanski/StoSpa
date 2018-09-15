@@ -4,7 +4,7 @@
 
 Usage:
     plot_error_against_beta.py -h | --help
-    plot_error_against_beta.py <file_name>... [options]
+    plot_error_against_beta.py <filename>... [options]
 
 Options:
     -h --help                       Show this screen
@@ -18,10 +18,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_data(file_name):
+def get_data(filename):
     num_points = None
 
-    f = open(file_name, "r")
+    f = open(filename, "r")
     for line in f:
         if "#" not in line:
             break
@@ -30,16 +30,16 @@ def get_data(file_name):
             break
     f.close()
 
-    data = np.loadtxt(file_name)
+    d = np.loadtxt(filename)
     if num_points is None:
-        num_points = np.sqrt(data.shape[1])
-    data = data.reshape([3, num_points, num_points]).transpose([0, 2, 1])
+        num_points = np.sqrt(d.shape[1])
+    d = d.reshape([3, num_points, num_points]).transpose([0, 2, 1])
 
     return data
 
 
-def get_min(data):
-    return np.unravel_index(np.argmin(data), data.shape)
+def get_min(d):
+    return np.unravel_index(np.argmin(d), d.shape)
 
 
 def get_index(mesh_x, mesh_y, value):
@@ -53,37 +53,25 @@ def get_index(mesh_x, mesh_y, value):
     return idx
 
 
-def plot(arguments):
-    for name in arguments["<file_name>"]:
+def plot(d, name, reduce=True):
 
-        d = get_data(name)
+    plt.figure(name)
 
-        plt.figure(name)
+    if reduce:
+        plt.plot(d[1][d[0] == d[1]], d[2][d[0] == d[1]], color="black")
+        plt.xlabel(r"$\beta$")
+        plt.ylabel("e")
+    else:
+        num_cont = np.linspace(np.amin(d[2]), np.amax(d[2]), 20)
+        cs = plt.contour(d[0], d[1], d[2], num_cont)
+        plt.clabel(cs, inline=1, fontsize=10)
+        plt.ylabel(r"$\beta_y$")
+        plt.xlabel(r"$\beta_x$")
+        plt.gca().set_aspect('equal')
 
-        if arguments["--get_min"]:
-            s = r"Coordinates of the minimum for {} = ({}, {})"
-            min_index = get_min(d[2])
-            print(s.format(name, d[0][min_index], d[1][min_index]))
-
-        if arguments["--get_error"]:
-            s = r"Value of error at ({}, {}) = {}"
-            index = get_index(d[0], d[1], arguments["--ger_error"])
-            print(s.format(d[0][index], d[1][index], d[2][index]))
-
-        if arguments["--1d"]:
-            plt.plot(d[1][d[0] == d[1]], d[2][d[0] == d[1]], color="black")
-            plt.xlabel(r"$\beta$")
-            plt.ylabel("e")
-        else:
-            cs = plt.contour(d[0], d[1], d[2], np.linspace(np.amin(d[2]), np.amax(d[2]), 20))
-            plt.clabel(cs, inline=1, fontsize=10)
-            plt.ylabel(r"$\beta_y$")
-            plt.xlabel(r"$\beta_x$")
-            plt.gca().set_aspect('equal')
-
-            min_index = get_min(d[2])
-            plt.scatter(d[0][min_index], d[1][min_index], label="Min.")
-            plt.legend()
+        min_index = get_min(d[2])
+        plt.scatter(d[0][min_index], d[1][min_index], label="Min.")
+        plt.legend()
 
 
 if __name__ == '__main__':
@@ -91,10 +79,24 @@ if __name__ == '__main__':
     # Get the command line arguments
     args = docopt(__doc__)
     if args["--get_error"]:
-        args["--get_error"] = [float(x) for x in args["--get_error"].split(",")]
+        e = args["--get_error"].split(",")
+        args["--get_error"] = [float(x) for x in e]
         if len(args["--get_error"]) == 1:
             args["--get_error"].append(args["--get_error"][0])
 
-    plot(args)
+    for name in args["<filename>"]:
+        data = get_data(name)
+
+        if args["--get_min"]:
+            min_index = get_min(data[2])
+            s = r"Coordinates of the minimum for {} = ({}, {})"
+            print(s.format(name, data[0][min_index], data[1][min_index]))
+
+        if args["--get_error"]:
+            index = get_index(data[0], data[1], arguments["--ger_error"])
+            s = r"Value of error at ({}, {}) = {}"
+            print(s.format(data[0][index], data[1][index], data[2][index]))
+
+        plot(data, name, args["--1d"])
 
     plt.show()

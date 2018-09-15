@@ -15,20 +15,19 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def plot(arguments):
+def plot(d, name):
+    assert d.shape[0] == 5
+
     labels = ["FEM", "FDM", "FVM", "FET"]
 
-    for name in arguments["<file_name>"]:
-        plt.figure(name)
-        d = np.loadtxt(name)
-        assert d.shape[0] == 5
-        for i in range(4):
-            plt.plot(d[0], d[i+1], label=labels[i])
+    plt.figure(name)
 
-        plt.legend()
-        plt.ylabel(r"Error")
-        plt.xlabel(r"$\kappa$")
-        plt.tight_layout()
+    for i in range(4):
+        plt.plot(d[0], d[i+1], label=labels[i])
+
+    plt.legend()
+    plt.ylabel(r"Error")
+    plt.xlabel(r"$\kappa$")
 
 
 if __name__ == '__main__':
@@ -36,6 +35,8 @@ if __name__ == '__main__':
     # Get the command line arguments
     args = docopt(__doc__)
 
-    plot(args)
+    for name in arguments["<file_name>"]:
+        data = np.loadtxt(name)
+        plot(data, name)
 
     plt.show()

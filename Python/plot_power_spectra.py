@@ -4,7 +4,7 @@
 
 Usage:
     plot_power_spectra.py -h | --help
-    plot_power_spectra.py <file_name>... [options]
+    plot_power_spectra.py <filename>... [options]
 
 Options:
     -h --help                       Show this screen
@@ -17,10 +17,10 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_data(file_name):
+def get_data(filename):
     original_data_shape = None
 
-    f = open(file_name, "r")
+    f = open(filename, "r")
     for line in f:
         if "#" not in line:
             break
@@ -29,31 +29,26 @@ def get_data(file_name):
             original_data_shape = [int(x) for x in original_data_shape]
     f.close()
 
-    data = np.loadtxt(file_name).reshape(original_data_shape)
+    data = np.loadtxt(filename).reshape(original_data_shape)
 
     return data
 
 
-def plot(arguments):
+def plot(d, name):
 
-    for name in arguments["<file_name>"]:
-        # Get the size of square grid of errors
+    plt.figure(name)
 
-        d = get_data(name)
-        num_dims = len(d[0, 0].shape)
-        d = d[arguments["--species"], arguments["--time"]]
+    num_dims = len(d.shape)
 
-        plt.figure(name)
-
-        if num_dims == 1:
-            plt.bar(np.arange(len(d)), d)
-            plt.xlabel(r"$m$")
-            plt.ylabel(r"$P_s$")
-        else:
-            im = plt.imshow(d, origin="lower", aspect="auto", cmap="Greys")
-            plt.ylabel(r"$m_y$")
-            plt.xlabel(r"$m_x$")
-            plt.colorbar(im)
+    if num_dims == 1:
+        plt.bar(np.arange(len(d)), d)
+        plt.xlabel(r"$m$")
+        plt.ylabel(r"$P_s$")
+    else:
+        im = plt.imshow(d, origin="lower", aspect="auto", cmap="Greys")
+        plt.ylabel(r"$m_y$")
+        plt.xlabel(r"$m_x$")
+        plt.colorbar(im)
 
 
 if __name__ == '__main__':
@@ -63,6 +58,8 @@ if __name__ == '__main__':
     args["--time"] = int(args["--time"])
     args["--species"] = int(args["--species"])
 
-    plot(args)
+    for name in arguments["<filename>"]:
+        data = get_data(name)[arguments["--species"], arguments["--time"]]
+        plot(data, name)
 
     plt.show()
