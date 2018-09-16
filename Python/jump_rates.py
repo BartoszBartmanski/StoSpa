@@ -21,11 +21,17 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 
-def get_parameter(param):
+def get_parameter(param, const=False):
+    if param is None:
+        param = 1
     if isinstance(param, (int, float)):
         param = float(param)
+        if const:
+            param = 1
     elif isinstance(param, (tuple, list, np.ndarray)):
         param = np.array(param)
+        if const:
+            param = np.ones(len(param))
     return param
 
 
@@ -53,7 +59,7 @@ class JumpRate(object):
     def get_kappa(self):
         return self.__kappa__
 
-    def get_lambda(self, index, parameter, num_dims=2):
+    def get_lambda(self, index, parameter=None, num_dims=2):
         assert isinstance(index, int)
         if index == 1:
             return self.__lambda_1__(parameter)
@@ -70,7 +76,7 @@ class JumpRate(object):
             else:
                 return l_1 + l_2
 
-    def get_theta(self, index, parameter, num_dims=2):
+    def get_theta(self, index, parameter=None, num_dims=2):
         assert isinstance(index, int)
         l_1 = self.__lambda_1__(parameter)
         l_2 = self.__lambda_2__(parameter)
@@ -89,18 +95,18 @@ class JumpRate(object):
             return l_0 / l_0
 
     def __lambda_1__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ / (self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
     def __lambda_2__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ / (self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
     def __lambda_3__(self, parameter):
-        parameter = get_parameter(parameter)
-        return 0 * np.ones(len(parameter))
+        parameter = get_parameter(parameter, const=True)
+        return 0 * parameter
 
 
 class FDM(JumpRate):
@@ -127,39 +133,39 @@ class FDM(JumpRate):
 class FEM(JumpRate):
 
     def __lambda_1__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ * (2.0 - self.__kappa__ ** 2)
         val /= (3.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
     def __lambda_2__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ * (self.__kappa__ ** 2 + 1.0)
         val /= (6.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
     def __lambda_3__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ * (2.0 * self.__kappa__ ** 2 - 1.0)
         val /= (3.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
 
 class FVM(JumpRate):
 
     def __lambda_1__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ / (self.__kappa__ ** 2 * self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
     def __lambda_2__(self, parameter):
-        parameter = get_parameter(parameter)
-        return 0 * np.ones(len(parameter))
+        parameter = get_parameter(parameter, const=True)
+        return 0 * parameter
 
     def __lambda_3__(self, parameter):
-        parameter = get_parameter(parameter)
+        parameter = get_parameter(parameter, const=True)
         val = self.__diff__ / (self.__h__ ** 2)
-        return val * np.ones(len(parameter))
+        return val * parameter
 
 
 class FET(JumpRate):
