@@ -76,7 +76,7 @@ class JumpRate(object):
         l_1 = self.__lambda_1__(parameter)
         l_2 = self.__lambda_2__(parameter)
         l_3 = self.__lambda_3__(parameter)
-        if num_dims == 1:
+        if self.__num_dims__ == 1:
             l_0 = l_1 + l_2
         else:
             l_0 = 2 * l_1 + 4 * l_2 + 2 * l_3
