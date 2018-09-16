@@ -146,12 +146,13 @@ class Parameters(object):
 
 if __name__ == '__main__':
     args = docopt(__doc__)
-    args["<value>"] = change_type(args["<value>"], args["<type>"])
 
     parameters = Parameters(args["<filename>"])
     if args["change"]:
+        args["<value>"] = change_type(args["<value>"], args["<type>"])
         parameters.change(args["<key>"], args["<value>"])
     elif args["add"]:
+        args["<value>"] = change_type(args["<value>"], args["<type>"])
         parameters.add(args["<key>"], args["<value>"])
     elif args["delete"]:
         parameters.delete(args["<key>"])

@@ -23,9 +23,9 @@ import matplotlib.pyplot as plt
 
 def get_parameter(param):
     if isinstance(param, (int, float)):
-        param = [param]
-    assert isinstance(param, (tuple, list, np.ndarray))
-    param = np.array(param)
+        param = float(param)
+    elif isinstance(param, (tuple, list, np.ndarray)):
+        param = np.array(param)
     return param
 
 
@@ -33,7 +33,7 @@ class JumpRate(object):
     def __init__(self, diff, h, kappa):
         """
         diff - diffusion coefficient
-        h - compartment size in the y-direction
+        h - compartment size (in the y-direction in 2d)
         kappa - compartment aspect ratio (horizontal/vertical)
         """
         assert isinstance(diff, (float, int))
@@ -53,7 +53,7 @@ class JumpRate(object):
     def get_kappa(self):
         return self.__kappa__
 
-    def get_lambda(self, index, parameter):
+    def get_lambda(self, index, parameter, num_dims=2):
         assert isinstance(index, int)
         if index == 1:
             return self.__lambda_1__(parameter)
@@ -65,14 +65,20 @@ class JumpRate(object):
             l_1 = self.__lambda_1__(parameter)
             l_2 = self.__lambda_2__(parameter)
             l_3 = self.__lambda_3__(parameter)
-            return (2 * l_1 + 4 * l_2 + 2 * l_3)
+            if num_dims == 2:
+                return (2 * l_1 + 4 * l_2 + 2 * l_3)
+            else:
+                return l_1 + l_2
 
-    def get_theta(self, index, parameter):
+    def get_theta(self, index, parameter, num_dims=2):
         assert isinstance(index, int)
         l_1 = self.__lambda_1__(parameter)
         l_2 = self.__lambda_2__(parameter)
         l_3 = self.__lambda_3__(parameter)
-        l_0 = 2 * l_1 + 4 * l_2 + 2 * l_3
+        if num_dims == 2:
+            l_0 = 2 * l_1 + 4 * l_2 + 2 * l_3
+        else:
+            l_0 = l_1 + l_2
         if index == 1:
             return l_1 / l_0
         elif index == 2:
@@ -81,6 +87,20 @@ class JumpRate(object):
             return l_3 / l_0
         else:
             return l_0 / l_0
+
+    def __lambda_1__(self, parameter):
+        parameter = get_parameter(parameter)
+        val = self.__diff__ / (self.__h__ ** 2)
+        return val * np.ones(len(parameter))
+
+    def __lambda_2__(self, parameter):
+        parameter = get_parameter(parameter)
+        val = self.__diff__ / (self.__h__ ** 2)
+        return val * np.ones(len(parameter))
+
+    def __lambda_3__(self, parameter):
+        parameter = get_parameter(parameter)
+        return 0 * np.ones(len(parameter))
 
 
 class FDM(JumpRate):
@@ -120,7 +140,7 @@ class FEM(JumpRate):
 
     def __lambda_3__(self, parameter):
         parameter = get_parameter(parameter)
-        val =self.__diff__ * (2.0 * self.__kappa__ ** 2 - 1.0)
+        val = self.__diff__ * (2.0 * self.__kappa__ ** 2 - 1.0)
         val /= (3.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
         return val * np.ones(len(parameter))
 
