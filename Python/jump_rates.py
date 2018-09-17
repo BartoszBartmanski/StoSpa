@@ -13,6 +13,7 @@ Options:
     --length=<val>          Vertical voxel length. [default: 0.025]
     --kappa=<val>           Aspect ratio of the voxels. [default: 1.0]
     --diff=<val>            Macro-scale diffusion constant. [default: 1.0]
+    --save=<path>           Save the figure in <path>.
 
 """
 
@@ -60,33 +61,21 @@ class JumpRate(object):
             return self.__lambda_1__(parameter)
         elif index == 2:
             return self.__lambda_2__(parameter)
-        elif index == 3:
-            return self.__lambda_3__(parameter)
         else:
             l_1 = self.__lambda_1__(parameter)
             l_2 = self.__lambda_2__(parameter)
-            l_3 = self.__lambda_3__(parameter)
-            if self.__num_dims__ == 1:
-                return l_1 + l_2
-            else:
-                return (2 * l_1 + 4 * l_2 + 2 * l_3)
+            return l_1 + l_2
 
     def get_theta(self, index, parameter=None):
         assert isinstance(index, int)
         l_1 = self.__lambda_1__(parameter)
         l_2 = self.__lambda_2__(parameter)
-        l_3 = self.__lambda_3__(parameter)
-        if self.__num_dims__ == 1:
-            l_0 = l_1 + l_2
-        else:
-            l_0 = 2 * l_1 + 4 * l_2 + 2 * l_3
+        l_0 = l_1 + l_2
 
         if index == 1:
             return l_1 / l_0
         elif index == 2:
             return l_2 / l_0
-        elif index == 3:
-            return l_3 / l_0
         else:
             return l_0 / l_0
 
@@ -99,10 +88,6 @@ class JumpRate(object):
         parameter = self.__get_parameter__(parameter, const=True)
         val = self.__diff__ / (self.__h__ ** 2)
         return val * parameter
-
-    def __lambda_3__(self, parameter):
-        parameter = self.__get_parameter__(parameter, const=True)
-        return 0 * parameter
 
 
 class JumpRate2D(JumpRate):
@@ -118,6 +103,45 @@ class JumpRate2D(JumpRate):
 
     def get_kappa(self):
         return self.__kappa__
+
+    def get_lambda(self, index, parameter=None):
+        assert isinstance(index, int)
+        if index == 1:
+            return self.__lambda_1__(parameter)
+        elif index == 2:
+            return self.__lambda_2__(parameter)
+        elif index == 3:
+            return self.__lambda_3__(parameter)
+        else:
+            l_1 = self.__lambda_1__(parameter)
+            l_2 = self.__lambda_2__(parameter)
+            l_3 = self.__lambda_3__(parameter)
+            return (2 * l_1 + 4 * l_2 + 2 * l_3)
+
+    def get_theta(self, index, parameter=None):
+        assert isinstance(index, int)
+        l_1 = self.__lambda_1__(parameter)
+        l_2 = self.__lambda_2__(parameter)
+        l_3 = self.__lambda_3__(parameter)
+        l_0 = 2 * l_1 + 4 * l_2 + 2 * l_3
+
+        if index == 1:
+            return l_1 / l_0
+        elif index == 2:
+            return l_2 / l_0
+        elif index == 3:
+            return l_3 / l_0
+        else:
+            return l_0 / l_0
+
+    def __lambda_1__(self, parameter):
+        raise NotImplementedError
+
+    def __lambda_2__(self, parameter):
+        raise NotImplementedError
+
+    def __lambda_3__(self, parameter):
+        raise NotImplementedError
 
 
 class FDM(JumpRate2D):
@@ -142,23 +166,29 @@ class FDM(JumpRate2D):
 
 
 class FEM(JumpRate2D):
+    def __init__(self, diff, h, kappa):
+        super().__init__(diff, h, kappa)
+        self.__a__ = 2 * 2.0
+        self.__b__ = 2 * 1.0
+        self.__c__ = 1.0
+        self.__denominator__ = 6.0 * self.__kappa__ ** 2 * self.__h__ ** 2
 
     def __lambda_1__(self, parameter):
         parameter = self.__get_parameter__(parameter, const=True)
-        val = self.__diff__ * (2.0 - self.__kappa__ ** 2)
-        val /= (3.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
+        val = self.__diff__ * (self.__a__ - self.__b__ * self.__kappa__ ** 2)
+        val /= self.__denominator__
         return val * parameter
 
     def __lambda_2__(self, parameter):
         parameter = self.__get_parameter__(parameter, const=True)
-        val = self.__diff__ * (self.__kappa__ ** 2 + 1.0)
-        val /= (6.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
+        val = self.__diff__ * self.__c__ * (self.__kappa__ ** 2 + 1.0)
+        val /= self.__denominator__
         return val * parameter
 
     def __lambda_3__(self, parameter):
         parameter = self.__get_parameter__(parameter, const=True)
-        val = self.__diff__ * (2.0 * self.__kappa__ ** 2 - 1.0)
-        val /= (3.0 * self.__kappa__ ** 2 * self.__h__ ** 2)
+        val = self.__diff__ * (self.__a__ * self.__kappa__ ** 2 - self.__b__)
+        val /= self.__denominator__
         return val * parameter
 
 
@@ -284,4 +314,8 @@ if __name__ == '__main__':
 
     plt.xlabel(r"$\alpha$, $\beta$")
     plt.legend()
-    plt.show()
+
+    if args["--save"]:
+        plt.savefig(args["--save"])
+    else:
+        plt.show()
