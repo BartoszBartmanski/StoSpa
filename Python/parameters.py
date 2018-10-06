@@ -20,7 +20,7 @@ import json
 from docopt import docopt
 
 
-def _change_type(value, t):
+def change_item(value, t):
 
     if t == "int" or t == "i":
         value = int(value)
@@ -37,7 +37,7 @@ def change_type(value, t):
     value = value.split(",")
 
     for i in range(len(value)):
-        value[i] = _change_type(value[i], t)
+        value[i] = change_item(value[i], t)
 
     if len(value) == 1:
         value = value[0]
@@ -112,6 +112,10 @@ class Parameters(object):
 
     def get_dict(self):
         return self.__params__
+
+    def update(self, another_obj):
+        assert isinstance(another_obj, Parameters)
+        self.__params__.update(another_obj.get_dict())
 
     def display(self):
         self.__keys__.sort()
