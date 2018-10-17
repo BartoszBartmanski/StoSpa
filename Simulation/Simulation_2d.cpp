@@ -14,16 +14,6 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     assert(beta_x >= 0.0 and beta_x <= 1.0);
     assert(beta_y >= 0.0 and beta_y <= 1.0);
 
-    if (num_method != "fdm" and num_method != "fvm" and num_method != "fem" and num_method != "fet")
-    {
-        throw runtime_error("Parameter num_method can only be one of the following:\n- fdm\n- fvm\n- fem\n- fet");
-    }
-
-    if (boundary_condition != "reflective" and boundary_condition != "periodic")
-    {
-        throw runtime_error("Parameter boundary_condition can only be reflective or periodic");
-    }
-
     // Input parameters
     mNumRuns = num_runs;
     mNumSpecies = num_species;
@@ -31,7 +21,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
 
     mDomainBounds = domain_bounds;
-    mBC = boundary_condition;
+    mBC = move(boundary_condition);
 
     // Additional input parameters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
@@ -56,7 +46,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
         mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
     }
 
-    mNumMethod = num_method;
+    mNumMethod = move(num_method);
     if (mNumMethod == "fdm")
     {
         mJumpRates = make_shared<FDM>(mRatio, m_h, mAlpha);
@@ -72,6 +62,10 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     else if (mNumMethod == "fet")
     {
         mJumpRates = make_shared<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
+    }
+    else if (mNumMethod == "fetU")
+    {
+        mJumpRates = make_shared<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
     }
     else
     {
@@ -129,7 +123,7 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
             this->AddReaction(diff_class);
         }
     }
-    else
+    else if (mBC == "periodic")
     {
         for (auto direction : directions)
         {
@@ -148,6 +142,10 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
             }
             this->AddReaction(diff_class);
         }
+    }
+    else
+    {
+        throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
     }
 
 }

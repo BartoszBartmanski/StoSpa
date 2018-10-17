@@ -118,5 +118,41 @@ public:
 
 };
 
+class FETUniform : public JumpRate
+{
+private:
+    double mBetaX;
+
+    double mBetaY;
+
+    unsigned mTruncOrder;
+
+    double mLambda0;
+
+    double mTheta1;
+
+    double mTheta2;
+
+    double mTheta3;
+
+public:
+    FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order);
+
+    double GetTheta1();
+
+    double GetTheta2();
+
+    double GetTheta3();
+
+    double GetLambda0() override;
+
+    double GetLambda1() override;
+
+    double GetLambda2() override;
+
+    double GetLambda3() override;
+
+};
+
 
 #endif //STOSPA_JUMPRATES_HPP

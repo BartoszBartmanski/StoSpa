@@ -433,4 +433,10 @@ TEST_CASE("Test JumpRates.*pp")
     {
         REQUIRE(abs(fet.GetLambda0() - 258.407) < 0.001);
     }
+
+    FETUniform fet_u = FETUniform(1.4, 0.1, 0.0, 0.0, 1000);
+    SECTION("Check GetTheta# functions")
+    {
+        REQUIRE(1.0 - (2*fet_u.GetTheta1() + 4*fet_u.GetTheta2() + 2*fet_u.GetTheta3()) < 0.001);
+    }
 }

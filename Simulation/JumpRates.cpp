@@ -123,7 +123,6 @@ double FET::GetLambda0()
 
 double FET::GetTheta1()
 {
-
     double theta_1 = 0;
 
     for (unsigned j = 1; j < mTruncOrder + 1; j++)
@@ -188,6 +187,109 @@ double FET::GetLambda2()
 }
 
 double FET::GetLambda3()
+{
+    return mTheta3;
+}
+
+
+FETUniform::FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
+{
+    mTruncOrder = truncation_order;
+    mKappa = kappa;
+    mH = length;
+    mBetaX = beta_x;
+    mBetaY = beta_y;
+    mLambda0 = GetLambda0();
+    mTheta1 = GetTheta1();
+    mTheta3 = GetTheta3();
+    mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+}
+
+double FETUniform::GetLambda0()
+{
+    double e_t = 0;
+
+    // First we calculate the expected time to leave the voxel, then we invert this to calculate the propensity
+    for (unsigned j = 1; j < mTruncOrder + 1; j++)
+    {
+        for (unsigned k = 1; k < mTruncOrder + 1; k++)
+        {
+            double sum_squares = (pow(mKappa * (2.0*j-1.0), 2) + pow((2.0*k-1.0), 2));
+            e_t += 1.0/(pow((2.0*k-1.0) * (2.0*j-1.0), 2) * sum_squares);
+        }
+    }
+
+    return pow(M_PI, 6) / (64.0 * pow(mKappa * mH, 2) * e_t);
+}
+
+double FETUniform::GetTheta1()
+{
+
+    double theta_1 = 0;
+
+    for (unsigned j = 1; j < mTruncOrder + 1; j++)
+    {
+        for (unsigned k = 1; k < mTruncOrder + 1; k++)
+        {
+            double sum_squares = (pow(mKappa * (2*j-1), 2) + pow((2*k-1), 2));
+
+            double val = 32.0 * pow((-1), (j + 1));
+            val /= (pow(M_PI, 4) * sum_squares * pow((2.0 * j - 1.0), 2));
+            theta_1 += sin((j - 0.5) * M_PI * mBetaY) * val;
+        }
+    }
+
+    return theta_1;
+}
+
+double FETUniform::GetTheta2()
+{
+    double theta2 = 0.0;
+
+    for (unsigned j = 1; j < mTruncOrder + 1; j++)
+    {
+        for (unsigned k = 1; k < mTruncOrder + 1; k++)
+        {
+            double sum_squares = (pow(mKappa * (2*j-1), 2) + pow((2*k-1), 2));
+            double val1 = pow(mKappa, 2) * (sin(M_PI*(mBetaX*k-0.5*mBetaX+k))+1.0) / pow((2 * k - 1), 2);
+            double val2 = (sin(M_PI*(mBetaY*j-0.5*mBetaY+j))+1.0) / pow((2 * j - 1), 2);
+            theta2 += 16.0 * (val1 + val2) / (pow(M_PI, 4) * sum_squares);
+        }
+    }
+
+    return theta2;
+}
+
+double FETUniform::GetTheta3()
+{
+    double theta3 = 0.0;
+
+    for (unsigned j = 1; j < mTruncOrder + 1; j++)
+    {
+        for (unsigned k = 1; k < mTruncOrder + 1; k++)
+        {
+            double sum_squares = (pow(mKappa * (2*j-1), 2) + pow((2*k-1), 2));
+
+            double val = 32.0 * pow((-1), (k+1)) * (2 * j - 1) * pow(mKappa, 2);
+            val /= (pow(M_PI, 4) * sum_squares * pow((2 * k - 1), 2));
+            theta3 += sin((k - 0.5) * M_PI * mBetaX) * val;
+        }
+    }
+
+    return theta3;
+}
+
+double FETUniform::GetLambda1()
+{
+    return mTheta1;
+}
+
+double FETUniform::GetLambda2()
+{
+    return mTheta2;
+}
+
+double FETUniform::GetLambda3()
 {
     return mTheta3;
 }
