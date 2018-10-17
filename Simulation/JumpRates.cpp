@@ -270,7 +270,7 @@ double FETUniform::GetTheta3()
         {
             double sum_squares = (pow(mKappa * (2*j-1), 2) + pow((2*k-1), 2));
 
-            double val = 32.0 * pow((-1), (k+1)) * (2 * j - 1) * pow(mKappa, 2);
+            double val = 32.0 * pow((-1), (k+1)) * pow(mKappa, 2);
             val /= (pow(M_PI, 4) * sum_squares * pow((2 * k - 1), 2));
             theta3 += sin((k - 0.5) * M_PI * mBetaX) * val;
         }

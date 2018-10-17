@@ -14,24 +14,14 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     assert(num_voxels > 0);
     assert(domain_bounds.size() == 2);
 
-    if (num_method != "fdm" and num_method != "fvm" and num_method != "fem" and num_method != "fet")
-    {
-        throw runtime_error("Parameter num_method can only be one of the following:\n- fdm\n- fvm\n- fem\n- fet");
-    }
-
-    if (boundary_condition != "periodic" and boundary_condition != "reflective")
-    {
-        throw runtime_error("Parameter boundary_condition can only be one of the following:\n- reflective\n- periodic");
-    }
-
     // Input parameters
     mNumRuns = num_runs;
     mNumSpecies = num_species;
-    mNumMethod = num_method;
+    mNumMethod = move(num_method);
     mNumVoxels = {num_voxels, 1};
     mTotalNumVoxels = num_voxels;
     mDomainBounds = domain_bounds;
-    mBC = boundary_condition;
+    mBC = move(boundary_condition);
 
     // Simulation attributes that will change with each time step
     mCurrentTime = vector<double>(mNumRuns, 0);
@@ -51,14 +41,14 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     }
 }
 
-void Simulation_1d::SetDiffusionRate(double diffusion_coefficient, unsigned int species)
+void Simulation_1d::SetDiffusionRate(double diff, unsigned int species)
 {
     // Check for sensible input
-    assert(diffusion_coefficient >= 0.0);
+    assert(diff >= 0.0);
     assert(species < mNumSpecies);
 
-    mDiffusionCoefficients[species] = diffusion_coefficient;
-    double lambda = diffusion_coefficient / pow(m_h, 2);
+    mDiffusionCoefficients[species] = diff;
+    double lambda = diff / pow(m_h, 2);
 
     vector<vector<int>> directions = {{-1}, {1}};
     if (mBC == "reflective")
@@ -68,12 +58,16 @@ void Simulation_1d::SetDiffusionRate(double diffusion_coefficient, unsigned int 
         auto diff_right = make_shared<DiffusionReflective>(lambda, species, directions[1]);
         this->AddReaction(diff_right);
     }
-    else
+    else if (mBC == "periodic")
     {
         auto diff_left = make_shared<DiffusionPeriodic>(lambda, species, directions[0]);
         this->AddReaction(diff_left);
         auto diff_right = make_shared<DiffusionPeriodic>(lambda, species, directions[1]);
         this->AddReaction(diff_right);
+    }
+    else
+    {
+        throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
     }
 }
 

@@ -36,12 +36,12 @@ public:
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
-     * @param diffusion
+     * @param diff
      * @param decay
      * @param production
      * @param species
      */
-    void SetDiffusionRate(double diffusion_coefficient, unsigned species) override;
+    void SetDiffusionRate(double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index

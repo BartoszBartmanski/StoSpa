@@ -424,9 +424,11 @@ TEST_CASE("Test Simulation_2d.*pp")
 TEST_CASE("Test JumpRates.*pp")
 {
     FET fet = FET(1.4, 0.1, 0.0, 0.0, 1000);
+    double diff = 1.0 - (2*fet.GetTheta1() + 4*fet.GetTheta2() + 2*fet.GetTheta3());
     SECTION("Check GetTheta# functions")
     {
-        REQUIRE(1.0 - (2*fet.GetTheta1() + 4*fet.GetTheta2() + 2*fet.GetTheta3()) < 0.001);
+        REQUIRE(diff > 0.0);
+        REQUIRE(diff < 0.001);
     }
 
     SECTION("Check GetLambda0 function")
@@ -434,9 +436,11 @@ TEST_CASE("Test JumpRates.*pp")
         REQUIRE(abs(fet.GetLambda0() - 258.407) < 0.001);
     }
 
-    FETUniform fet_u = FETUniform(1.4, 0.1, 0.0, 0.0, 1000);
+    FETUniform fet_u = FETUniform(1.4, 0.1, 0.5, 0.5, 1000);
+    diff = 1.0 - (2*fet_u.GetTheta1() + 4*fet_u.GetTheta2() + 2*fet_u.GetTheta3());
     SECTION("Check GetTheta# functions")
     {
-        REQUIRE(1.0 - (2*fet_u.GetTheta1() + 4*fet_u.GetTheta2() + 2*fet_u.GetTheta3()) < 0.001);
+        REQUIRE(diff > 0.0);
+        REQUIRE(diff < 0.001);
     }
 }
