@@ -278,18 +278,3 @@ double FETUniform::GetTheta3()
 
     return theta3;
 }
-
-double FETUniform::GetLambda1()
-{
-    return mTheta1 * mLambda0;
-}
-
-double FETUniform::GetLambda2()
-{
-    return mTheta2 * mLambda0;
-}
-
-double FETUniform::GetLambda3()
-{
-    return mTheta3 * mLambda0;
-}

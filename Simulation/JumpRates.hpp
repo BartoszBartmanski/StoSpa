@@ -85,28 +85,30 @@ public:
 class FET : public JumpRate
 {
 protected:
-    double mBetaX;
+    double mBetaX=0.0;
 
-    double mBetaY;
+    double mBetaY=0.0;
 
-    unsigned mTruncOrder;
+    unsigned mTruncOrder=1000;
 
-    double mLambda0;
+    double mLambda0=1.0;
 
-    double mTheta1;
+    double mTheta1=0.25;
 
-    double mTheta2;
+    double mTheta2=0.0;
 
-    double mTheta3;
+    double mTheta3=0.25;
 
 public:
+    FET() = default;
+
     FET(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order);
 
-    double GetTheta1();
+    virtual double GetTheta1();
 
-    double GetTheta2();
+    virtual double GetTheta2();
 
-    double GetTheta3();
+    virtual double GetTheta3();
 
     double GetLambda0() override;
 
@@ -118,39 +120,18 @@ public:
 
 };
 
-class FETUniform : public JumpRate
+class FETUniform : public FET
 {
-protected:
-    double mBetaX;
-
-    double mBetaY;
-
-    unsigned mTruncOrder;
-
-    double mLambda0;
-
-    double mTheta1;
-
-    double mTheta2;
-
-    double mTheta3;
-
 public:
     FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order);
 
-    double GetTheta1();
+    double GetTheta1() override;
 
-    double GetTheta2();
+    double GetTheta2() override;
 
-    double GetTheta3();
+    double GetTheta3() override;
 
     double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
 
 };
 
