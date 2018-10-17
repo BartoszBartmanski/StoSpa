@@ -6,6 +6,7 @@
 #define STOSPA_SIMULATION_2D_HPP
 
 #include "AbstractSimulation.hpp"
+#include "JumpRates.hpp"
 
 using namespace std;
 
@@ -24,6 +25,8 @@ protected:
 
     /** Free parameter in the y-direction for FET method derivation of jump coefficients. */
     double mBetaY=0.5;
+
+    shared_ptr<JumpRate> mJumpRates;
 
 public:
 
@@ -53,36 +56,6 @@ public:
     ~Simulation_2d() override = default;
 
     /**
-     * Calculates the total propensity for a single molecule associated with diffusion according to the FET method.
-     * @return value of lambda_0 in FET
-     */
-    double GetLambdaDiffusion(unsigned species=0, unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_1, which is the probability of moving in the x-direction.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_1
-     */
-    double GetTheta1(unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_2, which is the probability of moving diagonally.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_2
-     */
-    double GetTheta2(unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_3, which is the probability of moving diagonally.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_3
-     */
-    double GetTheta3(unsigned truncation_order=1000);
-
-    /**
      * Returns the aspect ratio of voxels (horizontal length divided by the vertical voxel length).
      * @return a double
      */
@@ -108,10 +81,10 @@ public:
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
-     * @param diffusion
+     * @param diff
      * @param species
      */
-    void SetDiffusionRate(double diffusion_coefficient, unsigned species) override;
+    void SetDiffusionRate(double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index

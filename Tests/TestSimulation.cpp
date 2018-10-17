@@ -2,6 +2,7 @@
 #include "catch.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
+#include "JumpRates.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
@@ -313,16 +314,6 @@ TEST_CASE("Test Simulation_2d.*pp")
         }
     }
 
-    SECTION("Check GetTheta# functions")
-    {
-        REQUIRE(1.0 - (2*sim.GetTheta1(1000) + 4*sim.GetTheta2(1000) + 2*sim.GetTheta3(1000)) < 0.001);
-    }
-
-    SECTION("Check GetLambdaDiffusion function")
-    {
-        REQUIRE(abs(sim.GetLambdaDiffusion() - 0.3165) < 0.001);
-    }
-
     SECTION("Check GetTotalNumMolecules function")
     {
         sim.SetInitialNumMolecules({0, 0}, 1000, 0);
@@ -428,4 +419,18 @@ TEST_CASE("Test Simulation_2d.*pp")
         REQUIRE(sim_rel.GetRelativeError(analytic.GetAnalytic()) < 0.2);
     }
 
+}
+
+TEST_CASE("Test JumpRates.*pp")
+{
+    FET fet = FET(1.4, 0.1, 0.0, 0.0, 1000);
+    SECTION("Check GetTheta# functions")
+    {
+        REQUIRE(1.0 - (2*fet.GetTheta1() + 4*fet.GetTheta2() + 2*fet.GetTheta3()) < 0.001);
+    }
+
+    SECTION("Check GetLambda0 function")
+    {
+        REQUIRE(abs(fet.GetLambda0() - 258.407) < 0.001);
+    }
 }

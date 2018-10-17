@@ -27,7 +27,6 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     // Input parameters
     mNumRuns = num_runs;
     mNumSpecies = num_species;
-    mNumMethod = num_method;
     mNumVoxels = {num_voxels, unsigned(ratio * num_voxels)};
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
 
@@ -56,6 +55,29 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     {
         mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
     }
+
+    mNumMethod = num_method;
+    if (mNumMethod == "fdm")
+    {
+        mJumpRates = make_shared<FDM>(mRatio, m_h, mAlpha);
+    }
+    else if (mNumMethod == "fem")
+    {
+        mJumpRates = make_shared<FEM>(mRatio, m_h);
+    }
+    else if (mNumMethod == "fvm")
+    {
+        mJumpRates = make_shared<FVM>(mRatio, m_h);
+    }
+    else if (mNumMethod == "fet")
+    {
+        mJumpRates = make_shared<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
+    }
+    else
+    {
+        throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
+    }
+
 }
 
 double Simulation_2d::GetVoxelRatio()
@@ -78,166 +100,53 @@ double Simulation_2d::GetBetaY()
     return mBetaY;
 }
 
-double Simulation_2d::GetLambdaDiffusion(unsigned int species, unsigned truncation_order)
-{
-    double lambda_diffusion = 0;
-    // First we calculate the expected time to leave the voxel, then we invert this to calculate the propensity
-    for (unsigned j = 1; j < truncation_order + 1; j++)
-    {
-        for (unsigned k = 1; k < truncation_order + 1; k++)
-        {
-            lambda_diffusion += (pow(-1, j + k)/((2.0*j-1.0) * (2.0*k-1.0) * (pow(mRatio*(2.0*j-1.0), 2) + pow((2.0*k-1.0), 2))));
-        }
-    }
-
-    lambda_diffusion *= (64.0 * pow(mRatio * m_h, 2) / (pow(M_PI, 4) * mDiffusionCoefficients[species]));
-
-    lambda_diffusion = 1.0 / lambda_diffusion;
-
-    return lambda_diffusion;
-}
-
-double Simulation_2d::GetTheta1(unsigned truncation_order)
-{
-    double theta1 = 0.0;
-
-    for (unsigned j = 1; j < truncation_order + 1; j++)
-    {
-        for (unsigned k = 1; k < truncation_order + 1; k++)
-        {
-            double factor = 4.0 * pow(mRatio * m_h, 2) / (pow(M_PI, 2) * (pow(mRatio * (2.0*j-1.0), 2) + pow((2.0*k-1.0), 2)));
-            theta1 += ((2.0 * pow(-1, k+1) * (2.0*k-1.0) * sin(0.5*(2.0*j-1.0)*M_PI*mBetaY) * factor) / (pow(mRatio * m_h, 2) * (2.0*j-1.0)));
-        }
-    }
-
-    return theta1;
-}
-
-double Simulation_2d::GetTheta2(unsigned truncation_order)
-{
-    double theta2 = 0.0;
-
-    for (unsigned j = 1; j < truncation_order + 1; j++)
-    {
-        for (unsigned k = 1; k < truncation_order + 1; k++)
-        {
-            double factor = 4.0 * pow(mRatio * m_h, 2) / (pow(M_PI, 2) * (pow(mRatio * (2.0*j-1.0), 2) + pow((2.0*k-1.0), 2)));
-            theta2 += ((pow(-1, j+k) * (2.0*k-1.0) * (sin(M_PI*(mBetaY * j - 0.5 * mBetaY + j)) + 1.0) * factor) / (pow(m_h * mRatio, 2) * (2.0*j-1.0)));
-            theta2 += ((pow(-1, j+k) * (2.0*j-1.0) * (sin(M_PI*(mBetaX * k - 0.5 * mBetaX + k)) + 1.0) * factor) / (pow(m_h, 2) * (2.0*k-1.0)));
-        }
-    }
-
-    return theta2;
-}
-
-double Simulation_2d::GetTheta3(unsigned truncation_order)
-{
-    double theta3 = 0.0;
-
-    for (unsigned j = 1; j < truncation_order + 1; j++)
-    {
-        for (unsigned k = 1; k < truncation_order + 1; k++)
-        {
-            double factor = 4.0 * pow(mRatio * m_h, 2) / (pow(M_PI, 2) * (pow(mRatio * (2.0*j-1.0), 2) + pow((2.0*k-1.0), 2)));
-            theta3 += ((2.0 * pow(-1, j+1) * (2.0*j-1.0) * sin(0.5*(2.0*k-1.0)*M_PI*mBetaX) * factor) / (pow(m_h, 2) * (2.0*k-1.0)));
-        }
-    }
-
-    return theta3;
-}
-
-void Simulation_2d::SetDiffusionRate(double diffusion_coefficient, unsigned int species)
+void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
 {
     // Check for sensible input
-    assert(diffusion_coefficient >= 0.0);
+    assert(diff >= 0.0);
     assert(species < mNumSpecies);
 
-    mDiffusionCoefficients[species] = diffusion_coefficient;
-
-    vector<double> lambda(3, 0);
-    if (mNumMethod == "fdm")
-    {
-        // Check that the parameters satisfy the discrete maximum principle (which means that the probabilities are non-negative)
-        double upper_bound = min(mRatio, 1.0/mRatio);
-        assert(mAlpha >= 0.0 and mAlpha <= upper_bound and upper_bound <= 1.0);
-
-        lambda[0] = diffusion_coefficient * (1.0 - mRatio * mAlpha) / pow(mRatio * m_h, 2);
-        lambda[1] = diffusion_coefficient * (0.5 * mRatio *mAlpha) / pow(mRatio * m_h, 2);
-        lambda[2] = diffusion_coefficient * (pow(mRatio, 2) - mRatio * mAlpha) / pow(mRatio * m_h, 2);
-
-    }
-    else if (mNumMethod == "fem")
-    {
-        // Check that the parameters satisfy the discrete maximum principle
-        assert(mRatio >= 1.0/sqrt(2) and mRatio <= sqrt(2));
-
-        // This method is equivalent to fdm when the free parameter is as follows
-        mAlpha = (pow(mRatio, 2) + 1.0) / (3.0 * mRatio);
-
-        lambda[0] = diffusion_coefficient * (2.0 - pow(mRatio, 2)) / (3.0 * pow(mRatio * m_h, 2));
-        lambda[1] = diffusion_coefficient * (pow(mRatio, 2) + 1.0) / (6.0 * pow(mRatio * m_h, 2));
-        lambda[2] = diffusion_coefficient * (2.0 * pow(mRatio, 2) - 1.0) / (3.0 * pow(mRatio * m_h, 2));
-    }
-    else if (mNumMethod == "fvm")
-    {
-        lambda[0] = diffusion_coefficient / pow(mRatio * m_h, 2);
-        lambda[1] = 0.0;
-        lambda[2] = diffusion_coefficient / pow(m_h, 2);
-    }
-    else if (mNumMethod == "fet")
-    {
-        double lambda_diffusion = GetLambdaDiffusion(species, 1000);
-        double theta_1 = GetTheta1(1000);
-        lambda[0] = lambda_diffusion * theta_1;
-        double theta_3 = GetTheta3(1000);
-        lambda[2] = lambda_diffusion * theta_3;
-        double theta_2 = 0.25 * (1.0 - 2.0*theta_1 - 2.0 * theta_3);
-        lambda[1] = lambda_diffusion * theta_2;
-    }
-    else
-    {
-        throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
-    }
+    mDiffusionCoefficients[species] = diff;
 
     vector<vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
     if (mBC == "reflective")
     {
         for (auto direction : directions)
         {
-            shared_ptr<DiffusionReflective> diff;
+            shared_ptr<DiffusionReflective> diff_class;
             if (direction[1] == 0)  // Horizontal jumps
             {
-                diff = make_shared<DiffusionReflective>(lambda[0], species, direction);
+                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda1(), species, direction);
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                diff = make_shared<DiffusionReflective>(lambda[2], species, direction);
+                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda3(), species, direction);
             }
             else  // Diagonal jumps
             {
-                diff = make_shared<DiffusionReflective>(lambda[1], species, direction);
+                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda2(), species, direction);
             }
-            this->AddReaction(diff);
+            this->AddReaction(diff_class);
         }
     }
     else
     {
         for (auto direction : directions)
         {
-            shared_ptr<DiffusionPeriodic> diff;
+            shared_ptr<DiffusionPeriodic> diff_class;
             if (direction[1] == 0)  // Horizontal jumps
             {
-                diff = make_shared<DiffusionPeriodic>(lambda[0], species, direction);
+                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda1(), species, direction);
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                diff = make_shared<DiffusionPeriodic>(lambda[2], species, direction);
+                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda3(), species, direction);
             }
             else  // Diagonal jumps
             {
-                diff = make_shared<DiffusionPeriodic>(lambda[1], species, direction);
+                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda2(), species, direction);
             }
-            this->AddReaction(diff);
+            this->AddReaction(diff_class);
         }
     }
 
