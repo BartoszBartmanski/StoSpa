@@ -84,7 +84,7 @@ public:
 
 class FET : public JumpRate
 {
-private:
+protected:
     double mBetaX;
 
     double mBetaY;
@@ -120,7 +120,7 @@ public:
 
 class FETUniform : public JumpRate
 {
-private:
+protected:
     double mBetaX;
 
     double mBetaY;

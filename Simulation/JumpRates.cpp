@@ -178,17 +178,17 @@ double FET::GetTheta3()
 
 double FET::GetLambda1()
 {
-    return mTheta1;
+    return mTheta1 * mLambda0;
 }
 
 double FET::GetLambda2()
 {
-    return mTheta2;
+    return mTheta2 * mLambda0;
 }
 
 double FET::GetLambda3()
 {
-    return mTheta3;
+    return mTheta3 * mLambda0;
 }
 
 
@@ -281,15 +281,15 @@ double FETUniform::GetTheta3()
 
 double FETUniform::GetLambda1()
 {
-    return mTheta1;
+    return mTheta1 * mLambda0;
 }
 
 double FETUniform::GetLambda2()
 {
-    return mTheta2;
+    return mTheta2 * mLambda0;
 }
 
 double FETUniform::GetLambda3()
 {
-    return mTheta3;
+    return mTheta3 * mLambda0;
 }
