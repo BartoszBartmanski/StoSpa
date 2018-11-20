@@ -4478,7 +4478,7 @@ namespace Catch { namespace clara { namespace TextFlow {
                 assert( m_column.m_initialIndent == std::string::npos || m_column.m_width > m_column.m_initialIndent );
                 calcLength();
                 if( m_len == 0 )
-                    m_stringIndex++; // Empty string
+                    m_stringIndex++; // None string
             }
 
             auto operator *() const -> std::string {

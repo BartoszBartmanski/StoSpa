@@ -18,12 +18,14 @@
 #include <sstream>
 #include <map>
 #include <memory>
+#include <queue>
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
+#include "None.hpp"
 
 using namespace std;
 
@@ -78,6 +80,9 @@ protected:
     /** A vector of grids, each of which consists of an array for voxels and an array for time increments. */
     vector<Grid> mGrids;
 
+    /** Seed used for generating a random number. */
+    unsigned mSeed;
+
     /** For generating random numbers */
     mt19937 mGen;
 
@@ -105,6 +110,10 @@ public:
 
     /** Default destructor. */
     virtual ~AbstractSimulation()= default;
+
+    void SetSeed(unsigned number);
+
+    unsigned GetSeed();
 
     /**
      * SSA loop. A single molecule jump or a single reaction.

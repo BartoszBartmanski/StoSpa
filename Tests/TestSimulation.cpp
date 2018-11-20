@@ -15,6 +15,14 @@ TEST_CASE("Test Simulation_1d.*pp")
     auto prod = make_shared<Production>(10.0, 0);
     double end_time = 1.0;
 
+    SECTION("Check random seed generation")
+    {
+        unsigned seed = 10123755;
+        sim.SetSeed(seed);
+        unsigned num = sim.GetSeed();
+        REQUIRE(seed == num);
+    }
+
     SECTION("Check the constructor")
     {
         REQUIRE(sim.GetNumRuns() == 1);

@@ -16,10 +16,14 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
 {
     // TODO: add a seed to rd
     random_device rd;
-    mGen = mt19937(rd());
+    mSeed = rd();
+    mGen = mt19937(mSeed);
     mUniform = uniform_real_distribution<double>(0.0, 1.0);
 
     mDiffusionCoefficients.resize(mNumSpecies);
+
+//    shared_ptr<None> none = make_shared<None>(1.0, 0);
+//    mReactions.push_back(none);
 }
 
 void AbstractSimulation::AddReaction(shared_ptr<AbstractReaction> reaction)
@@ -93,6 +97,17 @@ void AbstractSimulation::SetupTimeIncrements()
             mGrids[run].time_increments[i] = Exponential(GetTotalPropensity(run, i));
         }
     }
+}
+
+void AbstractSimulation::SetSeed(unsigned number)
+{
+    mSeed = number;
+    mGen = mt19937(number);
+}
+
+unsigned AbstractSimulation::GetSeed()
+{
+    return mSeed;
 }
 
 void AbstractSimulation::SSA_loop(const unsigned& run)
