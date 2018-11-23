@@ -176,13 +176,6 @@ public:
     vector<unsigned> GetVoxels(unsigned species=0, unsigned run=0);
 
     /**
-     * Returns the current state of the mTimeIncrements
-     * @param species - index of the species
-     * @return mTimeIncrements[run]
-     */
-    vector<double> GetTimeIncrements(unsigned run=0);
-
-    /**
      * Returns the concentration of the specified species.
      * @param species - index of the species
      * @return concentration[species]

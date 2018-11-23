@@ -50,6 +50,17 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/Version.hpp.in ${CMAKE_CURRENT_S
 # Add Docopt to be compiled
 add_subdirectory(Docopt)
 
+# Add boost
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+#    add_executable(progname file1.cxx file2.cxx)
+#    target_link_libraries(progname ${Boost_LIBRARIES})
+endif()
+
 # Add threads library and set threads flag on
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -72,7 +83,7 @@ add_executable(unittest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
 
 # Add an executable for running simulations and link docopt to it
 add_executable(stospa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
-target_link_libraries(stospa docopt)
+target_link_libraries(stospa docopt ${Boost_LIBRARIES})
 
 # Generate a list of source files in Plots directory
 file(GLOB PLOTS_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Plots/" "${CMAKE_CURRENT_SOURCE_DIR}/Plots/*")
@@ -81,5 +92,5 @@ file(GLOB PLOTS_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Plots/" "${CMAKE_C
 foreach( plot_source ${PLOTS_SOURCES} )
     string( REPLACE ".cpp" "" plot_exec ${plot_source} )
     add_executable( ${plot_exec} ${CMAKE_CURRENT_SOURCE_DIR}/Plots/${plot_source} ${SOURCE_FILES})
-    target_link_libraries(${plot_exec} docopt Threads::Threads)
+    target_link_libraries(${plot_exec} docopt Threads::Threads ${Boost_LIBRARIES})
 endforeach( plot_source ${PLOTS_SOURCES} )
