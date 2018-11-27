@@ -89,18 +89,21 @@ double AbstractSimulation::Exponential(double propensity)
 
 void AbstractSimulation::SetupTimeIncrements()
 {
-    mTimesSet = true;
-    mPropensities.resize(mReactions.size());
-
-    pair<double, unsigned> a_pair;
-    for (unsigned run=0; run < mNumRuns; run++)
+    if (!mTimesSet)
     {
-        for (unsigned i = 0; i < mTotalNumVoxels; i++)
+        mPropensities.resize(mReactions.size());
+
+        pair<double, unsigned> a_pair;
+        for (unsigned run = 0; run < mNumRuns; run++)
         {
-            double t_0 = 1.0 / Exponential(GetTotalPropensity(run, i));
-            a_pair = make_pair(t_0, i);
-            mGrids[run].handles[i] = mGrids[run].time_increments.push(a_pair);
+            for (unsigned i = 0; i < mTotalNumVoxels; i++)
+            {
+                double t_0 = 1.0 / Exponential(GetTotalPropensity(run, i));
+                a_pair = make_pair(t_0, i);
+                mGrids[run].handles[i] = mGrids[run].time_increments.push(a_pair);
+            }
         }
+        mTimesSet = true;
     }
 }
 
@@ -115,12 +118,20 @@ unsigned AbstractSimulation::GetSeed()
     return mSeed;
 }
 
+void AbstractSimulation::UpdateTime(unsigned run, unsigned voxel_index)
+{
+    double inv_time = 1.0 / (mCurrentTime[run] + Exponential(GetTotalPropensity(run, voxel_index)));
+    pair<double, unsigned> new_pair = make_pair(inv_time, voxel_index);
+    *mGrids[run].handles[voxel_index] = new_pair;
+    mGrids[run].time_increments.update(mGrids[run].handles[voxel_index]);
+}
+
 void AbstractSimulation::SSA_loop(const unsigned& run)
 {
     // Find the smallest time until the next reaction
     double inv_time = mGrids[run].time_increments.top().first;
     mCurrentTime[run] = 1.0 / inv_time;
-    int voxel_index = mGrids[run].time_increments.top().second;
+    unsigned voxel_index = mGrids[run].time_increments.top().second;
 
     if (mCurrentTime[run] < inf)
     {
@@ -129,17 +140,11 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
         int jump_index = mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index);
 
         // Update the times until the next reaction
-        inv_time = 1.0 / (mCurrentTime[run] + Exponential(GetTotalPropensity(run, voxel_index)));
-        pair<double, unsigned> new_pair = make_pair(inv_time, voxel_index);
-        *mGrids[run].handles[voxel_index] = new_pair;
-        mGrids[run].time_increments.update(mGrids[run].handles[voxel_index]);
+        UpdateTime(run, voxel_index);
 
         if (jump_index != voxel_index)
         {
-            inv_time = 1.0/(mCurrentTime[run] + Exponential(GetTotalPropensity(run, jump_index)));
-            new_pair = make_pair(inv_time, jump_index);
-            *mGrids[run].handles[jump_index] = new_pair;
-            mGrids[run].time_increments.update(mGrids[run].handles[jump_index]);
+            UpdateTime(run, unsigned(jump_index));
         }
 
         // Update the number of jumps variable

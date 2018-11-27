@@ -118,6 +118,8 @@ public:
 
     unsigned GetSeed();
 
+    inline void UpdateTime(unsigned run, unsigned voxel_index);
+
     /**
      * SSA loop. A single molecule jump or a single reaction.
      */
