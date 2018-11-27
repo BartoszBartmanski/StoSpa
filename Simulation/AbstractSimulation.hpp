@@ -36,6 +36,9 @@ protected:
     /** Helper constants */
     double inf;
 
+    /** Switch for setting times until next reactions vector. */
+    bool mTimesSet;
+
     /** Number of runs of this simulation */
     unsigned mNumRuns;
 

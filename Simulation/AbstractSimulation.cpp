@@ -5,6 +5,7 @@
 #include "AbstractSimulation.hpp"
 
 AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity()),
+                                           mTimesSet(false),
                                            mNumRuns(1),
                                            mNumSpecies(1),
                                            mNumMethod("fdm"),
@@ -88,6 +89,7 @@ double AbstractSimulation::Exponential(double propensity)
 
 void AbstractSimulation::SetupTimeIncrements()
 {
+    mTimesSet = true;
     mPropensities.resize(mReactions.size());
 
     pair<double, unsigned> a_pair;
@@ -148,7 +150,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 
 void AbstractSimulation::Advance(const double& time_step, const unsigned& iterator)
 {
-    if (mTime == 0)
+    if (!mTimesSet)
     {
         SetupTimeIncrements();
     }
