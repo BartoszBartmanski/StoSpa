@@ -43,7 +43,7 @@ public:
         assert(num_species == 2);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * mTotalEnzyme * grid.voxels[0][voxel_index] / (grid.voxels[0][voxel_index] + grid.voxelSize * mKm);
 
