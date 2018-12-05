@@ -55,6 +55,8 @@ public:
     /** Get the propensity (this will be used within a simulation class). */
     virtual double GetPropensity(Grid& grid, const int& voxel_index)=0;
 
+    virtual double GetFuturePropensity(Grid& grid, const int& voxel_index)=0;
+
     /** Update the grids that hold the molecules (this will be used within a simulation class). */
     virtual int UpdateGrid(Grid& grid, const int& voxel_index)=0;
 

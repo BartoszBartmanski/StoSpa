@@ -18,14 +18,13 @@
 #include <sstream>
 #include <map>
 #include <memory>
-#include <queue>
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
-#include "None.hpp"
+#include "Extrande.hpp"
 
 using namespace std;
 
@@ -35,6 +34,12 @@ protected:
 
     /** Helper constants */
     double inf;
+
+    /** Whether the times until the next reactions have been set. */
+    bool mTimesSet;
+
+    /** Whether to use the extrande algorithm. */
+    bool mExtrande;
 
     /** Number of runs of this simulation */
     unsigned mNumRuns;
@@ -100,7 +105,9 @@ protected:
 
     inline unsigned NextReaction(const unsigned& run, const int& voxel_index);
 
-    inline double Exponential(double propensity);
+    inline double Exponential(const double& propensity);
+
+    inline void UpdateBound(const unsigned& run, const int& voxel_index);
 
 public:
 

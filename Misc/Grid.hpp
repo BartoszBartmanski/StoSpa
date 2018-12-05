@@ -28,6 +28,9 @@ public:
     /** Vector of times until the next reaction for each voxel. */
     vector<double> time_increments;
 
+    /** Vector of bounds for the total propensities. */
+    vector<double> a_0;
+
     /** Constructor. */
     Grid(unsigned num_species, double voxel_size, unsigned num_voxels_x, unsigned int num_voxels_y=1);
 

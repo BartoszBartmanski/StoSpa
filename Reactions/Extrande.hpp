@@ -7,18 +7,15 @@
 
 #include <AbstractReaction.hpp>
 
-class None : public AbstractReaction
+class Extrande : public AbstractReaction
 {
-    unsigned mSpeciesIndex;
 public:
-    explicit None(double reaction_rate, unsigned species)
+    explicit Extrande()
     {
-        assert(reaction_rate >= 0);
+        // Rate constant here being actual total propensity in a voxel
+        mRateConstant = 0;
 
-        mRateConstant = reaction_rate;
-        mSpeciesIndex = species;
-
-        mReactionName = "None";
+        mReactionName = "Extrande";
     }
 
     void SetRateConstant(double rate_constant) override
@@ -32,7 +29,7 @@ public:
         assert(num_species > 0);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(Grid& grid, const int& voxel_index, bool future) override
     {
         return mRateConstant;
     }
