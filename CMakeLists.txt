@@ -55,8 +55,8 @@ set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
 
 # Add all the source files
-include_directories(Simulation Reactions Misc Plots Tests)
-file(GLOB SOURCE_FILES_SIMULATION "${CMAKE_CURRENT_SOURCE_DIR}/Simulation/*pp")
+include_directories(Simulator Reactions Misc Simulations Tests)
+file(GLOB SOURCE_FILES_SIMULATION "${CMAKE_CURRENT_SOURCE_DIR}/Simulator/*pp")
 file(GLOB SOURCE_FILES_REACTIONS "${CMAKE_CURRENT_SOURCE_DIR}/Reactions/*pp")
 file(GLOB SOURCE_FILES_MISC "${CMAKE_CURRENT_SOURCE_DIR}/Misc/*pp")
 file(GLOB SOURCE_FILES_UNIT_TESTS "${CMAKE_CURRENT_SOURCE_DIR}/Tests/*pp")
@@ -74,12 +74,12 @@ add_executable(unittest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
 add_executable(stospa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
 target_link_libraries(stospa docopt)
 
-# Generate a list of source files in Plots directory
-file(GLOB PLOTS_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Plots/" "${CMAKE_CURRENT_SOURCE_DIR}/Plots/*")
+# Generate a list of source files in Simulations directory
+file(GLOB SIM_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/" "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/*cpp")
 
-# For each source file in Plots directory generate an executable and link docopt and threads libraries
-foreach( plot_source ${PLOTS_SOURCES} )
-    string( REPLACE ".cpp" "" plot_exec ${plot_source} )
-    add_executable( ${plot_exec} ${CMAKE_CURRENT_SOURCE_DIR}/Plots/${plot_source} ${SOURCE_FILES})
-    target_link_libraries(${plot_exec} docopt Threads::Threads)
-endforeach( plot_source ${PLOTS_SOURCES} )
+# For each source file in Simulations directory generate an executable and link docopt and threads libraries
+foreach( sim_source ${SIM_SOURCES} )
+    string( REPLACE ".cpp" "" sim_exec ${sim_source} )
+    add_executable( ${sim_exec} ${CMAKE_CURRENT_SOURCE_DIR}/Simulations/${sim_source} ${SOURCE_FILES})
+    target_link_libraries(${sim_exec} docopt Threads::Threads)
+endforeach( sim_source ${SIM_SOURCES} )

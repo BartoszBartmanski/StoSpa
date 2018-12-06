@@ -42,6 +42,9 @@ protected:
     /** Whether to use the extrande algorithm. */
     bool mExtrande;
 
+    /** Shared pointer to extrande reaction. */
+    shared_ptr<Extrande> mpExtrande;
+
     /** Number of runs of this simulation */
     unsigned mNumRuns;
 
@@ -119,6 +122,8 @@ public:
     void SetSeed(unsigned number);
 
     unsigned GetSeed();
+
+    void UseExtrande();
 
     /**
      * SSA loop. A single molecule jump or a single reaction.

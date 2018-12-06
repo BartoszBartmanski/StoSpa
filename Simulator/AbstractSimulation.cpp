@@ -16,6 +16,7 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            m_h(0),
                                            mVoxelSize(0)
 {
+    mpExtrande = nullptr;
     random_device rd;
     mSeed = rd();
     mGen = mt19937(mSeed);
@@ -81,33 +82,35 @@ double AbstractSimulation::Exponential(const double& propensity)
 
 void AbstractSimulation::UpdateBound(const unsigned& run, const int& voxel_index)
 {
+    if (mExtrande)
+    {
+        double max_next_prop = 0;
+        for (const auto& reaction : mReactions)
+        {
+            double future = reaction->GetFuturePropensity(mGrids[run], voxel_index);
+            if (future > max_next_prop)
+            {
+                max_next_prop = future;
+            }
+        }
+        mpExtrande->SetRateConstant(max_next_prop);
+    }
+
     double total = 0;
-    double max_next_prop = 0;
     for (unsigned i=0; i < mReactions.size(); i++)
     {
         double propensity = mReactions[i]->GetPropensity(mGrids[run], voxel_index);
         mPropensities[i] = propensity;
         total += propensity;
-
-        double future = mReactions[i]->GetFuturePropensity(mGrids[run], voxel_index);
-        if (future > max_next_prop)
-        {
-            max_next_prop = future;
-        }
     }
 
-    mPropensities[mPropensities.size() - 1] = max_next_prop;
-    mGrids[run].a_0[voxel_index] = total + max_next_prop;
+    mGrids[run].a_0[voxel_index] = total;
 }
 
 void AbstractSimulation::SetupTimeIncrements()
 {
     if (!mTimesSet)
     {
-        // Add the none -> none reaction
-        shared_ptr<Extrande> none = make_shared<Extrande>();
-        mReactions.push_back(none);
-
         mPropensities.resize(mReactions.size());
 
         for (unsigned run = 0; run < mNumRuns; run++)
@@ -133,6 +136,14 @@ unsigned AbstractSimulation::GetSeed()
     return mSeed;
 }
 
+void AbstractSimulation::UseExtrande()
+{
+    mExtrande = true;
+    // Add the (none -> none) reaction
+    shared_ptr<Extrande> none = make_shared<Extrande>();
+    mReactions.push_back(none);
+}
+
 void AbstractSimulation::SSA_loop(const unsigned& run)
 {
     // Find the smallest time until the next reaction
@@ -148,10 +159,12 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
         int jump_index = mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index);
 
         // Update the times until the next reaction
-        mGrids[run].time_increments[voxel_index] = mGrids[run].time + Exponential(GetTotalPropensity(run, voxel_index));
+        UpdateBound(run, voxel_index);
+        mGrids[run].time_increments[voxel_index] = mGrids[run].time + Exponential(mGrids[run].a_0[voxel_index]);
         if (jump_index != voxel_index)
         {
-            mGrids[run].time_increments[jump_index] = mGrids[run].time + Exponential(GetTotalPropensity(run, jump_index));
+            UpdateBound(run, jump_index);
+            mGrids[run].time_increments[jump_index] = mGrids[run].time + Exponential(mGrids[run].a_0[jump_index]);
         }
 
         // Update the number of jumps variable
