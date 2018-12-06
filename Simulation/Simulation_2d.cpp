@@ -30,7 +30,6 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mBetaY = beta_y;
 
     // Simulation attributes that will change with each time step
-    mCurrentTime = vector<double>(mNumRuns, 0);
     mNumJumps = 0;
     mTime = 0.0;
 

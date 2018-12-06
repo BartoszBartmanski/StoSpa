@@ -15,6 +15,7 @@ Grid::Grid(unsigned num_species, double voxel_size, unsigned num_voxels_x, unsig
     numVoxels = {num_voxels_x, num_voxels_y};
     voxelSize = voxel_size;
     voxels.resize(num_species);
+    time = 0.0;
 
     for (unsigned i=0; i<num_species; i++)
     {

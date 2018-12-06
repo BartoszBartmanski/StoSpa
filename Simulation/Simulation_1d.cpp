@@ -24,7 +24,6 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     mBC = move(boundary_condition);
 
     // Simulation attributes that will change with each time step
-    mCurrentTime = vector<double>(mNumRuns, 0);
     mNumJumps = 0;
     mTime = 0.0;
 
@@ -63,6 +62,13 @@ void Simulation_1d::SetDiffusionRate(double diff, unsigned int species)
         auto diff_left = make_shared<DiffusionPeriodic>(lambda, species, directions[0]);
         this->AddReaction(diff_left);
         auto diff_right = make_shared<DiffusionPeriodic>(lambda, species, directions[1]);
+        this->AddReaction(diff_right);
+    }
+    else if (mBC == "Exponential")
+    {
+        auto diff_left = make_shared<DiffusionReflectiveExp>(lambda, species, directions[0], 1.0);
+        this->AddReaction(diff_left);
+        auto diff_right = make_shared<DiffusionReflectiveExp>(lambda, species, directions[1], 1.0);
         this->AddReaction(diff_right);
     }
     else

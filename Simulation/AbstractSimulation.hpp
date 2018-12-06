@@ -21,6 +21,7 @@
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
+#include "DiffusionReflectiveExp.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
@@ -63,9 +64,6 @@ protected:
 
     /** Boundary condition. */
     string mBC = "reflective";
-
-    /** Current time of the specific run of the simulation. */
-    vector<double> mCurrentTime;
 
     /** Current time for all the runs. */
     double mTime;

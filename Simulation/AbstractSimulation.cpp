@@ -16,7 +16,6 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            m_h(0),
                                            mVoxelSize(0)
 {
-    // TODO: add a seed to rd
     random_device rd;
     mSeed = rd();
     mGen = mt19937(mSeed);
@@ -83,14 +82,22 @@ double AbstractSimulation::Exponential(const double& propensity)
 void AbstractSimulation::UpdateBound(const unsigned& run, const int& voxel_index)
 {
     double total = 0;
+    double max_next_prop = 0;
     for (unsigned i=0; i < mReactions.size(); i++)
     {
         double propensity = mReactions[i]->GetPropensity(mGrids[run], voxel_index);
         mPropensities[i] = propensity;
         total += propensity;
+
+        double future = mReactions[i]->GetFuturePropensity(mGrids[run], voxel_index);
+        if (future > max_next_prop)
+        {
+            max_next_prop = future;
+        }
     }
 
-    mGrids[run].a_0[voxel_index] = total;
+    mPropensities[mPropensities.size() - 1] = max_next_prop;
+    mGrids[run].a_0[voxel_index] = total + max_next_prop;
 }
 
 void AbstractSimulation::SetupTimeIncrements()
@@ -131,20 +138,20 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
     // Find the smallest time until the next reaction
     auto result = min_element(mGrids[run].time_increments.begin(), mGrids[run].time_increments.end());
 
-    mCurrentTime[run] = *result;
+    mGrids[run].time = *result;
     int voxel_index = int(distance(mGrids[run].time_increments.begin(), result));
 
-    if (mCurrentTime[run] < inf)
+    if (mGrids[run].time < inf)
     {
         // Determine which reaction happens next and update the molecule numbers accordingly
         unsigned reaction = NextReaction(run, voxel_index);
         int jump_index = mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index);
 
         // Update the times until the next reaction
-        mGrids[run].time_increments[voxel_index] = mCurrentTime[run] + Exponential(GetTotalPropensity(run, voxel_index));
+        mGrids[run].time_increments[voxel_index] = mGrids[run].time + Exponential(GetTotalPropensity(run, voxel_index));
         if (jump_index != voxel_index)
         {
-            mGrids[run].time_increments[jump_index] = mCurrentTime[run] + Exponential(GetTotalPropensity(run, jump_index));
+            mGrids[run].time_increments[jump_index] = mGrids[run].time + Exponential(GetTotalPropensity(run, jump_index));
         }
 
         // Update the number of jumps variable
@@ -162,7 +169,7 @@ void AbstractSimulation::Advance(const double& time_step, const unsigned& iterat
 
     for (unsigned run=0; run < mNumRuns; run++)
     {
-        while (mCurrentTime[run] < iterator * time_step)
+        while (mGrids[run].time < iterator * time_step)
         {
             SSA_loop(run);
         }

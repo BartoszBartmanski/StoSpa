@@ -17,7 +17,9 @@ public:
     /** Infinity. */
     double inf = numeric_limits<double>::infinity();
 
-    double voxelSize=1.0;
+    double voxelSize;
+
+    double time;
 
     vector<unsigned> numVoxels;
 

@@ -50,6 +50,16 @@ public:
         return propensity;
     }
 
+    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    {
+        unsigned future_0 = grid.voxels[0][voxel_index] - 1;
+
+        double propensity = mRateConstant * mTotalEnzyme * future_0 / (future_0 + grid.voxelSize * mKm);
+
+        return propensity;
+    }
+
+
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {
         grid.voxels[0][voxel_index] -= 1;
