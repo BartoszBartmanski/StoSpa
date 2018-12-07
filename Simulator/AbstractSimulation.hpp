@@ -95,9 +95,6 @@ protected:
     /** Uniform distribution. */
     uniform_real_distribution<double> mUniform;
 
-    /** vector of all propensities. */
-    vector<double> mPropensities;
-
     /** Vector of the diffusion coefficients. */
     vector<double> mDiffusionCoefficients;
 

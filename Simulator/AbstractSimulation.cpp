@@ -44,22 +44,23 @@ unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_
 {
     double r_a_0 = mUniform(mGen) * mGrids[run].a_0[voxel_index];
 
-    unsigned reaction = 0;
+    unsigned reaction_idx = 0;
     double lower_bound = 0;
-    for (const double& propensity : mPropensities)
+    for (const shared_ptr<AbstractReaction>& reaction : mReactions)
     {
+        double propensity = reaction->GetPropensity(mGrids[run], voxel_index);
         if (r_a_0 > lower_bound and r_a_0 < lower_bound + propensity)
         {
             break;
         }
         else
         {
-            reaction += 1;
+            reaction_idx += 1;
             lower_bound += propensity;
         }
     }
 
-    return reaction;
+    return reaction_idx;
 }
 
 double AbstractSimulation::Exponential(const double& propensity)
@@ -84,11 +85,9 @@ void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
     }
 
     double total = 0;
-    for (unsigned i=0; i < mReactions.size(); i++)
+    for (const shared_ptr<AbstractReaction>& reaction : mReactions)
     {
-        double propensity = mReactions[i]->GetPropensity(mGrids[run], voxel_index);
-        mPropensities[i] = propensity;
-        total += propensity;
+        total += reaction->GetPropensity(mGrids[run], voxel_index);
     }
 
     mGrids[run].a_0[voxel_index] = total;
@@ -99,8 +98,6 @@ void AbstractSimulation::SetupTimeIncrements()
 {
     if (!mTimesSet)
     {
-        mPropensities.resize(mReactions.size());
-
         for (unsigned run = 0; run < mNumRuns; run++)
         {
             for (unsigned i = 0; i < mTotalNumVoxels; i++)
