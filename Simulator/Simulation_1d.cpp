@@ -24,7 +24,7 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     mBC = move(boundary_condition);
 
     // Simulation attributes that will change with each time step
-    mNumJumps = 0;
+    mNumJumps = vector<unsigned>(mNumRuns, 0);
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation

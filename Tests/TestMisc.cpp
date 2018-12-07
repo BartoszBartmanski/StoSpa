@@ -25,7 +25,7 @@ TEST_CASE("Test Grids.*pp")
     SECTION("Check time increments")
     {
         double inf = numeric_limits<double>::infinity();
-        for (const double& voxel : grid.time_increments)
+        for (const double& voxel : grid.next_reaction_time)
         {
             REQUIRE(voxel == inf);
         }

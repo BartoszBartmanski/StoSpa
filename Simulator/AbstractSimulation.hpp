@@ -72,7 +72,7 @@ protected:
     double mTime;
 
     /** Number of jumps at the at time in the simulation. */
-    unsigned mNumJumps;
+    vector<unsigned> mNumJumps;
 
     /** Voxel width in one dimension and voxel height in two dimensions. */
     double m_h;
@@ -101,14 +101,11 @@ protected:
     /** Vector of the diffusion coefficients. */
     vector<double> mDiffusionCoefficients;
 
-    /** Calculates the total propensity for a specified voxel. */
-    inline double GetTotalPropensity(const unsigned& run, const int& voxel_index);
-
     inline unsigned NextReaction(const unsigned& run, const int& voxel_index);
 
     inline double Exponential(const double& propensity);
 
-    inline void UpdateBound(const unsigned& run, const int& voxel_index);
+    inline void UpdateTime(const unsigned& run, const int& voxel_index);
 
 public:
 
@@ -251,7 +248,7 @@ public:
      * Returns the total number of reactions that have taken place.
      * @return mNumJumps
      */
-    unsigned GetNumJumps();
+    unsigned GetNumJumps(unsigned run);
 
     /**
      * Returns the number of voxels along each direction.

@@ -23,5 +23,5 @@ Grid::Grid(unsigned num_species, double voxel_size, unsigned num_voxels_x, unsig
     }
     a_0 = vector<double>(num_voxels_x*num_voxels_y, 0);
 
-    time_increments = vector<double>(num_voxels_x*num_voxels_y, inf);
+    next_reaction_time = vector<double>(num_voxels_x*num_voxels_y, inf);
 }

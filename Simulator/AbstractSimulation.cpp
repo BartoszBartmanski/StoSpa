@@ -12,10 +12,10 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            mNumMethod("fdm"),
                                            mTotalNumVoxels(1),
                                            mTime(0),
-                                           mNumJumps(0),
                                            m_h(0),
                                            mVoxelSize(0)
 {
+    mNumJumps = vector<unsigned>(mNumRuns, 0);
     mpExtrande = nullptr;
     random_device rd;
     mSeed = rd();
@@ -40,21 +40,8 @@ vector<shared_ptr<AbstractReaction>> AbstractSimulation::GetReactions()
     return mReactions;
 }
 
-inline double AbstractSimulation::GetTotalPropensity(const unsigned& run, const int& voxel_index)
-{
-    double propensity = 0;
-
-    for (const shared_ptr<AbstractReaction>& reaction : mReactions)
-    {
-        propensity += reaction->GetPropensity(mGrids[run], voxel_index);
-    }
-
-    return propensity;
-}
-
 unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_index)
 {
-    UpdateBound(run, voxel_index);
     double r_a_0 = mUniform(mGen) * mGrids[run].a_0[voxel_index];
 
     unsigned reaction = 0;
@@ -80,7 +67,7 @@ double AbstractSimulation::Exponential(const double& propensity)
     return (-1.0/propensity) * log(mUniform(mGen));
 }
 
-void AbstractSimulation::UpdateBound(const unsigned& run, const int& voxel_index)
+void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
 {
     if (mExtrande)
     {
@@ -105,6 +92,7 @@ void AbstractSimulation::UpdateBound(const unsigned& run, const int& voxel_index
     }
 
     mGrids[run].a_0[voxel_index] = total;
+    mGrids[run].next_reaction_time[voxel_index] = mGrids[run].time + Exponential(total);
 }
 
 void AbstractSimulation::SetupTimeIncrements()
@@ -117,8 +105,7 @@ void AbstractSimulation::SetupTimeIncrements()
         {
             for (unsigned i = 0; i < mTotalNumVoxels; i++)
             {
-                UpdateBound(run, i);
-                mGrids[run].time_increments[i] = Exponential(mGrids[run].a_0[i]);
+                UpdateTime(run, i);
             }
         }
         mTimesSet = true;
@@ -141,16 +128,17 @@ void AbstractSimulation::UseExtrande()
     mExtrande = true;
     // Add the (none -> none) reaction
     shared_ptr<Extrande> none = make_shared<Extrande>();
+    mpExtrande = none;
     mReactions.push_back(none);
 }
 
 void AbstractSimulation::SSA_loop(const unsigned& run)
 {
     // Find the smallest time until the next reaction
-    auto result = min_element(mGrids[run].time_increments.begin(), mGrids[run].time_increments.end());
+    auto result = min_element(mGrids[run].next_reaction_time.begin(), mGrids[run].next_reaction_time.end());
 
     mGrids[run].time = *result;
-    int voxel_index = int(distance(mGrids[run].time_increments.begin(), result));
+    int voxel_index = int(distance(mGrids[run].next_reaction_time.begin(), result));
 
     if (mGrids[run].time < inf)
     {
@@ -159,16 +147,14 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
         int jump_index = mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index);
 
         // Update the times until the next reaction
-        UpdateBound(run, voxel_index);
-        mGrids[run].time_increments[voxel_index] = mGrids[run].time + Exponential(mGrids[run].a_0[voxel_index]);
+        UpdateTime(run, voxel_index);
         if (jump_index != voxel_index)
         {
-            UpdateBound(run, jump_index);
-            mGrids[run].time_increments[jump_index] = mGrids[run].time + Exponential(mGrids[run].a_0[jump_index]);
+            UpdateTime(run, jump_index);
         }
 
         // Update the number of jumps variable
-        mNumJumps += 1;
+        mNumJumps[run] += 1;
     }
 
 }
@@ -197,7 +183,7 @@ vector<unsigned> AbstractSimulation::GetVoxels(unsigned int species, unsigned in
 
 vector<double> AbstractSimulation::GetTimeIncrements(unsigned int run)
 {
-    return mGrids[run].time_increments;
+    return mGrids[run].next_reaction_time;
 }
 
 vector<double> AbstractSimulation::GetConcentration(unsigned int species)
@@ -262,9 +248,9 @@ unsigned AbstractSimulation::GetTotalMolecules(unsigned int species, unsigned in
     return total;
 }
 
-unsigned AbstractSimulation::GetNumJumps()
+unsigned AbstractSimulation::GetNumJumps(unsigned run)
 {
-    return mNumJumps;
+    return mNumJumps[run];
 }
 
 vector<unsigned> AbstractSimulation::GetNumVoxels()

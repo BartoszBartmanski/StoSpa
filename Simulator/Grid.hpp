@@ -28,7 +28,7 @@ public:
     vector<vector<unsigned>> voxels;
 
     /** Vector of times until the next reaction for each voxel. */
-    vector<double> time_increments;
+    vector<double> next_reaction_time;
 
     /** Vector of bounds for the total propensities. */
     vector<double> a_0;
