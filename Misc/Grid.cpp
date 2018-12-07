@@ -21,5 +21,5 @@ Grid::Grid(unsigned num_species, double voxel_size, unsigned num_voxels_x, unsig
         voxels[i] = vector<unsigned>(num_voxels_x*num_voxels_y, 0);
     }
 
-    handles.reserve(num_voxels_x * num_voxels_y);
+    handles.resize(num_voxels_x * num_voxels_y);
 }

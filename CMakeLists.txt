@@ -26,7 +26,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 
 # Add the O3 optimisation flag and any specified warning flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 ${WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 
 # Check for git version and put it in BUILD_VERSION variable
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
