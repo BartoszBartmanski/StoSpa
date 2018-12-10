@@ -32,7 +32,7 @@ TEST_CASE("Test Simulation_1d.*pp")
         REQUIRE(sim.GetDomainBounds()[0] == 0.0);
         REQUIRE(sim.GetDomainBounds()[1] == 20.0);
         REQUIRE(sim.GetBoundaryCondition() == "reflective");
-        REQUIRE(sim.GetNumJumps() == 0);
+        REQUIRE(sim.GetNumJumps(0) == 0);
         REQUIRE(sim.GetCurrentTime() == 0);
         REQUIRE(sim.GetSpacing() == 20.0/5);
         REQUIRE(sim.GetVoxelSize() == 20.0/5);
@@ -41,13 +41,6 @@ TEST_CASE("Test Simulation_1d.*pp")
     SECTION("Check SetDiffusionRate function")
     {
         REQUIRE(sim.GetDiffusionCoefficient() == 1.0);
-    }
-
-    SECTION("Check AddReaction function")
-    {
-        sim.AddReaction(decay);
-        REQUIRE(sim.GetReactions().back()->GetReactionName() == "Decay");
-        REQUIRE(sim.GetReactions().back()->GetRateConstant() == 1.0);
     }
 
     SECTION("Check SetInitialNumMolecules function")
@@ -228,7 +221,7 @@ TEST_CASE("Test Simulation_2d.*pp")
         REQUIRE(sim.GetDomainBounds()[0] == 0.0);
         REQUIRE(sim.GetDomainBounds()[1] == 20.0);
         REQUIRE(sim.GetBoundaryCondition() == "reflective");
-        REQUIRE(sim.GetNumJumps() == 0);
+        REQUIRE(sim.GetNumJumps(0) == 0);
         REQUIRE(sim.GetCurrentTime() == 0);
         REQUIRE(sim.GetVoxelSize() == 1.4 * pow(20.0/7, 2));
         REQUIRE(sim.GetVoxelRatio() == 1.4);
@@ -240,13 +233,6 @@ TEST_CASE("Test Simulation_2d.*pp")
     SECTION("Check SetReactionRates function")
     {
         REQUIRE(sim.GetDiffusionCoefficient() == 1.0);
-    }
-
-    SECTION("Check AddReaction function")
-    {
-        sim.AddReaction(decay);
-        REQUIRE(sim.GetReactions().back()->GetReactionName() == "Decay");
-        REQUIRE(sim.GetReactions().back()->GetRateConstant() == 1.0);
     }
 
     SECTION("Check SetInitialNumMolecules function")
