@@ -7,6 +7,7 @@
 AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity()),
                                            mTimesSet(false),
                                            mExtrande(false),
+                                           mExtrandeIndex(0),
                                            mNumRuns(1),
                                            mNumSpecies(1),
                                            mNumMethod("fdm"),
@@ -16,7 +17,6 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            mVoxelSize(0)
 {
     mNumJumps = vector<unsigned>(mNumRuns, 0);
-    mpExtrande = nullptr;
     random_device rd;
     mSeed = rd();
     mGen = mt19937(mSeed);
@@ -33,11 +33,6 @@ void AbstractSimulation::AddReaction(shared_ptr<AbstractReaction> reaction)
     {
         mReactions.push_back(reaction);
     }
-}
-
-vector<shared_ptr<AbstractReaction>> AbstractSimulation::GetReactions()
-{
-    return mReactions;
 }
 
 unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_index)
@@ -58,6 +53,16 @@ unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_
             reaction_idx += 1;
             lower_bound += propensity;
         }
+    }
+
+    if (mExtrande and reaction_idx == mReactions.size())
+    {
+        reaction_idx = mExtrandeIndex;
+    }
+
+    if (reaction_idx >= mReactions.size())
+    {
+        throw runtime_error("NextReaction function returns index outside of possible range");
     }
 
     return reaction_idx;
@@ -81,7 +86,7 @@ void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
                 max_next_prop = future;
             }
         }
-        mpExtrande->SetRateConstant(max_next_prop);
+        mReactions[mExtrandeIndex]->SetRateConstant(max_next_prop);
     }
 
     double total = 0;
@@ -125,8 +130,8 @@ void AbstractSimulation::UseExtrande()
     mExtrande = true;
     // Add the (none -> none) reaction
     shared_ptr<Extrande> none = make_shared<Extrande>();
-    mpExtrande = none;
     mReactions.push_back(none);
+    mExtrandeIndex = unsigned(mReactions.size()) - 1;
 }
 
 void AbstractSimulation::SSA_loop(const unsigned& run)

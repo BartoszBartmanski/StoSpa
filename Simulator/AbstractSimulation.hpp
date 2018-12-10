@@ -42,8 +42,8 @@ protected:
     /** Whether to use the extrande algorithm. */
     bool mExtrande;
 
-    /** Shared pointer to extrande reaction. */
-    shared_ptr<Extrande> mpExtrande;
+    /** Index of the Extrande reaction in the mReactions vector. */
+    unsigned mExtrandeIndex;
 
     /** Number of runs of this simulation */
     unsigned mNumRuns;
@@ -109,7 +109,6 @@ public:
     /** Default constructor. */
     AbstractSimulation();
 
-
     /** Default destructor. */
     virtual ~AbstractSimulation()= default;
 
@@ -165,12 +164,6 @@ public:
      * @param rate_constant
      */
     void AddReaction(shared_ptr<AbstractReaction> reaction);
-
-    /**
-     * Returns a vector of pointers to additional reactions.
-     * @return mAdditionalReactions
-     */
-    vector<shared_ptr<AbstractReaction>> GetReactions();
 
     /**
      * Returns the current state of the mVoxels
