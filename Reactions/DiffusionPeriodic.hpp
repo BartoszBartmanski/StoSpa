@@ -49,6 +49,12 @@ public:
         return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];
     }
 
+    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    {
+        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];
+    }
+
+
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {
         mUnflattenedIndex[0] = mod((voxel_index % grid.numVoxels[0]) + mDirection[0], grid.numVoxels[0]);

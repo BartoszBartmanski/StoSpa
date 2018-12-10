@@ -38,6 +38,14 @@ public:
         return mRateConstant * grid.voxels[0][voxel_index] * grid.voxels[1][voxel_index] / grid.voxelSize;
     }
 
+    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    {
+        unsigned future_0 = grid.voxels[0][voxel_index] - 1;
+        unsigned future_1 = grid.voxels[1][voxel_index];
+
+        return mRateConstant * future_0 * future_1 / grid.voxelSize;
+    }
+
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {
         grid.voxels[0][voxel_index] -= 1;

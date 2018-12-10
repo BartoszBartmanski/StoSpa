@@ -18,14 +18,14 @@
 #include <sstream>
 #include <map>
 #include <memory>
-#include <queue>
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
+#include "DiffusionReflectiveExp.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
-#include "None.hpp"
+#include "Extrande.hpp"
 
 using namespace std;
 
@@ -35,6 +35,15 @@ protected:
 
     /** Helper constants */
     double inf;
+
+    /** Whether the times until the next reactions have been set. */
+    bool mTimesSet;
+
+    /** Whether to use the extrande algorithm. */
+    bool mExtrande;
+
+    /** Index of the Extrande reaction in the mReactions vector. */
+    unsigned mExtrandeIndex;
 
     /** Number of runs of this simulation */
     unsigned mNumRuns;
@@ -59,14 +68,11 @@ protected:
     /** Boundary condition. */
     string mBC = "reflective";
 
-    /** Current time of the specific run of the simulation. */
-    vector<double> mCurrentTime;
-
     /** Current time for all the runs. */
     double mTime;
 
     /** Number of jumps at the at time in the simulation. */
-    unsigned mNumJumps;
+    vector<unsigned> mNumJumps;
 
     /** Voxel width in one dimension and voxel height in two dimensions. */
     double m_h;
@@ -89,24 +95,19 @@ protected:
     /** Uniform distribution. */
     uniform_real_distribution<double> mUniform;
 
-    /** vector of all propensities. */
-    vector<double> mPropensities;
-
     /** Vector of the diffusion coefficients. */
     vector<double> mDiffusionCoefficients;
 
-    /** Calculates the total propensity for a specified voxel. */
-    inline double GetTotalPropensity(const unsigned& run, const int& voxel_index);
-
     inline unsigned NextReaction(const unsigned& run, const int& voxel_index);
 
-    inline double Exponential(double propensity);
+    inline double Exponential(const double& propensity);
+
+    inline void UpdateTime(const unsigned& run, const int& voxel_index);
 
 public:
 
     /** Default constructor. */
     AbstractSimulation();
-
 
     /** Default destructor. */
     virtual ~AbstractSimulation()= default;
@@ -114,6 +115,8 @@ public:
     void SetSeed(unsigned number);
 
     unsigned GetSeed();
+
+    void UseExtrande();
 
     /**
      * SSA loop. A single molecule jump or a single reaction.
@@ -161,12 +164,6 @@ public:
      * @param rate_constant
      */
     void AddReaction(shared_ptr<AbstractReaction> reaction);
-
-    /**
-     * Returns a vector of pointers to additional reactions.
-     * @return mAdditionalReactions
-     */
-    vector<shared_ptr<AbstractReaction>> GetReactions();
 
     /**
      * Returns the current state of the mVoxels
@@ -241,7 +238,7 @@ public:
      * Returns the total number of reactions that have taken place.
      * @return mNumJumps
      */
-    unsigned GetNumJumps();
+    unsigned GetNumJumps(unsigned run);
 
     /**
      * Returns the number of voxels along each direction.
