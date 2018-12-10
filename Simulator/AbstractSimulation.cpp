@@ -73,7 +73,7 @@ double AbstractSimulation::Exponential(const double& propensity)
     return (-1.0/propensity) * log(mUniform(mGen));
 }
 
-void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
+void AbstractSimulation::UpdateTotalPropensity(const unsigned& run, const int& voxel_index)
 {
     if (mExtrande)
     {
@@ -95,9 +95,13 @@ void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
         total += reaction->GetPropensity(mGrids[run], voxel_index);
     }
 
-    mGrids[run].a_0[voxel_index] = total;
+   mGrids[run].a_0[voxel_index] = total;
+}
 
-    double inv_time = 1.0 / (mGrids[run].time + Exponential(total));
+void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
+{
+    UpdateTotalPropensity(run, voxel_index);
+    double inv_time = 1.0 / (mGrids[run].time + Exponential(mGrids[run].a_0[voxel_index]));
     pair<double, unsigned> new_pair = make_pair(inv_time, voxel_index);
     *mGrids[run].handles[voxel_index] = new_pair;
     mGrids[run].next_reaction_time.update(mGrids[run].handles[voxel_index]);
@@ -107,11 +111,15 @@ void AbstractSimulation::SetupTimeIncrements()
 {
     if (!mTimesSet)
     {
+        pair<double, unsigned> a_pair;
         for (unsigned run = 0; run < mNumRuns; run++)
         {
             for (unsigned i = 0; i < mTotalNumVoxels; i++)
             {
-                UpdateTime(run, i);
+                UpdateTotalPropensity(run, i);
+                double t_0 = 1.0 / Exponential(mGrids[run].a_0[i]);
+                a_pair = make_pair(t_0, i);
+                mGrids[run].handles[i] = mGrids[run].next_reaction_time.push(a_pair);
             }
         }
         mTimesSet = true;

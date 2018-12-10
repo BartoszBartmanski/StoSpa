@@ -103,6 +103,8 @@ protected:
 
     inline double Exponential(const double& propensity);
 
+    inline void UpdateTotalPropensity(const unsigned& run, const int& voxel_index);
+
     inline void UpdateTime(const unsigned& run, const int& voxel_index);
 
 public:
