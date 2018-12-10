@@ -18,6 +18,7 @@
 #include <sstream>
 #include <map>
 #include <memory>
+#include <utility>
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"

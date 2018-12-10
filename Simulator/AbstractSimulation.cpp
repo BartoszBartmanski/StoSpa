@@ -96,7 +96,11 @@ void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
     }
 
     mGrids[run].a_0[voxel_index] = total;
-    mGrids[run].next_reaction_time[voxel_index] = mGrids[run].time + Exponential(total);
+
+    double inv_time = 1.0 / (mGrids[run].time + Exponential(total));
+    pair<double, unsigned> new_pair = make_pair(inv_time, voxel_index);
+    *mGrids[run].handles[voxel_index] = new_pair;
+    mGrids[run].next_reaction_time.update(mGrids[run].handles[voxel_index]);
 }
 
 void AbstractSimulation::SetupTimeIncrements()
@@ -137,10 +141,9 @@ void AbstractSimulation::UseExtrande()
 void AbstractSimulation::SSA_loop(const unsigned& run)
 {
     // Find the smallest time until the next reaction
-    auto result = min_element(mGrids[run].next_reaction_time.begin(), mGrids[run].next_reaction_time.end());
-
-    mGrids[run].time = *result;
-    int voxel_index = int(distance(mGrids[run].next_reaction_time.begin(), result));
+    double inv_time = mGrids[run].next_reaction_time.top().first;
+    mGrids[run].time = 1.0 / inv_time;
+    unsigned voxel_index = mGrids[run].next_reaction_time.top().second;
 
     if (mGrids[run].time < inf)
     {
@@ -152,7 +155,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
         UpdateTime(run, voxel_index);
         if (jump_index != voxel_index)
         {
-            UpdateTime(run, jump_index);
+            UpdateTime(run, unsigned(jump_index));
         }
 
         // Update the number of jumps variable
@@ -160,6 +163,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
     }
 
 }
+
 
 void AbstractSimulation::Advance(const double& time_step, const unsigned& iterator)
 {
@@ -181,11 +185,6 @@ void AbstractSimulation::Advance(const double& time_step, const unsigned& iterat
 vector<unsigned> AbstractSimulation::GetVoxels(unsigned int species, unsigned int run)
 {
     return mGrids[run].voxels[species];
-}
-
-vector<double> AbstractSimulation::GetTimeIncrements(unsigned int run)
-{
-    return mGrids[run].next_reaction_time;
 }
 
 vector<double> AbstractSimulation::GetConcentration(unsigned int species)
