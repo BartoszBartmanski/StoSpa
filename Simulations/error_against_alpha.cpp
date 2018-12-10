@@ -161,6 +161,10 @@ int main(int argc, const char** argv)
             sims[i].AddReaction(make_shared<Decay>(decay, 0));
             sims[i].AddReaction(make_shared<Production>(prod, 0));
             sims[i].SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), initial_num, 0);
+        }
+
+        for (unsigned i=0; i < num_threads; i++)
+        {
             futures[i] = async(launch::async, get_error, ref(sims[i]), sol, end_time);
         }
 

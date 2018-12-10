@@ -26,7 +26,7 @@ endif()
 set(CMAKE_CXX_STANDARD 14)
 
 # Add the O3 optimisation flag and any specified warning flags
-set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -O3 ${WARNING_FLAGS}")
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 
 # Check for git version and put it in BUILD_VERSION variable
 if(EXISTS ${CMAKE_CURRENT_SOURCE_DIR}/.git)
@@ -50,6 +50,17 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/Version.hpp.in ${CMAKE_CURRENT_S
 # Add Docopt to be compiled
 add_subdirectory(Docopt)
 
+# Add boost
+set(Boost_USE_STATIC_LIBS OFF)
+set(Boost_USE_MULTITHREADED ON)
+set(Boost_USE_STATIC_RUNTIME OFF)
+find_package(Boost)
+if(Boost_FOUND)
+    include_directories(${Boost_INCLUDE_DIRS})
+#    add_executable(progname file1.cxx file2.cxx)
+#    target_link_libraries(progname ${Boost_LIBRARIES})
+endif()
+
 # Add threads library and set threads flag on
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
@@ -66,13 +77,15 @@ set(SOURCE_FILES ${SOURCE_FILES_SIMULATION} ${SOURCE_FILES_REACTIONS} ${SOURCE_F
 
 # Add an executable for Benchmarking
 add_executable(benchmarking ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarking/benchmarking.cpp ${SOURCE_FILES})
+target_link_libraries(benchmarking ${Boost_LIBRARIES})
 
 # Add an executable for Unit Testing
 add_executable(unittest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
+target_link_libraries(unittest ${Boost_LIBRARIES})
 
 # Add an executable for running simulations and link docopt to it
 add_executable(stospa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
-target_link_libraries(stospa docopt)
+target_link_libraries(stospa docopt ${Boost_LIBRARIES})
 
 # Generate a list of source files in Simulations directory
 file(GLOB SIM_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/" "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/*cpp")

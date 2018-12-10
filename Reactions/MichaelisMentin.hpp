@@ -43,7 +43,7 @@ public:
         return propensity;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         unsigned future = grid.voxels[2][voxel_index] + 1;
         double propensity = mRateConstant * future;
@@ -91,7 +91,7 @@ public:
         return propensity;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         unsigned future = grid.voxels[2][voxel_index] - 1;
         double propensity = mRateConstant * future;
@@ -140,7 +140,7 @@ public:
         return propensity;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         unsigned future = grid.voxels[2][voxel_index] - 1;
         double propensity = mRateConstant * future;

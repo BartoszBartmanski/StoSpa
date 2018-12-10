@@ -48,7 +48,7 @@ public:
         return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];
     }

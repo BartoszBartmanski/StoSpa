@@ -50,7 +50,7 @@ public:
         return propensity;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         unsigned future_0 = grid.voxels[0][voxel_index] - 1;
 

@@ -48,17 +48,11 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim.SetInitialNumMolecules({3}, 1000, 0);
         sim.SetupTimeIncrements();
         vector<unsigned> voxels = sim.GetVoxels();
-        vector<double> times_to_next_reaction = sim.GetTimeIncrements();
         REQUIRE(voxels[0] == 0);
         REQUIRE(voxels[1] == 0);
         REQUIRE(voxels[2] == 0);
         REQUIRE(voxels[3] == 1000);
         REQUIRE(voxels[4] == 0);
-        REQUIRE(times_to_next_reaction[0] == numeric_limits<double>::infinity());
-        REQUIRE(times_to_next_reaction[1] == numeric_limits<double>::infinity());
-        REQUIRE(times_to_next_reaction[2] == numeric_limits<double>::infinity());
-        REQUIRE(times_to_next_reaction[3] != numeric_limits<double>::infinity());
-        REQUIRE(times_to_next_reaction[4] == numeric_limits<double>::infinity());
     }
 
     SECTION("Check SetInitialState function")
@@ -67,11 +61,9 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim.SetInitialState({vec}, 0);
         sim.SetupTimeIncrements();
         vector<unsigned> voxels = sim.GetVoxels();
-        vector<double> times_to_next_reaction = sim.GetTimeIncrements();
         for (unsigned i=0; i < voxels.size(); i++)
         {
             REQUIRE(voxels[i] == vec[i]);
-            REQUIRE(times_to_next_reaction[i] != numeric_limits<double>::infinity());
         }
     }
 
@@ -240,11 +232,9 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim.SetInitialNumMolecules({0, 0}, 1000, 0);
         sim.SetupTimeIncrements();
         REQUIRE(sim.GetVoxels()[0] == 1000);
-        REQUIRE(sim.GetTimeIncrements()[0] != numeric_limits<double>::infinity());
         for (unsigned i=1; i< sim.GetVoxels().size(); i++)
         {
             REQUIRE(sim.GetVoxels()[i] == 0);
-            REQUIRE(sim.GetTimeIncrements()[i] == numeric_limits<double>::infinity());
         }
     }
 
@@ -260,15 +250,11 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim.SetInitialState(vec, 0);
         sim.SetupTimeIncrements();
         vector<unsigned> voxels = sim.GetVoxels();
-        vector<double> times = sim.GetTimeIncrements();
         REQUIRE(voxels[0] == 100);
-        REQUIRE(times[0] != numeric_limits<double>::infinity());
         REQUIRE(voxels[1] == 10);
-        REQUIRE(times[1] != numeric_limits<double>::infinity());
         for (unsigned i=2; i< sim.GetVoxels().size(); i++)
         {
             REQUIRE(voxels[i] == 0);
-            REQUIRE(times[i] == numeric_limits<double>::infinity());
         }
     }
 
@@ -278,15 +264,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim.SetInitialNumMolecules({1, 0}, 10, 0);
         sim.SetupTimeIncrements();
         vector<double> conc = sim.GetConcentration();
-        vector<double> times = sim.GetTimeIncrements();
         REQUIRE(conc[0] == 1000.0/(1010 * sim.GetVoxelSize()));
         REQUIRE(conc[1] == 10.0/(1010 * sim.GetVoxelSize()));
-        REQUIRE(times[0] != numeric_limits<double>::infinity());
-        REQUIRE(times[1] != numeric_limits<double>::infinity());
+
         for (unsigned i=2; i< sim.GetVoxels().size(); i++)
         {
             REQUIRE(conc[i] == 0);
-            REQUIRE(times[i] == numeric_limits<double>::infinity());
         }
     }
 
@@ -296,15 +279,11 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim.SetInitialNumMolecules({1, 0}, 10, 0);
         sim.SetupTimeIncrements();
         vector<double> avg = sim.GetAverageNumMolecules();
-        vector<double> times = sim.GetTimeIncrements();
         REQUIRE(avg[0] == 1000.0);
         REQUIRE(avg[1] == 10.0);
-        REQUIRE(times[0] != numeric_limits<double>::infinity());
-        REQUIRE(times[1] != numeric_limits<double>::infinity());
         for (unsigned i=2; i< sim.GetVoxels().size(); i++)
         {
             REQUIRE(avg[i] == 0);
-            REQUIRE(times[i] == numeric_limits<double>::infinity());
         }
     }
 

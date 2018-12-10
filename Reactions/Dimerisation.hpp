@@ -43,7 +43,7 @@ public:
         return propensity;
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * (grid.voxels[mSpeciesIndex][voxel_index] - 2) * (grid.voxels[mSpeciesIndex][voxel_index] - 3) / grid.voxelSize;
 

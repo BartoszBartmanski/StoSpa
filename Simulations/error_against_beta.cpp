@@ -164,14 +164,19 @@ int main(int argc, const char** argv)
     // Run the simulations and calculate the error
     for (unsigned set=0; set < num_sets; set++)
     {
-        for (unsigned i=0; i < num_threads; i++)
+        for (unsigned i = 0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
-            sims[i] = Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa, 0.0, beta_x[k], beta_y[k]);
+            sims[i] = Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa, 0.0, beta_x[k],
+                                    beta_y[k]);
             sims[i].SetDiffusionRate(diff, 0);
             sims[i].AddReaction(make_shared<Decay>(decay, 0));
             sims[i].AddReaction(make_shared<Production>(prod, 0));
             sims[i].SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), initial_num, 0);
+        }
+
+        for (unsigned i = 0; i < num_threads; i++)
+        {
             futures[i] = async(launch::async, get_error, ref(sims[i]), sol, end_time);
         }
 

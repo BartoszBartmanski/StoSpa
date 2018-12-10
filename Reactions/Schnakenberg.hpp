@@ -39,7 +39,7 @@ public:
         return mRateConstant * grid.voxels[0][voxel_index] * (grid.voxels[0][voxel_index] - 1) * grid.voxels[1][voxel_index] / pow(grid.voxelSize, 2);
     }
 
-    double GetFuturePropensity(Grid& grid, const int& voxel_index) override
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
         unsigned future_0 = grid.voxels[0][voxel_index] + 1;
         unsigned future_1 = grid.voxels[1][voxel_index] - 1;
