@@ -61,12 +61,6 @@ if(Boost_FOUND)
 #    target_link_libraries(progname ${Boost_LIBRARIES})
 endif()
 
-option(USE_VTK "Use VTK library" OFF)
-if (USE_VTK)
-    find_package(VTK REQUIRED)
-    add_definitions(-DHAVE_VTK)
-endif()
-
 # Add threads library and set threads flag on
 set(THREADS_PREFER_PTHREAD_FLAG ON)
 find_package(Threads REQUIRED)
