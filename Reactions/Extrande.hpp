@@ -30,16 +30,21 @@ public:
 
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
+        (void)grid;
+        (void)voxel_index;
         return mRateConstant;
     }
 
     double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
+        (void)grid;
+        (void)voxel_index;
         return mRateConstant;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {
+        (void)grid;
         return voxel_index;
     }
 };
