@@ -49,10 +49,9 @@ int main(int argc, const char** argv)
     params.SetCommand(arr_to_str(argc, argv));
     params.SetNumThreads(1);
 
-    // Get the directory name
-    string dir_name;
+    // Get the save directory
+    string dir_name = SAVE_DIR;
     if (args["--dir_name"]) { dir_name = args["--dir_name"].asString(); }
-    else { dir_name = get_dir(); }
 
     // Get the file name
     string file_name = "two_species_decay_dist";
