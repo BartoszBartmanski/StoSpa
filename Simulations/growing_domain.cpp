@@ -47,9 +47,8 @@ int main(int argc, const char** argv)
     params.SetCommand(arr_to_str(argc, argv));
 
     // Get the save directory
-    string dir_name;
+    string dir_name = SAVE_DIR;
     if (args["--dir_name"]) { dir_name = args["--dir_name"].asString(); }
-    else { dir_name = get_dir(); }
 
     // Declare the simulation name
     string sim_name = "growing_domain";

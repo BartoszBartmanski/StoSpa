@@ -3,6 +3,15 @@ cmake_minimum_required(VERSION 3.5)
 # Project name
 project(StoSpa)
 
+set(SAVE_DIR "/scratch/bartmanski/Data/" CACHE STRING "Directory where to save data.")
+if(EXISTS ${SAVE_DIR})
+    message(STATUS "Save dir: ${SAVE_DIR}")
+else(EXISTS ${SAVE_DIR})
+    message(STATUS "${SAVE_DIR} is not a valid path!")
+    set(SAVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    message(STATUS "Save dir: ${SAVE_DIR}")
+endif(EXISTS ${SAVE_DIR})
+
 # Add options for warning flags
 set(WARNING_FLAGS "")
 option(USE_WALL "Compile with Wall flag" OFF)
