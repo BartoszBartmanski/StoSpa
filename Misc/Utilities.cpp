@@ -86,98 +86,11 @@ vector<unsigned> split_stou(const string &input, char separator)
     return output;
 }
 
-string question(const string& q)
-{
-    cout << q << " [y/n]" << endl;
-    string ans;
-    cin >> ans;
-    while (ans != "y" and ans != "n")
-    {
-        cout << "[y/n]" << endl;
-        cin >> ans;
-    }
-    return ans;
-}
-
 bool check_dir(string path)
 {
     DIR *dir = opendir (path.c_str());
 
     return dir != nullptr;
-}
-
-string get_hostname()
-{
-    char hostname[1024];
-    gethostname(hostname, 1024);
-    return string(hostname);
-}
-
-string get_dir(string filename)
-{
-    string machine_name = get_hostname();
-
-    // Try opening a file that holds the save location for each machine
-    map<string, string> machines;
-    string line;
-    string path_to_file = string(PATH_TO_SOURCE) + filename;
-    ifstream my_file(path_to_file);
-
-    if (my_file.is_open())
-    {
-        while (getline(my_file, line))
-        {
-            if (!line.empty())
-            {
-                vector<string> split_line = split(line, ' ');
-                machines[split_line[0]] = split_line[1];
-            }
-        }
-        my_file.close();
-    }
-    else
-    {
-        cout << "Unable to open file " + path_to_file << endl;
-    }
-    my_file.close();
-
-    string path_to_sim;
-
-    auto search = machines.find(machine_name);
-    if( search != machines.end() )
-    {
-        path_to_sim = search->second;
-    }
-    else
-    {
-        cout << "The results of this simulation will be written to tmp." << endl;
-        string ans = question("Are you sure?");
-
-        if (ans == "y") { path_to_sim = "/tmp/"; }
-        else
-        {
-            cout << "Specify the path of where to save the results of this simulation: " << endl;
-            cin >> path_to_sim;
-
-            // Test whether the given path is valid
-            while ( !check_dir(path_to_sim) )
-            {
-                cout << "Path not valid. Specify the path to where to save the results of this simulation:" << endl;
-                cin >> path_to_sim;
-            }
-
-            // Ask whether to save the specified path to machines.txt file
-            ans = question("Save the path for this machine?");
-            if ( ans == "y" )
-            {
-                ofstream database(path_to_file, ios::app);
-                database << machine_name << " " << path_to_sim << endl;
-                database.close();
-            }
-        }
-    }
-
-    return path_to_sim;
 }
 
 vector<string> get_list_of_files(const string& path, const string& pattern, int cutoff)
@@ -245,6 +158,7 @@ string update_path(string dir_name, string file_name, unsigned start_index)
 Progress::Progress(unsigned num_steps)
 {
     mNumSteps = num_steps;
+    mCurrentStep = 0;
     cout << setprecision(2) << fixed << "\rProgress: " << 0.0 << "%" << flush;
 }
 

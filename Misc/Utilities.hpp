@@ -71,31 +71,11 @@ vector<double> split_stod(const string &input, char separator=',');
 vector<unsigned> split_stou(const string &input, char separator=',');
 
 /**
- * Asks a yes or no question
- * @param q - question to be asked
- * @return returns either "y" or "n"
- */
-string question(const string& q="");
-
-/**
  * Checks whether the given path is valid.
  * @param path - string that is to be checked
  * @return boolean variable indicating whether the path is valid.
  */
 bool check_dir(string path);
-
-/**
- * Returns the name of the current machine
- * @return a string
- */
-string get_hostname();
-
-/**
- * Returns the path to the standard directory for a given machine based on a text file or asks for the save location.
- * @param filename - name of the file that contains the save locations
- * @return string for the path to the save directory
- */
-string get_dir(string filename="machines.txt");
 
 /**
  * Returns a list of files or directories for the given path
@@ -119,7 +99,7 @@ private:
     /** Total number of steps that need to be taken to finish the simulation. */
     unsigned mNumSteps;
 
-    unsigned mCurrentStep=0;
+    unsigned mCurrentStep;
 
 public:
     /**
