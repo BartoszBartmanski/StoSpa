@@ -157,13 +157,13 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
     {
         // Determine which reaction happens next and update the molecule numbers accordingly
         unsigned reaction = NextReaction(run, voxel_index);
-        int jump_index = mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index);
+        auto jump_index = unsigned(mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index));
 
         // Update the times until the next reaction
         UpdateTime(run, voxel_index);
         if (jump_index != voxel_index)
         {
-            UpdateTime(run, unsigned(jump_index));
+            UpdateTime(run, jump_index);
         }
 
         // Update the number of jumps variable
