@@ -57,12 +57,6 @@ TEST_CASE("Test Useful.*pp")
         REQUIRE(files[1] == "..");
     }
 
-    SECTION("Check get_dir function")
-    {
-        string test = get_dir();
-        REQUIRE(check_dir(test));
-    }
-
     SECTION("Check split function")
     {
         string a_string = "1000.0";
