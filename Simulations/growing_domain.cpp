@@ -128,8 +128,7 @@ int main(int argc, const char** argv)
     Simulation_1d sim = Simulation_1d(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
     sim.UseExtrande();
 
-    vector<unsigned> initial_pos = floor_div(sim.GetNumVoxels(), 2);
-    sim.SetInitialNumMolecules(initial_pos, initial_num[0], 0);
+    sim.SetInitialNumMolecules({0}, initial_num[0], 0);
 
     sim.SetDiffusionRate(diff, 0);
 
