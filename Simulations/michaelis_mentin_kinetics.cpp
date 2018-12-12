@@ -196,17 +196,13 @@ int main(int argc, const char** argv)
         sim->SetDiffusionRate(Diff[i], i);
     }
 
-    auto e_s_to_c = make_shared<MichaelisMentin_I>(k_1);
-    sim->AddReaction(e_s_to_c);
+    sim->AddReaction(make_unique<MichaelisMentin_I>(k_1));
 
-    auto c_to_e_s = make_shared<MichaelisMentin_II>(k_2);
-    sim->AddReaction(c_to_e_s);
+    sim->AddReaction(make_unique<MichaelisMentin_II>(k_2));
 
-    auto c_to_e_p = make_shared<MichaelisMentin_III>(k_3);
-    sim->AddReaction(c_to_e_p);
+    sim->AddReaction(make_unique<MichaelisMentin_III>(k_3));
 
-    auto prod_full = make_shared<Production>(k_0, 1);
-    sim->AddReaction(prod_full);
+    sim->AddReaction(make_unique<Production>(k_0, 1));
     params.SetProd({0, k_0, 0, 0});
 
     // Check that the directory exists and that the no file is being over-written.
@@ -246,13 +242,11 @@ int main(int argc, const char** argv)
     sim->SetDiffusionRate(Diff[1], 0);
     sim->SetDiffusionRate(Diff[3], 1);
 
-    auto prod_reduced = make_shared<Production>(k_0, 0);
     params.SetProd({k_0, 0});
-    sim->AddReaction(prod_reduced);
+    sim->AddReaction(make_unique<Production>(k_0, 0));
 
     double k_m = (k_2 + k_3) / k_1;
-    auto s_to_p = make_shared<MichaelisMentinReduced>(k_3, e_t, k_m);
-    sim->AddReaction(s_to_p);
+    sim->AddReaction(make_unique<MichaelisMentinReduced>(k_3, e_t, k_m));
 
     // Check that the directory exists and that the no file is being over-written.
     path_to_file = update_path(dir_name, file_name, start_index);
