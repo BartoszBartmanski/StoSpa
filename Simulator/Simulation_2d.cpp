@@ -109,17 +109,16 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
             shared_ptr<DiffusionReflective> diff_class;
             if (direction[1] == 0)  // Horizontal jumps
             {
-                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda1(), species, direction);
+                this->AddReaction(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda1(), species, direction));
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda3(), species, direction);
+                this->AddReaction(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda3(), species, direction));
             }
             else  // Diagonal jumps
             {
-                diff_class = make_shared<DiffusionReflective>(diff * mJumpRates->GetLambda2(), species, direction);
+                this->AddReaction(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda2(), species, direction));
             }
-            this->AddReaction(diff_class);
         }
     }
     else if (mBC == "periodic")
@@ -129,17 +128,16 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
             shared_ptr<DiffusionPeriodic> diff_class;
             if (direction[1] == 0)  // Horizontal jumps
             {
-                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda1(), species, direction);
+                this->AddReaction(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda1(), species, direction));
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda3(), species, direction);
+                this->AddReaction(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda3(), species, direction));
             }
             else  // Diagonal jumps
             {
-                diff_class = make_shared<DiffusionPeriodic>(diff * mJumpRates->GetLambda2(), species, direction);
+                this->AddReaction(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda2(), species, direction));
             }
-            this->AddReaction(diff_class);
         }
     }
     else

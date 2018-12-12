@@ -11,8 +11,8 @@ TEST_CASE("Test Simulation_1d.*pp")
 {
     Simulation_1d sim(1, 1, "fvm", 5, {0.0, 20.0}, "reflective");
     sim.SetDiffusionRate(1.0, 0);
-    auto decay = make_shared<Decay>(1.0, 0);
-    auto prod = make_shared<Production>(10.0, 0);
+    auto decay = make_unique<Decay>(1.0, 0);
+    auto prod = make_unique<Production>(10.0, 0);
     double end_time = 1.0;
 
     SECTION("Check random seed generation")
@@ -131,7 +131,7 @@ TEST_CASE("Test Simulation_1d.*pp")
     {
         Simulation_1d sim_decay(50, 1, "fvm", 21, {0.0, 20.0}, "reflective");
         sim_decay.SetDiffusionRate(1.0, 0);
-        sim_decay.AddReaction(decay);
+        sim_decay.AddReaction(make_unique<Decay>(1.0, 0));
         sim_decay.SetInitialNumMolecules({10}, 10000, 0);
         sim_decay.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
@@ -147,7 +147,7 @@ TEST_CASE("Test Simulation_1d.*pp")
     {
         Simulation_1d sim_prod(50, 1, "fvm", 21, {0.0, 20.0}, "reflective");
         sim_prod.SetDiffusionRate(1.0, 0);
-        sim_prod.AddReaction(prod);
+        sim_prod.AddReaction(make_unique<Production>(10.0, 0));
         sim_prod.SetInitialNumMolecules({10}, 10000, 0);
         sim_prod.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
@@ -163,8 +163,8 @@ TEST_CASE("Test Simulation_1d.*pp")
     {
         Simulation_1d sim_all(50, 1, "fvm", 21, {0.0, 20.0}, "reflective");
         sim_all.SetDiffusionRate(1.0, 0);
-        sim_all.AddReaction(decay);
-        sim_all.AddReaction(prod);
+        sim_all.AddReaction(make_unique<Decay>(1.0, 0));
+        sim_all.AddReaction(make_unique<Production>(10.0, 0));
         sim_all.SetInitialNumMolecules({10}, 10000, 0);
         sim_all.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
@@ -330,7 +330,7 @@ TEST_CASE("Test Simulation_2d.*pp")
     {
         Simulation_2d sim_decay(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0, 0.0, 0.0, 0.0);
         sim_decay.SetDiffusionRate(1.0, 0);
-        sim_decay.AddReaction(decay);
+        sim_decay.AddReaction(make_unique<Decay>(1.0, 0));
         sim_decay.SetInitialNumMolecules({sim_decay.GetNumVoxels()[0] / 2, sim_decay.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_decay.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
@@ -346,7 +346,7 @@ TEST_CASE("Test Simulation_2d.*pp")
     {
         Simulation_2d sim_prod(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0, 0.0, 0.0, 0.0);
         sim_prod.SetDiffusionRate(1.0, 0);
-        sim_prod.AddReaction(prod);
+        sim_prod.AddReaction(make_unique<Production>(10.0, 0));
         sim_prod.SetInitialNumMolecules({sim_prod.GetNumVoxels()[0] / 2, sim_prod.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_prod.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
@@ -362,8 +362,8 @@ TEST_CASE("Test Simulation_2d.*pp")
     {
         Simulation_2d sim_all(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0, 0.0, 0.0, 0.0);
         sim_all.SetDiffusionRate(1.0, 0);
-        sim_all.AddReaction(prod);
-        sim_all.AddReaction(decay);
+        sim_all.AddReaction(make_unique<Production>(10.0, 0));
+        sim_all.AddReaction(make_unique<Decay>(1.0, 0));
         sim_all.SetInitialNumMolecules({sim_all.GetNumVoxels()[0] / 2, sim_all.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_all.Advance(end_time);
         DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},

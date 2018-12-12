@@ -206,11 +206,7 @@ int main(int argc, const char** argv)
 
         num_species = 1;
         params.SetNumSpecies(num_species);
-
-        auto decay_reaction = make_shared<Decay>(decay[0], 0);
         params.SetDecay(decay[0]);
-
-        auto prod_reaction = make_shared<Production>(prod[0], 0);
         params.SetProd(prod[0]);
         
         for (unsigned i = 0; i < num_separate_runs; i++)
@@ -233,8 +229,8 @@ int main(int argc, const char** argv)
 
             // Setup the reaction rates (diffusion, decay and production)
             sim->SetDiffusionRate(diff[0], 0);
-            sim->AddReaction(decay_reaction);
-            sim->AddReaction(prod_reaction);
+            sim->AddReaction(make_unique<Decay>(decay[0], 0));
+            sim->AddReaction(make_unique<Production>(prod[0], 0));
 
             // Check whether this file name already exists and alter it appropriately
             string path_to_file = update_path(dir_name, sim_name, start_index);
@@ -256,14 +252,14 @@ int main(int argc, const char** argv)
         params.SetDiff({D_u, D_v});        
 
         // Create the additional reaction object
-        auto schnakenberg = make_shared<Schnakenberg>(0.000001 * pow(voxel_size, 2));
+        auto schnakenberg = make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2));
         params.AddAdditionalReactions(schnakenberg->GetReactionName(), schnakenberg->GetRateConstant());
 
-        auto decay_reaction = make_shared<Decay>(0.02, 0);
+        auto decay_reaction = make_unique<Decay>(0.02, 0);
         params.SetDecay({decay_reaction->GetRateConstant(), 0});
-        
-        auto prod_species_0 = make_shared<Production>(1.0 / voxel_size, 0);
-        auto prod_species_1 = make_shared<Production>(3.0 / voxel_size, 1);
+
+        auto prod_species_0 = make_unique<Production>(1.0 / voxel_size, 0);
+        auto prod_species_1 = make_unique<Production>(3.0 / voxel_size, 1);
         params.SetProd({prod_species_0->GetRateConstant(), prod_species_1->GetRateConstant()});
 
         // Initialise the steady state values
@@ -291,10 +287,10 @@ int main(int argc, const char** argv)
             // Setup the reaction rates
             sim->SetDiffusionRate(D_u, 0);
             sim->SetDiffusionRate(D_v, 1);
-            sim->AddReaction(decay_reaction);
-            sim->AddReaction(prod_species_0);
-            sim->AddReaction(prod_species_1);
-            sim->AddReaction(schnakenberg);
+            sim->AddReaction(make_unique<Decay>(0.02, 0));
+            sim->AddReaction(make_unique<Production>(1.0 / voxel_size, 0));
+            sim->AddReaction(make_unique<Production>(3.0 / voxel_size, 1));
+            sim->AddReaction(make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2)));
 
             // Check whether this file name already exists and alter it appropriately
             string path_to_file = update_path(dir_name, sim_name, start_index);
@@ -313,12 +309,12 @@ int main(int argc, const char** argv)
 
         // Get the production rate of species 0
         double k_2 = stod(args["--k_2"].asString());                        // production of species 0
-        auto prod_reaction = make_shared<Production>(k_2, 0);
+        auto prod_reaction = make_unique<Production>(k_2, 0);
         params.SetProd({k_2, 0});
 
         // Get the rate of the two species decay reaction
         double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
-        auto two_species_decay = make_shared<TwoSpeciesDecay>(k_1);
+        auto two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
         params.AddAdditionalReactions(two_species_decay->GetReactionName(), two_species_decay->GetRateConstant());
 
         for (unsigned i = 0; i < num_separate_runs; i++)
@@ -335,8 +331,8 @@ int main(int argc, const char** argv)
             // Setup the reaction rates (diffusion, decay and production)
             sim->SetDiffusionRate(diff[0], 0);
             sim->SetDiffusionRate(diff[1], 1);
-            sim->AddReaction(prod_reaction);
-            sim->AddReaction(two_species_decay);
+            sim->AddReaction(make_unique<Production>(k_2, 0));
+            sim->AddReaction(make_unique<TwoSpeciesDecay>(k_1));
 
             // Setup the number of molecules
             sim->SetInitialState(initial_num[0] * ones(sim->GetNumVoxels()), 0);
@@ -359,10 +355,10 @@ int main(int argc, const char** argv)
 
         // Rate constants
         double k_1 = 0.1;  // rate of dimerisation A + A -> 0
-        auto dimerisation = make_shared<Dimerisation>(k_1, 0);
+        auto dimerisation = make_unique<Dimerisation>(k_1, 0);
         params.AddAdditionalReactions(dimerisation->GetReactionName(), dimerisation->GetRateConstant());
 
-        auto prod_reaction = make_shared<Production>(prod[0], 0);
+        auto prod_reaction = make_unique<Production>(prod[0], 0);
         params.SetProd(prod[0]);
 
         for (unsigned i = 0; i < num_separate_runs; i++)
@@ -384,8 +380,8 @@ int main(int argc, const char** argv)
 
             // Setup the reaction rates
             sim->SetDiffusionRate(diff[0], 0);
-            sim->AddReaction(prod_reaction);
-            sim->AddReaction(dimerisation);
+            sim->AddReaction(make_unique<Production>(prod[0], 0));
+            sim->AddReaction(make_unique<Dimerisation>(k_1, 0));
 
             // Check whether this file name already exists and alter it appropriately
             string path_to_file = update_path(dir_name, sim_name, start_index);

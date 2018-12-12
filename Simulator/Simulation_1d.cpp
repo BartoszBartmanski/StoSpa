@@ -52,24 +52,18 @@ void Simulation_1d::SetDiffusionRate(double diff, unsigned int species)
     vector<vector<int>> directions = {{-1}, {1}};
     if (mBC == "reflective")
     {
-        auto diff_left = make_shared<DiffusionReflective>(lambda, species, directions[0]);
-        this->AddReaction(diff_left);
-        auto diff_right = make_shared<DiffusionReflective>(lambda, species, directions[1]);
-        this->AddReaction(diff_right);
+        this->AddReaction(make_unique<DiffusionReflective>(lambda, species, directions[0]));
+        this->AddReaction(make_unique<DiffusionReflective>(lambda, species, directions[1]));
     }
     else if (mBC == "periodic")
     {
-        auto diff_left = make_shared<DiffusionPeriodic>(lambda, species, directions[0]);
-        this->AddReaction(diff_left);
-        auto diff_right = make_shared<DiffusionPeriodic>(lambda, species, directions[1]);
-        this->AddReaction(diff_right);
+        this->AddReaction(make_unique<DiffusionPeriodic>(lambda, species, directions[0]));
+        this->AddReaction(make_unique<DiffusionPeriodic>(lambda, species, directions[1]));
     }
     else if (mBC == "Exponential")
     {
-        auto diff_left = make_shared<DiffusionReflectiveExp>(lambda, species, directions[0], 1.0);
-        this->AddReaction(diff_left);
-        auto diff_right = make_shared<DiffusionReflectiveExp>(lambda, species, directions[1], 1.0);
-        this->AddReaction(diff_right);
+        this->AddReaction(make_unique<DiffusionReflectiveExp>(lambda, species, directions[0], 1.0));
+        this->AddReaction(make_unique<DiffusionReflectiveExp>(lambda, species, directions[1], 1.0));
     }
     else
     {

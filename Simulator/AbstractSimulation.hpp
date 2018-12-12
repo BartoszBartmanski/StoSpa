@@ -64,7 +64,7 @@ protected:
     vector<double> mDomainBounds;
 
     /** Map that contains additional reactions. */
-    vector<shared_ptr<AbstractReaction>> mReactions;
+    vector<unique_ptr<AbstractReaction>> mReactions;
 
     /** Boundary condition. */
     string mBC = "reflective";
@@ -114,6 +114,10 @@ public:
 
     /** Default destructor. */
     virtual ~AbstractSimulation()= default;
+    AbstractSimulation(const AbstractSimulation&) = delete; //move only type
+    AbstractSimulation& operator=(const AbstractSimulation&) = delete; //move only type
+    AbstractSimulation(AbstractSimulation&&) = default;
+    AbstractSimulation& operator=(AbstractSimulation&&) = default;
 
     void SetSeed(unsigned number);
 
@@ -166,7 +170,7 @@ public:
      * @param reaction_name
      * @param rate_constant
      */
-    void AddReaction(shared_ptr<AbstractReaction> reaction);
+    void AddReaction(unique_ptr<AbstractReaction>&& reaction);
 
     /**
      * Returns the current state of the mVoxels
@@ -174,13 +178,6 @@ public:
      * @return mVoxels associated with the specified species
      */
     vector<unsigned> GetVoxels(unsigned species=0, unsigned run=0);
-
-    /**
-     * Returns the current state of the mTimeIncrements
-     * @param species - index of the species
-     * @return mTimeIncrements[run]
-     */
-    vector<double> GetTimeIncrements(unsigned run=0);
 
     /**
      * Returns the concentration of the specified species.

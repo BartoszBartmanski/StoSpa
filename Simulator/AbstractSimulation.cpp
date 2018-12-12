@@ -26,12 +26,12 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
 
 }
 
-void AbstractSimulation::AddReaction(shared_ptr<AbstractReaction> reaction)
+void AbstractSimulation::AddReaction(unique_ptr<AbstractReaction>&& reaction)
 {
     reaction->CheckNumSpecies(mNumSpecies);
     if (reaction->GetRateConstant() > 0)
     {
-        mReactions.push_back(reaction);
+        mReactions.emplace_back(move(reaction));
     }
 }
 
@@ -41,7 +41,7 @@ unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_
 
     unsigned reaction_idx = 0;
     double lower_bound = 0;
-    for (const shared_ptr<AbstractReaction>& reaction : mReactions)
+    for (const unique_ptr<AbstractReaction>& reaction : mReactions)
     {
         double propensity = reaction->GetPropensity(mGrids[run], voxel_index);
         if (r_a_0 > lower_bound and r_a_0 < lower_bound + propensity)
@@ -90,7 +90,7 @@ void AbstractSimulation::UpdateTotalPropensity(const unsigned& run, const int& v
     }
 
     double total = 0;
-    for (const shared_ptr<AbstractReaction>& reaction : mReactions)
+    for (const unique_ptr<AbstractReaction>& reaction : mReactions)
     {
         total += reaction->GetPropensity(mGrids[run], voxel_index);
     }
@@ -141,8 +141,8 @@ void AbstractSimulation::UseExtrande()
 {
     mExtrande = true;
     // Add the (none -> none) reaction
-    shared_ptr<Extrande> none = make_shared<Extrande>();
-    mReactions.push_back(none);
+    unique_ptr<Extrande> none = unique_ptr<Extrande>();
+    mReactions.emplace_back(move(none));
     mExtrandeIndex = unsigned(mReactions.size()) - 1;
 }
 
