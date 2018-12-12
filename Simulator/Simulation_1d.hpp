@@ -28,12 +28,6 @@ public:
                   vector<double> domain_bounds,
                   string boundary_condition);
 
-    /** Empty constructor */
-    Simulation_1d() = default;
-
-    /** Default destructor. */
-    ~Simulation_1d() override = default;
-
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diff

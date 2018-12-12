@@ -15,6 +15,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
 
     Usage:
       growing_domain [options]
+      growing_domain -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -39,6 +40,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
 int main(int argc, const char** argv)
 {
     // Get command line input
+    //TODO: some problem here
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
 
     // Create a parameters object - used to order the parameters order in the comments of the data files
@@ -125,7 +127,7 @@ int main(int argc, const char** argv)
     params.SetNumRuns(num_runs);
 
     // Declare a pointer for the simulation object
-    Simulation_1d sim = Simulation_1d(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+    Simulation_1d sim(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
     sim.UseExtrande();
 
     vector<unsigned> initial_pos = floor_div(sim.GetNumVoxels(), 2);

@@ -49,12 +49,6 @@ public:
                   double beta_x=0.5,
                   double beta_y=0.5);
 
-    /** Empty constructor */
-    Simulation_2d() = default;
-
-    /** Default destructor. */
-    ~Simulation_2d() override = default;
-
     /**
      * Returns the aspect ratio of voxels (horizontal length divided by the vertical voxel length).
      * @return a double

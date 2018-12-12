@@ -159,10 +159,11 @@ int main(int argc, const char** argv)
 
         for (const string& method : methods)
         {
-            sims[method] = Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa[i], alpha, beta[0], beta[1]);
+            //TODO: change how this works
+            sims[method] = move(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa[i], alpha, beta[0], beta[1]));
             sims[method].SetDiffusionRate(diff, 0);
-            sims[method].AddReaction(make_shared<Decay>(decay, 0));
-            sims[method].AddReaction(make_shared<Production>(prod, 0));
+            sims[method].AddReaction(make_unique<Decay>(decay, 0));
+            sims[method].AddReaction(make_unique<Production>(prod, 0));
             sims[method].SetInitialNumMolecules(floor_div(sims[method].GetNumVoxels(), 2), initial_num, 0);
         }
 
