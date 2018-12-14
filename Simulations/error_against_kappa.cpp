@@ -132,9 +132,9 @@ int main(int argc, const char** argv)
     params.SetNumPoints(num_points);
 
     vector<string> methods = {"fem", "fdm", "fvm", "fet"};
-    map<string, vector<double>> error;
-    map<string, future<double>> futures;
-    map<string, Simulation_2d> sims;
+    vector<vector<double>> error(methods.size());
+    vector<future<double>> futures(methods.size());
+    vector<Simulation_2d> sims;
 
     // Initialise progress object
     Progress p(num_points);
@@ -157,24 +157,24 @@ int main(int argc, const char** argv)
                                                  trunc_order);
         vector<double> sol = analytic.GetAnalytic();
 
+        sims.clear();
         for (const string& method : methods)
         {
-            //TODO: change how this works
-            sims[method] = move(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa[i], alpha, beta[0], beta[1]));
-            sims[method].SetDiffusionRate(diff, 0);
-            sims[method].AddReaction(make_unique<Decay>(decay, 0));
-            sims[method].AddReaction(make_unique<Production>(prod, 0));
-            sims[method].SetInitialNumMolecules(floor_div(sims[method].GetNumVoxels(), 2), initial_num, 0);
+            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa[i], alpha, beta[0], beta[1]));
+            sims.back().SetDiffusionRate(diff, 0);
+            sims.back().AddReaction(make_unique<Decay>(decay, 0));
+            sims.back().AddReaction(make_unique<Production>(prod, 0));
+            sims.back().SetInitialNumMolecules(floor_div(sims.back().GetNumVoxels(), 2), initial_num, 0);
         }
 
-        for (const string& method : methods)
+        for (unsigned j=0; j< methods.size(); j++)
         {
-            futures[method] = async(launch::async, get_error, ref(sims[method]), sol, end_time);
+            futures[j] = async(launch::async, get_error, ref(sims[j]), sol, end_time);
         }
 
-        for (const string& method : methods)
+        for (unsigned j=0; j< methods.size(); j++)
         {
-            error[method].push_back(futures[method].get());
+            error[j].push_back(futures[j].get());
         }
 
         // Show progress of the simulation
@@ -186,17 +186,17 @@ int main(int argc, const char** argv)
 
     // Save the information about this plot in the same file as the data
     params.Add("row 1", "values of kappa");
-    params.Add("row 2", "values of error using fem");
-    params.Add("row 3", "values of error using fdm");
-    params.Add("row 4", "values of error using fvm");
-    params.Add("row 5", "values of error using fet");
+    for (unsigned j=0; j< methods.size(); j++)
+    {
+        params.Add("row " + to_string(j+2), "values of error using " + methods[j]);
+    }
     params.Save(path_to_file);
 
     // Save the data
     save_vector(kappa, path_to_file);
-    for (const string& method : methods)
+    for (unsigned j=0; j< methods.size(); j++)
     {
-        save_vector(error[method], path_to_file);
+        save_vector(error[j], path_to_file);
     }
 
     // Add the simulation name to the log file

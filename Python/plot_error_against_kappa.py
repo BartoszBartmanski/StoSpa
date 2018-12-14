@@ -35,7 +35,7 @@ if __name__ == '__main__':
     # Get the command line arguments
     args = docopt(__doc__)
 
-    for name in arguments["<file_name>"]:
+    for name in args["<file_name>"]:
         data = np.loadtxt(name)
         plot(data, name)
 

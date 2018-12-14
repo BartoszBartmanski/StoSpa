@@ -28,6 +28,12 @@ public:
                   vector<double> domain_bounds,
                   string boundary_condition);
 
+    Simulation_1d(const Simulation_1d&) = delete; //move only type
+    Simulation_1d& operator=(const Simulation_1d&) = delete; //move only type
+    Simulation_1d(Simulation_1d&&) = default;
+    Simulation_1d& operator=(Simulation_1d&&) = default;
+    ~Simulation_1d() override = default;
+
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diff

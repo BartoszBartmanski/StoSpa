@@ -35,7 +35,7 @@ def get_data(filename):
         num_points = np.sqrt(d.shape[1])
     d = d.reshape([3, num_points, num_points]).transpose([0, 2, 1])
 
-    return data
+    return d
 
 
 def get_min(d):

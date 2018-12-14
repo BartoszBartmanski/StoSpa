@@ -113,7 +113,7 @@ public:
     AbstractSimulation();
 
     /** Default destructor. */
-    ~AbstractSimulation()= default;
+    virtual ~AbstractSimulation()= default;
     AbstractSimulation(const AbstractSimulation&) = delete; //move only type
     AbstractSimulation& operator=(const AbstractSimulation&) = delete; //move only type
     AbstractSimulation(AbstractSimulation&&) = default;
