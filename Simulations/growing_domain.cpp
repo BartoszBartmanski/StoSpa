@@ -4,10 +4,11 @@
 
 #include <iostream>
 #include "docopt.h"
-#include "SimFunctions.hpp"
+#include "Utilities.hpp"
 #include "Parameters.hpp"
+#include "SimFunctions.hpp"
 #include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
+
 
 static const char USAGE[] =
         R"(Running stochastic simulations.
@@ -40,7 +41,6 @@ If couple of inputs are necessary for one argument, separate them by a comma.
 int main(int argc, const char** argv)
 {
     // Get command line input
-    //TODO: some problem here
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
 
     // Create a parameters object - used to order the parameters order in the comments of the data files
