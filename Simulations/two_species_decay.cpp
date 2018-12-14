@@ -112,11 +112,10 @@ int main(int argc, const char** argv)
     params.SetDiff({D_a, D_b});
 
     double k_2 = stod(args["--k_2"].asString());                        // production of species 0
-    auto prod = make_shared<Production>(k_2, 0);
-    params.SetProd({prod->GetRateConstant(), 0});
+    params.SetProd({k_2, 0});
 
     double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
-    auto two_species_decay = make_shared<TwoSpeciesDecay>(k_1);
+    auto two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
     params.AddAdditionalReactions(two_species_decay->GetReactionName(), two_species_decay->GetRateConstant());
 
     auto mean_a = unsigned(k_2 * pow(domain_bounds[1] - domain_bounds[0], 2) / k_1);
@@ -154,8 +153,8 @@ int main(int argc, const char** argv)
     // Setup the reaction rates
     sim->SetDiffusionRate(D_a, 0);
     sim->SetDiffusionRate(D_b, 1);
-    sim->AddReaction(prod);
-    sim->AddReaction(two_species_decay);
+    sim->AddReaction(make_unique<Production>(k_2, 0));
+    sim->AddReaction(move(two_species_decay));
 
     // Initialise progress object
     Progress p(num_steps);

@@ -28,10 +28,10 @@ public:
                   vector<double> domain_bounds,
                   string boundary_condition);
 
-    /** Empty constructor */
-    Simulation_1d() = default;
-
-    /** Default destructor. */
+    Simulation_1d(const Simulation_1d&) = delete; //move only type
+    Simulation_1d& operator=(const Simulation_1d&) = delete; //move only type
+    Simulation_1d(Simulation_1d&&) = default;
+    Simulation_1d& operator=(Simulation_1d&&) = default;
     ~Simulation_1d() override = default;
 
     /**

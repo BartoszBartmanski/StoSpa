@@ -155,7 +155,7 @@ int main(int argc, const char** argv)
 
     // Create vector of futures and simulations
     vector<future<double>> futures(num_threads);
-    vector<Simulation_2d> sims(num_threads);
+    vector<Simulation_2d> sims;
 
     // Initialise progress object
     Progress p(num_points*num_points);
@@ -163,15 +163,15 @@ int main(int argc, const char** argv)
     // Run the simulations and calculate the error
     for (unsigned set=0; set < num_sets; set++)
     {
+        sims.clear();
         for (unsigned i = 0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
-            sims[i] = Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa, 0.0, beta_x[k],
-                                    beta_y[k]);
-            sims[i].SetDiffusionRate(diff, 0);
-            sims[i].AddReaction(make_shared<Decay>(decay, 0));
-            sims[i].AddReaction(make_shared<Production>(prod, 0));
-            sims[i].SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), initial_num, 0);
+            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa, 0.0, beta_x[k], beta_y[k]));
+            sims.back().SetDiffusionRate(diff, 0);
+            sims.back().AddReaction(make_unique<Decay>(decay, 0));
+            sims.back().AddReaction(make_unique<Production>(prod, 0));
+            sims.back().SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), initial_num, 0);
         }
 
         for (unsigned i = 0; i < num_threads; i++)

@@ -4,10 +4,11 @@
 
 #include <iostream>
 #include "docopt.h"
-#include "SimFunctions.hpp"
+#include "Utilities.hpp"
 #include "Parameters.hpp"
+#include "SimFunctions.hpp"
 #include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
+
 
 static const char USAGE[] =
         R"(Running stochastic simulations.
@@ -15,6 +16,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
 
     Usage:
       growing_domain [options]
+      growing_domain -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -125,7 +127,7 @@ int main(int argc, const char** argv)
     params.SetNumRuns(num_runs);
 
     // Declare a pointer for the simulation object
-    Simulation_1d sim = Simulation_1d(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+    Simulation_1d sim(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
     sim.UseExtrande();
 
     sim.SetInitialNumMolecules({0}, initial_num[0], 0);

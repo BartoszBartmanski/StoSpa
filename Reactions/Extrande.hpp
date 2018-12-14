@@ -39,7 +39,7 @@ public:
     {
         (void)grid;
         (void)voxel_index;
-        return mRateConstant;
+        return 0;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
