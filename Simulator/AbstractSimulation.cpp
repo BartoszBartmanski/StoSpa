@@ -141,8 +141,7 @@ void AbstractSimulation::UseExtrande()
 {
     mExtrande = true;
     // Add the (none -> none) reaction
-    unique_ptr<Extrande> none = unique_ptr<Extrande>();
-    mReactions.emplace_back(move(none));
+    mReactions.emplace_back(make_unique<Extrande>());
     mExtrandeIndex = unsigned(mReactions.size()) - 1;
 }
 
