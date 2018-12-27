@@ -26,7 +26,7 @@ protected:
     /** Free parameter in the y-direction for FET method derivation of jump coefficients. */
     double mBetaY=0.5;
 
-    shared_ptr<JumpRate> mJumpRates;
+    unique_ptr<JumpRate> mJumpRates;
 
 public:
 

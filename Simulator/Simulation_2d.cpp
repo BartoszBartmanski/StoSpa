@@ -48,23 +48,23 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mNumMethod = move(num_method);
     if (mNumMethod == "fdm")
     {
-        mJumpRates = make_shared<FDM>(mRatio, m_h, mAlpha);
+        mJumpRates = make_unique<FDM>(mRatio, m_h, mAlpha);
     }
     else if (mNumMethod == "fem")
     {
-        mJumpRates = make_shared<FEM>(mRatio, m_h);
+        mJumpRates = make_unique<FEM>(mRatio, m_h);
     }
     else if (mNumMethod == "fvm")
     {
-        mJumpRates = make_shared<FVM>(mRatio, m_h);
+        mJumpRates = make_unique<FVM>(mRatio, m_h);
     }
     else if (mNumMethod == "fet")
     {
-        mJumpRates = make_shared<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
+        mJumpRates = make_unique<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
     }
     else if (mNumMethod == "fetU")
     {
-        mJumpRates = make_shared<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
+        mJumpRates = make_unique<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
     }
     else
     {
