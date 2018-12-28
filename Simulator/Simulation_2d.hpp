@@ -26,8 +26,6 @@ protected:
     /** Free parameter in the y-direction for FET method derivation of jump coefficients. */
     double mBetaY=0.5;
 
-    unique_ptr<JumpRate> mJumpRates;
-
 public:
 
     /**
@@ -38,16 +36,8 @@ public:
      * @param domain_bounds - bounds of the domain
      * @param boundary_condition - reflective or periodic boundary condition
      */
-    Simulation_2d(unsigned num_runs,
-                  unsigned num_species,
-                  string num_method,
-                  unsigned num_voxels,
-                  vector<double> domain_bounds,
-                  string boundary_condition,
-                  double ratio=1.0,
-                  double alpha=0.0,
-                  double beta_x=0.5,
-                  double beta_y=0.5);
+    Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
+                  vector<double> domain_bounds, double ratio, string boundary_condition);
 
     Simulation_2d(const Simulation_2d&) = delete; //move only type
     Simulation_2d& operator=(const Simulation_2d&) = delete; //move only type
@@ -62,22 +52,28 @@ public:
     double GetVoxelRatio();
 
     /**
-     * Returns the value of alpha (used in fdm derived jump coefficients).
+     * Set the value of alpha (parameter in FDM derivation)
+     * @param value
+     */
+    void SetAlpha(double value);
+
+    /**
+     * Returns the value of alpha (used in fdm derived jump rates).
      * @return a double
      */
     double GetAlpha();
 
     /**
-     * Returns the value of beta_x (used in fet derived jump coefficients).
-     * @return a double
+     * Set the values of beta_x and beta_y (parameters in FET derivation)
+     * @param values
      */
-    double GetBetaX();
+    void SetBeta(vector<double> values);
 
     /**
-     * Returns the value of beta_y (used in fet derived jump coefficients).
+     * Returns the values of beta_x and beta_y (parameters in FET derivation)
      * @return a double
      */
-    double GetBetaY();
+    vector<double> GetBeta();
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).

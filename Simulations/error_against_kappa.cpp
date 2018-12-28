@@ -160,7 +160,9 @@ int main(int argc, const char** argv)
         sims.clear();
         for (const string& method : methods)
         {
-            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa[i], alpha, beta[0], beta[1]));
+            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, kappa[i], bc));
+            sims.back().SetAlpha(alpha);
+            sims.back().SetBeta(beta);
             sims.back().SetDiffusionRate(diff, 0);
             sims.back().AddReaction(make_unique<Decay>(decay, 0));
             sims.back().AddReaction(make_unique<Production>(prod, 0));

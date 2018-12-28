@@ -1,8 +1,7 @@
 #include "Simulation_2d.hpp"
 
 Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
-                             vector<double> domain_bounds, string boundary_condition, double ratio, double alpha, double beta_x,
-                             double beta_y)
+                             vector<double> domain_bounds, double ratio, string boundary_condition)
 {
     // First check the input parameters
     assert(num_runs > 0);
@@ -10,24 +9,18 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     assert(num_voxels > 0);
     assert(domain_bounds.size() == 2);
     assert(ratio > 0.0);
-    assert(alpha >= 0.0);
-    assert(beta_x >= 0.0 and beta_x <= 1.0);
-    assert(beta_y >= 0.0 and beta_y <= 1.0);
 
     // Input parameters
     mNumRuns = num_runs;
     mNumSpecies = num_species;
     mNumVoxels = {num_voxels, unsigned(ratio * num_voxels)};
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
-
+    mNumMethod = move(num_method);
     mDomainBounds = domain_bounds;
     mBC = move(boundary_condition);
 
-    // Additional input parameters (due to working in 2d)
+    // Additional input paramdoubleeters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
-    mAlpha = alpha;
-    mBetaX = beta_x;
-    mBetaY = beta_y;
 
     // Simulation attributes that will change with each time step
     mNumJumps = vector<unsigned>(mNumRuns, 0);
@@ -45,32 +38,6 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
         mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
     }
 
-    mNumMethod = move(num_method);
-    if (mNumMethod == "fdm")
-    {
-        mJumpRates = make_unique<FDM>(mRatio, m_h, mAlpha);
-    }
-    else if (mNumMethod == "fem")
-    {
-        mJumpRates = make_unique<FEM>(mRatio, m_h);
-    }
-    else if (mNumMethod == "fvm")
-    {
-        mJumpRates = make_unique<FVM>(mRatio, m_h);
-    }
-    else if (mNumMethod == "fet")
-    {
-        mJumpRates = make_unique<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
-    }
-    else if (mNumMethod == "fetU")
-    {
-        mJumpRates = make_unique<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
-    }
-    else
-    {
-        throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
-    }
-
 }
 
 double Simulation_2d::GetVoxelRatio()
@@ -78,19 +45,31 @@ double Simulation_2d::GetVoxelRatio()
     return mRatio;
 }
 
+void Simulation_2d::SetAlpha(double value)
+{
+    assert(value >= 0.0);
+    mAlpha = value;
+}
+
 double Simulation_2d::GetAlpha()
 {
     return mAlpha;
 }
 
-double Simulation_2d::GetBetaX()
+void Simulation_2d::SetBeta(vector<double> values)
 {
-    return mBetaX;
+    assert(values.size() == 2);
+    for (const auto& val : values)
+    {
+        assert(val >= 0.0 and val <= 1.0);
+    }
+    mBetaX = values[0];
+    mBetaY = values[1];
 }
 
-double Simulation_2d::GetBetaY()
+vector<double> Simulation_2d::GetBeta()
 {
-    return mBetaY;
+    return {mBetaX, mBetaY};
 }
 
 void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
@@ -98,6 +77,32 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
     // Check for sensible input
     assert(diff >= 0.0);
     assert(species < mNumSpecies);
+
+    unique_ptr<JumpRate> jump_rate;
+    if (mNumMethod == "fdm")
+    {
+        jump_rate = make_unique<FDM>(mRatio, m_h, mAlpha);
+    }
+    else if (mNumMethod == "fem")
+    {
+        jump_rate = make_unique<FEM>(mRatio, m_h);
+    }
+    else if (mNumMethod == "fvm")
+    {
+        jump_rate = make_unique<FVM>(mRatio, m_h);
+    }
+    else if (mNumMethod == "fet")
+    {
+        jump_rate = make_unique<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
+    }
+    else if (mNumMethod == "fetU")
+    {
+        jump_rate = make_unique<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
+    }
+    else
+    {
+        throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
+    }
 
     mDiffusionCoefficients[species] = diff;
 
@@ -108,15 +113,15 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
         {
             if (direction[1] == 0)  // Horizontal jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda1(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda1(), species, direction));
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda3(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda3(), species, direction));
             }
             else  // Diagonal jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * mJumpRates->GetLambda2(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda2(), species, direction));
             }
         }
     }
@@ -126,15 +131,15 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
         {
             if (direction[1] == 0)  // Horizontal jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda1(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda1(), species, direction));
             }
             else if (direction[0] == 0)  // Vertical jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda3(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda3(), species, direction));
             }
             else  // Diagonal jumps
             {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * mJumpRates->GetLambda2(), species, direction));
+                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda2(), species, direction));
             }
         }
     }

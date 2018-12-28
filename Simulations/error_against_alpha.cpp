@@ -156,7 +156,8 @@ int main(int argc, const char** argv)
         for (unsigned i=0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
-            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, bc, kappa, alpha[k], 0.0, 0.0));
+            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, kappa, bc));
+            sims.back().SetAlpha(alpha[k]);
             sims.back().SetDiffusionRate(diff, 0);
             sims.back().AddReaction(make_unique<Decay>(decay, 0));
             sims.back().AddReaction(make_unique<Production>(prod, 0));
