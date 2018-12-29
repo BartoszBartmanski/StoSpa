@@ -195,7 +195,7 @@ TEST_CASE("Test Simulation_1d.*pp")
 
 TEST_CASE("Test Simulation_2d.*pp")
 {
-    Simulation_2d sim(50, 1, "fvm", 5, {0.0, 20.0}, 1.4, "reflective");
+    Simulation_2d sim(50, 1, "fvm", 5, {0.0, 20.0}, "reflective", 1.4);
     sim.SetDiffusionRate(1.0, 0);
     double decay_rate = 1.0;
     double prod_rate = 10.0;
@@ -317,7 +317,7 @@ TEST_CASE("Test Simulation_2d.*pp")
 
     SECTION("Check the accuracy of simulations - diffusion only")
     {
-        Simulation_2d sim_diff(50, 1, "fvm", 21, {0.0, 20.0}, 1.0, "reflective");
+        Simulation_2d sim_diff(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0);
         sim_diff.SetDiffusionRate(1.0, 0);
         sim_diff.SetInitialNumMolecules({sim_diff.GetNumVoxels()[0] / 2, sim_diff.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_diff.Advance(end_time);
@@ -332,7 +332,7 @@ TEST_CASE("Test Simulation_2d.*pp")
 
     SECTION("Check the accuracy of simulations - diffusion and decay")
     {
-        Simulation_2d sim_decay(50, 1, "fvm", 21, {0.0, 20.0}, 1.0, "reflective");
+        Simulation_2d sim_decay(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0);
         sim_decay.SetDiffusionRate(1.0, 0);
         sim_decay.AddReaction(make_unique<Decay>(1.0, 0));
         sim_decay.SetInitialNumMolecules({sim_decay.GetNumVoxels()[0] / 2, sim_decay.GetNumVoxels()[1] / 2}, 10000, 0);
@@ -348,7 +348,7 @@ TEST_CASE("Test Simulation_2d.*pp")
 
     SECTION("Check the accuracy of simulations - diffusion and production")
     {
-        Simulation_2d sim_prod(50, 1, "fvm", 21, {0.0, 20.0}, 1.0, "reflective");
+        Simulation_2d sim_prod(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0);
         sim_prod.SetDiffusionRate(1.0, 0);
         sim_prod.AddReaction(make_unique<Production>(10.0, 0));
         sim_prod.SetInitialNumMolecules({sim_prod.GetNumVoxels()[0] / 2, sim_prod.GetNumVoxels()[1] / 2}, 10000, 0);
@@ -364,7 +364,7 @@ TEST_CASE("Test Simulation_2d.*pp")
 
     SECTION("Check the accuracy of simulations - diffusion, production and decay")
     {
-        Simulation_2d sim_all(50, 1, "fvm", 21, {0.0, 20.0}, 1.0, "reflective");
+        Simulation_2d sim_all(50, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0);
         sim_all.SetDiffusionRate(1.0, 0);
         sim_all.AddReaction(make_unique<Production>(10.0, 0));
         sim_all.AddReaction(make_unique<Decay>(1.0, 0));
@@ -381,7 +381,7 @@ TEST_CASE("Test Simulation_2d.*pp")
 
     SECTION("Check GetRelativeError function")
     {
-        Simulation_2d sim_rel(100, 1, "fvm", 21, {0.0, 20.0}, 1.0, "reflective");
+        Simulation_2d sim_rel(100, 1, "fvm", 21, {0.0, 20.0}, "reflective", 1.0);
         sim_rel.SetDiffusionRate(1.0, 0);
         sim_rel.SetInitialNumMolecules({10, 10}, 10000, 0);
         sim_rel.Advance(end_time);

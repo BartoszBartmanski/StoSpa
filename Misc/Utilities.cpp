@@ -174,3 +174,8 @@ void Progress::Show()
         cout << endl;
     }
 }
+
+void Progress::Reset()
+{
+    mCurrentStep = 0;
+}

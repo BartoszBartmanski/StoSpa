@@ -1,7 +1,7 @@
 #include "Simulation_2d.hpp"
 
 Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
-                             vector<double> domain_bounds, double ratio, string boundary_condition)
+                             vector<double> domain_bounds, string boundary_condition, double ratio)
 {
     // First check the input parameters
     assert(num_runs > 0);

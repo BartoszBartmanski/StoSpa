@@ -83,314 +83,314 @@ int main(int argc, const char** argv)
 {
     // Get command line input
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true, "StoSpa 0.1");
-
-    // Show the raw command line input if prompted
-    if (args["--info"].asBool())
-    {
-        for (auto const &arg : args)
-        {
-            std::cout << arg.first << ": " << arg.second << std::endl;
-        }
-    }
-
-    // Create a parameters object - used to order the parameters order in the comments of the data files
-    Parameters params;
-    params.SetComments("Data for the simulation.");
-    params.SetCommand(arr_to_str(argc, argv));
-    params.SetNumThreads(1);
-
-    // Get the save directory
-    string dir_name = SAVE_DIR;
-    if (args["--dir_name"]) { dir_name = args["--dir_name"].asString(); }
-
-    // Declare the simulation name
-    string sim_name;
-    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
-
-    // Get the start index to be appended at the end of simulation file name
-    auto start_index = unsigned(stoi(args["--start_index"].asString()));
-
-    // Get number of dimensions of the domain
-    unsigned num_dims = unsigned(stoi(args["--num_dims"].asString()));
-    params.SetNumDims(num_dims);
-
-    // Get the number of voxels in the x-direction
-    unsigned num_voxels = unsigned(stoi(args["--num_voxels"].asString()));
-    params.SetNumVoxels(num_voxels);
-
-    // Get the domain bounds
-    vector<double> domain_bounds = split_stod(args["--domain_bounds"].asString());
-    params.SetDomainBounds(domain_bounds);
-
-    // Get initial number of molecules
-    vector<unsigned> initial_num = split_stou(args["--initial_num"].asString());
-    params.SetInitialNumMolecules(initial_num);
-
-    // Get the initial position of the molecules
-    vector<unsigned> initial_pos;
-    if (args["--initial_pos"].asBool())
-    {
-        initial_pos = split_stou(args["<pos>"].asString());
-        params.Add("initial_pos", args["<pos>"].asString());
-    }
-
-    // Get the numerical method of derivation for the jump coefficients
-    string num_method = args["--num_method"].asString();
-    params.SetNumMethod(num_method);
-
-    // Get the boundary condition
-    string bc = args["--bc"].asString();
-    params.SetBC(bc);
-
-    // Get the end time of the simulation
-    double end_time = stod(args["--end_time"].asString());
-    params.SetEndTime(end_time);
-
-    // Get the time step
-    double time_step = stod(args["--time_step"].asString());
-    params.SetTimeStep(time_step);
-
-    // Calculate the number of steps that will need to be taken to reach the desired point in time
-    auto num_steps = unsigned(end_time/time_step);
-
-    // Get the diffusion coefficients
-    vector<double> diff = split_stod(args["--diff"].asString());
-    params.SetDiff(diff);
-
-    // Get the decay constants
-    vector<double> decay = split_stod(args["--decay"].asString());
-    params.SetDecay(decay);
-
-    // Get the production constants
-    vector<double> prod = split_stod(args["--prod"].asString());
-    params.SetProd(prod);
-
-    // Get the voxel aspect ratio - kappa
-    double kappa = stod(args["--kappa"].asString());
-    if (num_dims == 1) { kappa = 0; }
-    params.SetKappa(kappa);
-
-    // Get the FDM derivation parameter - alpha
-    double alpha = stod(args["--alpha"].asString());
-    params.SetAlpha(alpha);
-
-    // Get the FET derivation parameter - beta
-    vector<double> beta = split_stod(args["--beta"].asString());
-    if (beta.size() == 1) { beta.push_back(beta[0]); }
-    params.SetBeta(beta);
-
-    // Declare the num_species variable, which will be set later
-    unsigned num_species;
-
-    // Calculate the voxel size
-    double voxel_size = get_voxel_size(domain_bounds, num_voxels, kappa);
-
-    // The data saved will be number of molecules, so save this as well
-    params.Add("data_type", "molecules");
-
-    // Initialise the both number of runs variables
-    unsigned num_runs = 1;
-    unsigned num_separate_runs = 1;
-
-    // Determine whether the simulations will be averaged or save separately
-    if (args["--average"].asBool()) { num_runs = unsigned(stoi(args["--num_runs"].asString())); }
-    else { num_separate_runs = unsigned(stoi(args["--num_runs"].asString())); }
-    params.SetNumRuns(num_runs);
-
-    // Declare a pointer for the simulation object
-    unique_ptr<AbstractSimulation> sim;
-
-    if (args["sim"].asBool())
-    {
-        sim_name.insert(0, "sim_" + to_string(num_dims) + "d");
-
-        num_species = 1;
-        params.SetNumSpecies(num_species);
-        params.SetDecay(decay[0]);
-        params.SetProd(prod[0]);
-        
-        for (unsigned i = 0; i < num_separate_runs; i++)
-        {
-            if (num_dims == 1)
-            {
-                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
-            }
-            else
-            {
-                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
-            }
-
-            // Check that the voxel size has been correctly calculated
-            assert(sim->GetVoxelSize() == voxel_size);
-
-            // Setup the number of molecules
-            if (initial_pos.empty()) { initial_pos = floor_div(sim->GetNumVoxels(), 2); }
-            sim->SetInitialNumMolecules(initial_pos, initial_num[0], 0);
-
-            // Setup the reaction rates (diffusion, decay and production)
-            sim->SetDiffusionRate(diff[0], 0);
-            sim->AddReaction(make_unique<Decay>(decay[0], 0));
-            sim->AddReaction(make_unique<Production>(prod[0], 0));
-
-            // Check whether this file name already exists and alter it appropriately
-            string path_to_file = update_path(dir_name, sim_name, start_index);
-            params.Save(path_to_file);
-
-            // Run the simulation
-            Run(sim, path_to_file, num_steps, time_step);
-        }
-    }
-    else if (args["schnakenberg"].asBool())
-    {
-        sim_name.insert(0, "schnakenberg_" + to_string(num_dims) + "d");
-
-        num_species = 2;
-        params.SetNumSpecies(num_species);
-
-        double D_u = 0.00001;                                                   // diffusion of species 0
-        double D_v = 0.001;                                                     // diffusion of species 1
-        params.SetDiff({D_u, D_v});        
-
-        // Create the additional reaction object
-        auto schnakenberg = make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2));
-        params.AddAdditionalReactions(schnakenberg->GetReactionName(), schnakenberg->GetRateConstant());
-
-        auto decay_reaction = make_unique<Decay>(0.02, 0);
-        params.SetDecay({decay_reaction->GetRateConstant(), 0});
-
-        auto prod_species_0 = make_unique<Production>(1.0 / voxel_size, 0);
-        auto prod_species_1 = make_unique<Production>(3.0 / voxel_size, 1);
-        params.SetProd({prod_species_0->GetRateConstant(), prod_species_1->GetRateConstant()});
-
-        // Initialise the steady state values
-        initial_num = {200, 75};
-        params.SetInitialNumMolecules(initial_num);
-
-        for (unsigned i = 0; i < num_separate_runs; i++)
-        {
-            if (num_dims == 1)
-            {
-                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
-            }
-            else
-            {
-                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
-            }
-
-            // Check that the voxel size has been correctly calculated
-            assert(sim->GetVoxelSize() == voxel_size);
-
-            // Setup the number of molecules
-            sim->SetInitialState(initial_num[0] * ones(sim->GetNumVoxels()), 0);
-            sim->SetInitialState(initial_num[1] * ones(sim->GetNumVoxels()), 1);
-
-            // Setup the reaction rates
-            sim->SetDiffusionRate(D_u, 0);
-            sim->SetDiffusionRate(D_v, 1);
-            sim->AddReaction(make_unique<Decay>(0.02, 0));
-            sim->AddReaction(make_unique<Production>(1.0 / voxel_size, 0));
-            sim->AddReaction(make_unique<Production>(3.0 / voxel_size, 1));
-            sim->AddReaction(make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2)));
-
-            // Check whether this file name already exists and alter it appropriately
-            string path_to_file = update_path(dir_name, sim_name, start_index);
-            params.Save(path_to_file);
-
-            // Run the simulation
-            Run(sim, path_to_file, num_steps, time_step);
-        }
-    }
-    else if (args["two_species_decay"].asBool())
-    {
-        sim_name.insert(0, "two_species_decay_" + to_string(num_dims) + "d");
-
-        num_species = 2;
-        params.SetNumSpecies(num_species);
-
-        // Get the production rate of species 0
-        double k_2 = stod(args["--k_2"].asString());                        // production of species 0
-        auto prod_reaction = make_unique<Production>(k_2, 0);
-        params.SetProd({k_2, 0});
-
-        // Get the rate of the two species decay reaction
-        double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
-        auto two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
-        params.AddAdditionalReactions(two_species_decay->GetReactionName(), two_species_decay->GetRateConstant());
-
-        for (unsigned i = 0; i < num_separate_runs; i++)
-        {
-            if (num_dims == 1)
-            {
-                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
-            }
-            else
-            {
-                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
-            }
-
-            // Setup the reaction rates (diffusion, decay and production)
-            sim->SetDiffusionRate(diff[0], 0);
-            sim->SetDiffusionRate(diff[1], 1);
-            sim->AddReaction(make_unique<Production>(k_2, 0));
-            sim->AddReaction(make_unique<TwoSpeciesDecay>(k_1));
-
-            // Setup the number of molecules
-            sim->SetInitialState(initial_num[0] * ones(sim->GetNumVoxels()), 0);
-            sim->SetInitialNumMolecules({0, 0}, 1, 1);
-
-            // Check whether this file name already exists and alter it appropriately
-            string path_to_file = update_path(dir_name, sim_name, start_index);
-            params.Save(path_to_file);
-
-            // Run the simulation
-            Run(sim, path_to_file, num_steps, time_step);
-        }
-    }
-    else if (args["dimerisation"].asBool())
-    {
-        sim_name.insert(0, "dimerisation_" + to_string(num_dims) + "d");
-
-        num_species = 1;
-        params.SetNumSpecies(num_species);
-
-        // Rate constants
-        double k_1 = 0.1;  // rate of dimerisation A + A -> 0
-        auto dimerisation = make_unique<Dimerisation>(k_1, 0);
-        params.AddAdditionalReactions(dimerisation->GetReactionName(), dimerisation->GetRateConstant());
-
-        auto prod_reaction = make_unique<Production>(prod[0], 0);
-        params.SetProd(prod[0]);
-
-        for (unsigned i = 0; i < num_separate_runs; i++)
-        {
-            if (num_dims == 1)
-            {
-                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
-            }
-            else
-            {
-                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
-            }
-
-            // Check that the voxel size has been correctly calculated
-            assert(sim->GetVoxelSize() == voxel_size);
-
-            // Setup the number of molecules
-            sim->SetInitialState(ones(sim->GetNumVoxels()), 0);
-
-            // Setup the reaction rates
-            sim->SetDiffusionRate(diff[0], 0);
-            sim->AddReaction(make_unique<Production>(prod[0], 0));
-            sim->AddReaction(make_unique<Dimerisation>(k_1, 0));
-
-            // Check whether this file name already exists and alter it appropriately
-            string path_to_file = update_path(dir_name, sim_name, start_index);
-            params.Save(path_to_file);
-
-            // Run the simulation
-            Run(sim, path_to_file, num_steps, time_step);
-        }
-    }
+//
+//    // Show the raw command line input if prompted
+//    if (args["--info"].asBool())
+//    {
+//        for (auto const &arg : args)
+//        {
+//            std::cout << arg.first << ": " << arg.second << std::endl;
+//        }
+//    }
+//
+//    // Create a parameters object - used to order the parameters order in the comments of the data files
+//    Parameters params;
+//    params.SetComments("Data for the simulation.");
+//    params.SetCommand(arr_to_str(argc, argv));
+//    params.SetNumThreads(1);
+//
+//    // Get the save directory
+//    string dir_name = SAVE_DIR;
+//    if (args["--dir_name"]) { dir_name = args["--dir_name"].asString(); }
+//
+//    // Declare the simulation name
+//    string sim_name;
+//    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
+//
+//    // Get the start index to be appended at the end of simulation file name
+//    auto start_index = unsigned(stoi(args["--start_index"].asString()));
+//
+//    // Get number of dimensions of the domain
+//    unsigned num_dims = unsigned(stoi(args["--num_dims"].asString()));
+//    params.SetNumDims(num_dims);
+//
+//    // Get the number of voxels in the x-direction
+//    unsigned num_voxels = unsigned(stoi(args["--num_voxels"].asString()));
+//    params.SetNumVoxels(num_voxels);
+//
+//    // Get the domain bounds
+//    vector<double> domain_bounds = split_stod(args["--domain_bounds"].asString());
+//    params.SetDomainBounds(domain_bounds);
+//
+//    // Get initial number of molecules
+//    vector<unsigned> initial_num = split_stou(args["--initial_num"].asString());
+//    params.SetInitialNumMolecules(initial_num);
+//
+//    // Get the initial position of the molecules
+//    vector<unsigned> initial_pos;
+//    if (args["--initial_pos"].asBool())
+//    {
+//        initial_pos = split_stou(args["<pos>"].asString());
+//        params.Add("initial_pos", args["<pos>"].asString());
+//    }
+//
+//    // Get the numerical method of derivation for the jump coefficients
+//    string num_method = args["--num_method"].asString();
+//    params.SetNumMethod(num_method);
+//
+//    // Get the boundary condition
+//    string bc = args["--bc"].asString();
+//    params.SetBC(bc);
+//
+//    // Get the end time of the simulation
+//    double end_time = stod(args["--end_time"].asString());
+//    params.SetEndTime(end_time);
+//
+//    // Get the time step
+//    double time_step = stod(args["--time_step"].asString());
+//    params.SetTimeStep(time_step);
+//
+//    // Calculate the number of steps that will need to be taken to reach the desired point in time
+//    auto num_steps = unsigned(end_time/time_step);
+//
+//    // Get the diffusion coefficients
+//    vector<double> diff = split_stod(args["--diff"].asString());
+//    params.SetDiff(diff);
+//
+//    // Get the decay constants
+//    vector<double> decay = split_stod(args["--decay"].asString());
+//    params.SetDecay(decay);
+//
+//    // Get the production constants
+//    vector<double> prod = split_stod(args["--prod"].asString());
+//    params.SetProd(prod);
+//
+//    // Get the voxel aspect ratio - kappa
+//    double kappa = stod(args["--kappa"].asString());
+//    if (num_dims == 1) { kappa = 0; }
+//    params.SetKappa(kappa);
+//
+//    // Get the FDM derivation parameter - alpha
+//    double alpha = stod(args["--alpha"].asString());
+//    params.SetAlpha(alpha);
+//
+//    // Get the FET derivation parameter - beta
+//    vector<double> beta = split_stod(args["--beta"].asString());
+//    if (beta.size() == 1) { beta.push_back(beta[0]); }
+//    params.SetBeta(beta);
+//
+//    // Declare the num_species variable, which will be set later
+//    unsigned num_species;
+//
+//    // Calculate the voxel size
+//    double voxel_size = get_voxel_size(domain_bounds, num_voxels, kappa);
+//
+//    // The data saved will be number of molecules, so save this as well
+//    params.Add("data_type", "molecules");
+//
+//    // Initialise the both number of runs variables
+//    unsigned num_runs = 1;
+//    unsigned num_separate_runs = 1;
+//
+//    // Determine whether the simulations will be averaged or save separately
+//    if (args["--average"].asBool()) { num_runs = unsigned(stoi(args["--num_runs"].asString())); }
+//    else { num_separate_runs = unsigned(stoi(args["--num_runs"].asString())); }
+//    params.SetNumRuns(num_runs);
+//
+//    // Declare a pointer for the simulation object
+//    unique_ptr<AbstractSimulation> sim;
+//
+//    if (args["sim"].asBool())
+//    {
+//        sim_name.insert(0, "sim_" + to_string(num_dims) + "d");
+//
+//        num_species = 1;
+//        params.SetNumSpecies(num_species);
+//        params.SetDecay(decay[0]);
+//        params.SetProd(prod[0]);
+//
+//        for (unsigned i = 0; i < num_separate_runs; i++)
+//        {
+//            if (num_dims == 1)
+//            {
+//                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+//            }
+//            else
+//            {
+//                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
+//            }
+//
+//            // Check that the voxel size has been correctly calculated
+//            assert(sim->GetVoxelSize() == voxel_size);
+//
+//            // Setup the number of molecules
+//            if (initial_pos.empty()) { initial_pos = floor_div(sim->GetNumVoxels(), 2); }
+//            sim->SetInitialNumMolecules(initial_pos, initial_num[0], 0);
+//
+//            // Setup the reaction rates (diffusion, decay and production)
+//            sim->SetDiffusionRate(diff[0], 0);
+//            sim->AddReaction(make_unique<Decay>(decay[0], 0));
+//            sim->AddReaction(make_unique<Production>(prod[0], 0));
+//
+//            // Check whether this file name already exists and alter it appropriately
+//            string path_to_file = update_path(dir_name, sim_name, start_index);
+//            params.Save(path_to_file);
+//
+//            // Run the simulation
+//            Run(sim, path_to_file, num_steps, time_step);
+//        }
+//    }
+//    else if (args["schnakenberg"].asBool())
+//    {
+//        sim_name.insert(0, "schnakenberg_" + to_string(num_dims) + "d");
+//
+//        num_species = 2;
+//        params.SetNumSpecies(num_species);
+//
+//        double D_u = 0.00001;                                                   // diffusion of species 0
+//        double D_v = 0.001;                                                     // diffusion of species 1
+//        params.SetDiff({D_u, D_v});
+//
+//        // Create the additional reaction object
+//        auto schnakenberg = make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2));
+//        params.AddAdditionalReactions(schnakenberg->GetReactionName(), schnakenberg->GetRateConstant());
+//
+//        auto decay_reaction = make_unique<Decay>(0.02, 0);
+//        params.SetDecay({decay_reaction->GetRateConstant(), 0});
+//
+//        auto prod_species_0 = make_unique<Production>(1.0 / voxel_size, 0);
+//        auto prod_species_1 = make_unique<Production>(3.0 / voxel_size, 1);
+//        params.SetProd({prod_species_0->GetRateConstant(), prod_species_1->GetRateConstant()});
+//
+//        // Initialise the steady state values
+//        initial_num = {200, 75};
+//        params.SetInitialNumMolecules(initial_num);
+//
+//        for (unsigned i = 0; i < num_separate_runs; i++)
+//        {
+//            if (num_dims == 1)
+//            {
+//                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+//            }
+//            else
+//            {
+//                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
+//            }
+//
+//            // Check that the voxel size has been correctly calculated
+//            assert(sim->GetVoxelSize() == voxel_size);
+//
+//            // Setup the number of molecules
+//            sim->SetInitialState(initial_num[0] * ones(sim->GetNumVoxels()), 0);
+//            sim->SetInitialState(initial_num[1] * ones(sim->GetNumVoxels()), 1);
+//
+//            // Setup the reaction rates
+//            sim->SetDiffusionRate(D_u, 0);
+//            sim->SetDiffusionRate(D_v, 1);
+//            sim->AddReaction(make_unique<Decay>(0.02, 0));
+//            sim->AddReaction(make_unique<Production>(1.0 / voxel_size, 0));
+//            sim->AddReaction(make_unique<Production>(3.0 / voxel_size, 1));
+//            sim->AddReaction(make_unique<Schnakenberg>(0.000001 * pow(voxel_size, 2)));
+//
+//            // Check whether this file name already exists and alter it appropriately
+//            string path_to_file = update_path(dir_name, sim_name, start_index);
+//            params.Save(path_to_file);
+//
+//            // Run the simulation
+//            Run(sim, path_to_file, num_steps, time_step);
+//        }
+//    }
+//    else if (args["two_species_decay"].asBool())
+//    {
+//        sim_name.insert(0, "two_species_decay_" + to_string(num_dims) + "d");
+//
+//        num_species = 2;
+//        params.SetNumSpecies(num_species);
+//
+//        // Get the production rate of species 0
+//        double k_2 = stod(args["--k_2"].asString());                        // production of species 0
+//        auto prod_reaction = make_unique<Production>(k_2, 0);
+//        params.SetProd({k_2, 0});
+//
+//        // Get the rate of the two species decay reaction
+//        double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
+//        auto two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
+//        params.AddAdditionalReactions(two_species_decay->GetReactionName(), two_species_decay->GetRateConstant());
+//
+//        for (unsigned i = 0; i < num_separate_runs; i++)
+//        {
+//            if (num_dims == 1)
+//            {
+//                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+//            }
+//            else
+//            {
+//                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
+//            }
+//
+//            // Setup the reaction rates (diffusion, decay and production)
+//            sim->SetDiffusionRate(diff[0], 0);
+//            sim->SetDiffusionRate(diff[1], 1);
+//            sim->AddReaction(make_unique<Production>(k_2, 0));
+//            sim->AddReaction(make_unique<TwoSpeciesDecay>(k_1));
+//
+//            // Setup the number of molecules
+//            sim->SetInitialState(initial_num[0] * ones(sim->GetNumVoxels()), 0);
+//            sim->SetInitialNumMolecules({0, 0}, 1, 1);
+//
+//            // Check whether this file name already exists and alter it appropriately
+//            string path_to_file = update_path(dir_name, sim_name, start_index);
+//            params.Save(path_to_file);
+//
+//            // Run the simulation
+//            Run(sim, path_to_file, num_steps, time_step);
+//        }
+//    }
+//    else if (args["dimerisation"].asBool())
+//    {
+//        sim_name.insert(0, "dimerisation_" + to_string(num_dims) + "d");
+//
+//        num_species = 1;
+//        params.SetNumSpecies(num_species);
+//
+//        // Rate constants
+//        double k_1 = 0.1;  // rate of dimerisation A + A -> 0
+//        auto dimerisation = make_unique<Dimerisation>(k_1, 0);
+//        params.AddAdditionalReactions(dimerisation->GetReactionName(), dimerisation->GetRateConstant());
+//
+//        auto prod_reaction = make_unique<Production>(prod[0], 0);
+//        params.SetProd(prod[0]);
+//
+//        for (unsigned i = 0; i < num_separate_runs; i++)
+//        {
+//            if (num_dims == 1)
+//            {
+//                sim = make_unique<Simulation_1d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc);
+//            }
+//            else
+//            {
+//                sim = make_unique<Simulation_2d>(num_runs, num_species, num_method, num_voxels, domain_bounds, bc, kappa, alpha, beta[0], beta[1]);
+//            }
+//
+//            // Check that the voxel size has been correctly calculated
+//            assert(sim->GetVoxelSize() == voxel_size);
+//
+//            // Setup the number of molecules
+//            sim->SetInitialState(ones(sim->GetNumVoxels()), 0);
+//
+//            // Setup the reaction rates
+//            sim->SetDiffusionRate(diff[0], 0);
+//            sim->AddReaction(make_unique<Production>(prod[0], 0));
+//            sim->AddReaction(make_unique<Dimerisation>(k_1, 0));
+//
+//            // Check whether this file name already exists and alter it appropriately
+//            string path_to_file = update_path(dir_name, sim_name, start_index);
+//            params.Save(path_to_file);
+//
+//            // Run the simulation
+//            Run(sim, path_to_file, num_steps, time_step);
+//        }
+//    }
 
     return 0;
 }

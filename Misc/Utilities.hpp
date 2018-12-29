@@ -119,6 +119,12 @@ public:
      */
     void Show();
 
+    /**
+     * Resets the counters
+     * @return
+     */
+    void Reset();
+
 };
 
 #endif //STOCHASTIC_DIFFUSION_UTILITIES_HPP

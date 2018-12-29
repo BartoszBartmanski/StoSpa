@@ -58,6 +58,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/Misc/Version.hpp.in ${CMAKE_CURRENT_S
 
 # Add Docopt to be compiled
 add_subdirectory(Docopt)
+include_directories(Docopt)
 
 # Add boost
 set(Boost_USE_STATIC_LIBS OFF)

@@ -4,25 +4,120 @@
 
 #include "Parameters.hpp"
 
-Parameters::Parameters()
+Parameters::Parameters(map<string, docopt::value> cl_input)
 {
-    mComments = "Below are all the parameters used to generate the data contained in this file.";
-    mNumThreads = 0;
-    mNumRuns = 0;
-    mNumDims = 0;
-    mNumSpecies = 0;
-    mNumVoxels = 0;
-    m_h = 0;
-    mKappa = 0;
-    mEndTime = 0;
-    mTimeStep = 0;
-    mNumPoints = 0;
-    mTruncOrder = 0;
+    if (cl_input.count("--dir_name"))
+    {
+        mSaveDir = cl_input["--dir_name"].asString();
+    }
+
+    if (cl_input.count("--start_index"))
+    {
+        mStartIndex = unsigned(stoi(cl_input["--start_index"].asString()));
+    }
+
+    if (cl_input.count("--num_dims"))
+    {
+        mNumDims = unsigned(stoi(cl_input["--num_dims"].asString()));
+    }
+
+    if (cl_input.count("--num_voxels"))
+    {
+        mNumVoxels = unsigned(stoi(cl_input["--num_voxels"].asString()));
+    }
+
+    if (cl_input.count("--num_species"))
+    {
+        mNumSpecies = unsigned(stoi(cl_input["--num_species"].asString()));
+    }
+
+    if (cl_input.count("--domain_bounds"))
+    {
+        mDomainBounds = split<double>(cl_input["--domain_bounds"].asString());
+    }
+
+    if (cl_input.count("--initial_num"))
+    {
+        mInitialNum = split<unsigned>(cl_input["--initial_num"].asString());
+    }
+
+    if (cl_input.count("--num_method"))
+    {
+        mNumMethod = cl_input["--num_method"].asString();
+    }
+
+    if (cl_input.count("--bc"))
+    {
+        mBC = cl_input["--bc"].asString();
+    }
+
+    if (cl_input.count("--end_time"))
+    {
+        mEndTime = stod(cl_input["--end_time"].asString());
+    }
+
+    if(cl_input.count("--time_step"))
+    {
+        mTimeStep = stod(cl_input["--time_step"].asString());
+    }
+
+    if (cl_input.count("--diff"))
+    {
+        mDiff = split<double>(cl_input["--diff"].asString());
+    }
+
+    if (cl_input.count("--decay"))
+    {
+        mDecay = split<double>(cl_input["--decay"].asString());
+    }
+
+    if (cl_input.count("--prod"))
+    {
+        mProd = split<double>(cl_input["--prod"].asString());
+    }
+
+    if (cl_input.count("--kappa"))
+    {
+        mKappa = unsigned(stod(cl_input["--kappa"].asString())*mNumVoxels)/double(mNumVoxels);
+    }
+
+    if (cl_input.count("--alpha"))
+    {
+        mAlpha = stod(cl_input["--alpha"].asString());
+    }
+
+    if (cl_input.count("--beta"))
+    {
+        mBeta = split<double>(cl_input["--beta"].asString());
+        if (mBeta.size() == 1) { mBeta.push_back(mBeta[0]); }
+    }
+
+    if (cl_input.count("--num_runs"))
+    {
+        mNumRuns = unsigned(stoi(cl_input["--num_runs"].asString()));
+    }
+
+    if (cl_input.count("--trunc_order"))
+    {
+        mTruncOrder = unsigned(stoi(cl_input["--trunc_order"].asString()));
+    }
+
+    if (cl_input.count("--num_points"))
+    {
+        mNumPoints = unsigned(stoi(cl_input["--num_points"].asString()));
+    }
+
+    if (cl_input.count("--num_threads"))
+    {
+        mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
+        mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
+    }
+
 }
 
-void Parameters::Add(const string& name, const string& value)
+void Parameters::Add(string name, string value)
 {
-    mOther[name] = value;
+    mOther[name] = move(value);
 }
 
 void Parameters::Save(const string& path_to_file)
@@ -39,9 +134,8 @@ void Parameters::Save(const string& path_to_file)
         info << "# num_dims = " << mNumDims << endl;
         if (mNumDims==1)
         {
-            mAlpha.clear();
             mBeta.clear();
-            mKappa=0;
+            mKappa=-1;
         }
     }
     if (mNumRuns) { info << "# num_runs = " << mNumRuns << endl; }
@@ -49,24 +143,23 @@ void Parameters::Save(const string& path_to_file)
     if (!mNumMethod.empty()) { info << "# num_method = " << mNumMethod << endl; }
     if (mNumVoxels) { info << "# num_voxels = " << mNumVoxels << endl; }
     if (!mDomainBounds.empty()) { info << "# domain_bounds = " << mDomainBounds[0] << "," << mDomainBounds[1] << endl; }
-    if (m_h) { info << "# h = " << m_h << endl; }
-    if (mKappa) { info << "# kappa = " << mKappa << endl; }
-    if (!mAlpha.empty()) { info << "# alpha = " << mAlpha[0] << endl; }
+    if (mKappa > 0) { info << "# kappa = " << mKappa << endl; }
+    if (mAlpha >= 0) { info << "# alpha = " << mAlpha << endl; }
     if (!mBeta.empty())
     {
         if (mBeta.size() == 1) { mBeta.push_back(mBeta[0]); }
         info << "# beta = " << mBeta[0] << "," << mBeta[1] << endl;
     }
     if (!mBC.empty()) { info << "# bc = " << mBC << endl; }
-    if (mEndTime) { info << "# end_time = " << mEndTime << endl; }
-    if (mTimeStep) { info << "# time_step = " << mTimeStep << endl; }
+    if (mEndTime != 0) { info << "# end_time = " << mEndTime << endl; }
+    if (mTimeStep != 0) { info << "# time_step = " << mTimeStep << endl; }
     if (mNumPoints) { info << "# num_points = " << mNumPoints << endl; }
-    if (!mInitialNumMolecules.empty())
+    if (!mInitialNum.empty())
     {
-        oss << mInitialNumMolecules[0];
+        oss << mInitialNum[0];
         for (unsigned i=1; i < mNumSpecies; i++)
         {
-            oss << "," << mInitialNumMolecules[i];
+            oss << "," << mInitialNum[i];
         }
         info << "# initial_num_molecules = " << oss.str() << endl;
         oss.clear();
@@ -75,6 +168,7 @@ void Parameters::Save(const string& path_to_file)
     if (mTruncOrder) { info << "# truncation_order = " << mTruncOrder << endl; }
     if (!mDiff.empty())
     {
+        mDiff.resize(mNumSpecies);
         oss << mDiff[0];
         for (unsigned i=1; i < mNumSpecies; i++)
         {
@@ -86,6 +180,7 @@ void Parameters::Save(const string& path_to_file)
     }
     if (!mDecay.empty())
     {
+        mDecay.resize(mNumSpecies);
         oss << mDecay[0];
         for (unsigned i=1; i < mNumSpecies; i++)
         {
@@ -97,6 +192,7 @@ void Parameters::Save(const string& path_to_file)
     }
     if (!mProd.empty())
     {
+        mProd.resize(mNumSpecies);
         oss << mProd[0];
         for (unsigned i=1; i < mNumSpecies; i++)
         {
@@ -132,119 +228,218 @@ void Parameters::SetCommand(string command)
     mCommand = move(command);
 }
 
-void Parameters::SetNumThreads(unsigned num_threads)
+void Parameters::SetNumPoints(unsigned value)
 {
-    mNumThreads = num_threads;
+    mNumPoints = value;
+    mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
 }
 
-void Parameters::SetNumRuns(unsigned num_runs)
+unsigned Parameters::GetNumPoints()
 {
-    mNumRuns = num_runs;
+    return mNumPoints;
 }
 
-void Parameters::SetNumDims(unsigned num_dims)
+void Parameters::SetNumThreads(unsigned value)
 {
-    mNumDims = num_dims;
+    mNumThreads = value;
+    mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
 }
 
-void Parameters::SetNumSpecies(unsigned num_species)
+unsigned Parameters::GetNumThreads()
 {
-    mNumSpecies = num_species;
+    return mNumThreads;
 }
 
-void Parameters::SetNumMethod(string num_method)
+void Parameters::SetNumRuns(unsigned value)
 {
-    mNumMethod = move(num_method);
+    mNumRuns = value;
 }
 
-void Parameters::SetNumVoxels(unsigned num_voxels)
+unsigned Parameters::GetNumRuns()
 {
-    mNumVoxels = num_voxels;
+    return mNumRuns;
 }
 
-void Parameters::SetDomainBounds(vector<double> domain_bounds)
+void Parameters::SetNumDims(unsigned value)
 {
-    mDomainBounds = move(domain_bounds);
+    mNumDims = value;
 }
 
-void Parameters::SetBC(string bc)
+unsigned Parameters::GetNumDims()
 {
-    mBC = move(bc);
+    return mNumDims;
 }
 
-void Parameters::SetKappa(double kappa)
+void Parameters::SetNumSpecies(unsigned value)
 {
-    mKappa = kappa;
+    mNumSpecies = value;
 }
 
-void Parameters::SetAlpha(double alpha)
+unsigned Parameters::GetNumSpecies()
 {
-    mAlpha = {alpha};
+    return mNumSpecies;
 }
 
-void Parameters::SetBeta(vector<double> beta)
+void Parameters::SetNumMethod(string value)
 {
-    mBeta = move(beta);
+    mNumMethod = move(value);
 }
 
-void Parameters::SetEndTime(double end_time)
+string Parameters::GetNumMethod()
 {
-    mEndTime = end_time;
+    return mNumMethod;
 }
 
-void Parameters::SetTimeStep(double time_step)
+void Parameters::SetNumVoxels(unsigned value)
 {
-    mTimeStep = time_step;
+    mNumVoxels = value;
+    mKappa = unsigned(mKappa*mNumVoxels)/double(mNumVoxels);
 }
 
-void Parameters::SetNumPoints(unsigned num_points)
+unsigned Parameters::GetNumVoxels()
 {
-    mNumPoints = num_points;
+    return mNumVoxels;
 }
 
-void Parameters::SetDiff(vector<double> diff)
+void Parameters::SetDomainBounds(vector<double> values)
 {
-    mDiff = move(diff);
+    mDomainBounds = move(values);
 }
 
-void Parameters::SetDiff(double diff)
+vector<double> Parameters::GetDomainBounds()
 {
-    mDiff = {diff};
+    return mDomainBounds;
 }
 
-void Parameters::SetDecay(vector<double> decay)
+void Parameters::SetBC(string value)
 {
-    mDecay = move(decay);
+    mBC = move(value);
 }
 
-void Parameters::SetDecay(double decay)
+string Parameters::GetBC()
 {
-    mDecay = {decay};
+    return mBC;
 }
 
-void Parameters::SetProd(vector<double> prod)
+void Parameters::SetKappa(double value)
 {
-    mProd = move(prod);
+    mKappa = value;
+    mKappa = unsigned(mKappa*mNumVoxels)/double(mNumVoxels);
 }
 
-void Parameters::SetProd(double prod)
+double Parameters::GetKappa()
 {
-    mProd = {prod};
+    return mKappa;
 }
 
-void Parameters::SetInitialNumMolecules(unsigned num_molecules)
+void Parameters::SetAlpha(double value)
 {
-    mInitialNumMolecules = {num_molecules};
+    mAlpha = value;
 }
 
-void Parameters::SetInitialNumMolecules(vector<unsigned> num_molecules)
+double Parameters::GetAlpha()
 {
-    mInitialNumMolecules = move(num_molecules);
+    return mAlpha;
 }
 
-void Parameters::SetTruncOrder(unsigned trunc_order)
+void Parameters::SetBeta(vector<double> values)
 {
-    mTruncOrder = trunc_order;
+    mBeta = move(values);
+}
+
+vector<double> Parameters::GetBeta()
+{
+    return mBeta;
+}
+
+void Parameters::SetEndTime(double value)
+{
+    mEndTime = value;
+}
+
+double Parameters::GetEndTime()
+{
+    return mEndTime;
+}
+
+void Parameters::SetTimeStep(double value)
+{
+    mTimeStep = value;
+}
+
+double Parameters::GetTimeStep()
+{
+    return mTimeStep;
+}
+
+void Parameters::SetDiff(vector<double> values)
+{
+    mDiff = move(values);
+}
+
+vector<double> Parameters::GetDiff()
+{
+    return mDiff;
+}
+
+void Parameters::SetDecay(vector<double> values)
+{
+    mDecay = move(values);
+}
+
+vector<double> Parameters::GetDecay()
+{
+    return mDecay;
+}
+
+void Parameters::SetProd(vector<double> values)
+{
+    mProd = move(values);
+}
+
+vector<double> Parameters::GetProd()
+{
+    return mProd;
+}
+
+void Parameters::SetInitailNum(vector<unsigned> values)
+{
+    mInitialNum = move(values);
+}
+
+vector<unsigned> Parameters::GetInitialNum()
+{
+    return mInitialNum;
+}
+
+void Parameters::SetTruncOrder(unsigned value)
+{
+    mTruncOrder = value;
+}
+
+unsigned Parameters::GetTruncOrder()
+{
+    return mTruncOrder;
+}
+
+void Parameters::SetSaveDir(string value)
+{
+    mSaveDir = value;
+}
+
+string Parameters::GetSaveDir()
+{
+    return mSaveDir;
+}
+
+void Parameters::SetStartIndex(unsigned value)
+{
+    mStartIndex = value;
+}
+
+unsigned Parameters::GetStartIndex()
+{
+    return mStartIndex;
 }
 
 void Parameters::AddAdditionalReactions(string name, double rate)
