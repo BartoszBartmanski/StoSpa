@@ -66,9 +66,9 @@ string arr_to_str(int num, const char** array);
  * @param separator - character that is used as a separation
  * @return vector of strings that results from the separating the original string
  */
-vector<string> split(const string &input, char separator=',');
-vector<double> split_stod(const string &input, char separator=',');
-vector<unsigned> split_stou(const string &input, char separator=',');
+
+template<typename T=string>
+vector<T> split(const string &input, char separator=',');
 
 /**
  * Checks whether the given path is valid.

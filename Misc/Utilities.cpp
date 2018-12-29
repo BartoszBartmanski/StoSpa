@@ -44,6 +44,7 @@ string arr_to_str(int num, const char** array)
     return output;
 }
 
+template<>
 vector<string> split(const string &input, char separator)
 {
     istringstream ss(input);
@@ -58,7 +59,8 @@ vector<string> split(const string &input, char separator)
     return output;
 }
 
-vector<double> split_stod(const string &input, char separator)
+template<>
+vector<double> split(const string &input, char separator)
 {
     istringstream ss(input);
     string token;
@@ -72,7 +74,8 @@ vector<double> split_stod(const string &input, char separator)
     return output;
 }
 
-vector<unsigned> split_stou(const string &input, char separator)
+template<>
+vector<unsigned> split(const string &input, char separator)
 {
     istringstream ss(input);
     string token;
