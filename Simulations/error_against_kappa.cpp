@@ -1,7 +1,6 @@
 #include <iostream>
 #include <future>
 #include "docopt.h"
-#include "SimFunctions.hpp"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Simulation_2d.hpp"

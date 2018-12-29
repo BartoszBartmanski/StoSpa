@@ -6,7 +6,6 @@
 #include "docopt.h"
 #include "Utilities.hpp"
 #include "Parameters.hpp"
-#include "SimFunctions.hpp"
 #include "Simulation_1d.hpp"
 
 

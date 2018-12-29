@@ -1,7 +1,6 @@
 #include <iostream>
 #include <future>
 #include "docopt.h"
-#include "SimFunctions.hpp"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Simulation_2d.hpp"
@@ -44,6 +43,7 @@ int main(int argc, const char** argv)
     p.SetComments("Data for a plot of values of error against values of beta in the 2d simulations with beta being varied.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumDims(2);
+    p.SetNumMethod("fet");
 
     // Name the file
     string file_name = "error_against_beta";

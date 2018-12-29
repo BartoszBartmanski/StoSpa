@@ -1,7 +1,6 @@
 #include <iostream>
 #include <algorithm>
 #include "docopt.h"
-#include "SimFunctions.hpp"
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"

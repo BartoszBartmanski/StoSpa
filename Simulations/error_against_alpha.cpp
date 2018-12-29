@@ -3,7 +3,6 @@
 #include "docopt.h"
 #include "Utilities.hpp"
 #include "Parameters.hpp"
-#include "SimFunctions.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Simulation_2d.hpp"
 #include "Decay.hpp"
@@ -45,6 +44,7 @@ int main(int argc, const char** argv)
     p.SetComments("Data for a plot of values of error against values of alpha in the 2d simulations with alpha being varied.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumDims(2);
+    p.SetNumMethod("fdm");
 
     // Name the file
     string file_name = "error_against_alpha";

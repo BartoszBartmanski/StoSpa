@@ -4,7 +4,6 @@
 
 #include <iostream>
 #include "docopt.h"
-#include "SimFunctions.hpp"
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
@@ -38,7 +37,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --decay=<decay>                               Rate of decay [default: 0.0].
       --prod=<prod>                                 Rate of production [default: 0.0].
       --initial_num=<num>                           Initial number of molecules [default: 1000].
-      --initial_pos=<pos>                                 Initial position (in indices) of the molecules.
+      --initial_pos=<pos>                           Initial position (in indices) of the molecules.
 
 )";
 
@@ -57,10 +56,10 @@ int main(int argc, const char** argv)
 
     // Get the initial position of the molecules
     vector<unsigned> initial_pos;
-    if (args["--initial_pos"].asBool())
+    if (args["--initial_pos"])
     {
-        initial_pos = split<unsigned>(args["<pos>"].asString());
-        p.Add("initial_pos", args["<pos>"].asString());
+        initial_pos = split<unsigned>(args["--initial_pos"].asString());
+        p.Add("initial_pos", args["--initial_pos"].asString());
     }
 
     // Calculate the number of steps that will need to be taken to reach the desired point in time

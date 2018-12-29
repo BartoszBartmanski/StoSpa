@@ -8,111 +8,136 @@ Parameters::Parameters(map<string, docopt::value> cl_input)
 {
     if (cl_input.count("--dir_name"))
     {
-        mSaveDir = cl_input["--dir_name"].asString();
+        if (cl_input["--dir_name"])
+            mSaveDir = cl_input["--dir_name"].asString();
     }
 
     if (cl_input.count("--start_index"))
     {
-        mStartIndex = unsigned(stoi(cl_input["--start_index"].asString()));
+        if (cl_input["--start_index"])
+            mStartIndex = unsigned(stoi(cl_input["--start_index"].asString()));
     }
 
     if (cl_input.count("--num_dims"))
     {
-        mNumDims = unsigned(stoi(cl_input["--num_dims"].asString()));
+        if (cl_input["--num_dims"])
+            mNumDims = unsigned(stoi(cl_input["--num_dims"].asString()));
     }
 
     if (cl_input.count("--num_voxels"))
     {
-        mNumVoxels = unsigned(stoi(cl_input["--num_voxels"].asString()));
+        if (cl_input["--num_voxels"])
+            mNumVoxels = unsigned(stoi(cl_input["--num_voxels"].asString()));
     }
 
     if (cl_input.count("--num_species"))
     {
-        mNumSpecies = unsigned(stoi(cl_input["--num_species"].asString()));
+        if (cl_input["--num_species"])
+            mNumSpecies = unsigned(stoi(cl_input["--num_species"].asString()));
     }
 
     if (cl_input.count("--domain_bounds"))
     {
-        mDomainBounds = split<double>(cl_input["--domain_bounds"].asString());
+        if (cl_input["--domain_bounds"])
+            mDomainBounds = split<double>(cl_input["--domain_bounds"].asString());
     }
 
     if (cl_input.count("--initial_num"))
     {
-        mInitialNum = split<unsigned>(cl_input["--initial_num"].asString());
+        if (cl_input["--initial_num"])
+            mInitialNum = split<unsigned>(cl_input["--initial_num"].asString());
     }
 
     if (cl_input.count("--num_method"))
     {
-        mNumMethod = cl_input["--num_method"].asString();
+        if (cl_input["--num_method"])
+            mNumMethod = cl_input["--num_method"].asString();
     }
 
     if (cl_input.count("--bc"))
     {
-        mBC = cl_input["--bc"].asString();
+        if (cl_input["--bc"])
+            mBC = cl_input["--bc"].asString();
     }
 
     if (cl_input.count("--end_time"))
     {
-        mEndTime = stod(cl_input["--end_time"].asString());
+        if (cl_input["--end_time"])
+           mEndTime = stod(cl_input["--end_time"].asString());
     }
 
     if(cl_input.count("--time_step"))
     {
-        mTimeStep = stod(cl_input["--time_step"].asString());
+        if (cl_input["--time_step"])
+            mTimeStep = stod(cl_input["--time_step"].asString());
     }
 
     if (cl_input.count("--diff"))
     {
-        mDiff = split<double>(cl_input["--diff"].asString());
+        if (cl_input["--diff"])
+            mDiff = split<double>(cl_input["--diff"].asString());
     }
 
     if (cl_input.count("--decay"))
     {
-        mDecay = split<double>(cl_input["--decay"].asString());
+        if (cl_input["--decay"])
+            mDecay = split<double>(cl_input["--decay"].asString());
     }
 
     if (cl_input.count("--prod"))
     {
-        mProd = split<double>(cl_input["--prod"].asString());
+        if (cl_input["--prod"])
+            mProd = split<double>(cl_input["--prod"].asString());
     }
 
     if (cl_input.count("--kappa"))
     {
-        mKappa = unsigned(stod(cl_input["--kappa"].asString())*mNumVoxels)/double(mNumVoxels);
+        if (cl_input["--kappa"])
+            mKappa = unsigned(stod(cl_input["--kappa"].asString())*mNumVoxels)/double(mNumVoxels);
     }
 
     if (cl_input.count("--alpha"))
     {
-        mAlpha = stod(cl_input["--alpha"].asString());
+        if (cl_input["--alpha"])
+            mAlpha = stod(cl_input["--alpha"].asString());
     }
 
     if (cl_input.count("--beta"))
     {
-        mBeta = split<double>(cl_input["--beta"].asString());
-        if (mBeta.size() == 1) { mBeta.push_back(mBeta[0]); }
+        if (cl_input["--beta"])
+        {
+            mBeta = split<double>(cl_input["--beta"].asString());
+            if (mBeta.size() == 1) { mBeta.push_back(mBeta[0]); }
+        }
     }
 
     if (cl_input.count("--num_runs"))
     {
-        mNumRuns = unsigned(stoi(cl_input["--num_runs"].asString()));
+        if (cl_input["--num_runs"])
+            mNumRuns = unsigned(stoi(cl_input["--num_runs"].asString()));
     }
 
     if (cl_input.count("--trunc_order"))
     {
-        mTruncOrder = unsigned(stoi(cl_input["--trunc_order"].asString()));
+        if (cl_input["--trunc_order"])
+            mTruncOrder = unsigned(stoi(cl_input["--trunc_order"].asString()));
     }
 
     if (cl_input.count("--num_points"))
     {
-        mNumPoints = unsigned(stoi(cl_input["--num_points"].asString()));
+        if (cl_input["--end_time"])
+            mNumPoints = unsigned(stoi(cl_input["--num_points"].asString()));
     }
 
     if (cl_input.count("--num_threads"))
     {
-        mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
-        mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
-    }
+        if (cl_input["--num_threads"])
+        {
+            mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
+            mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
+        }
 
+    }
 }
 
 void Parameters::Add(string name, string value)
