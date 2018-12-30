@@ -42,7 +42,7 @@ endif()
 # Projects need c++14 standard - for make_unique and make_shared
 set(CMAKE_CXX_STANDARD 14)
 
-# Add the O3 optimisation flag and any specified warning flags
+# Add the warning flags
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${WARNING_FLAGS}")
 
 # Check for git version and put it in BUILD_VERSION variable
@@ -95,15 +95,11 @@ set(SOURCE_FILES ${SOURCE_FILES_SIMULATION} ${SOURCE_FILES_REACTIONS} ${SOURCE_F
 
 # Add an executable for Benchmarking
 add_executable(benchmarking ${CMAKE_CURRENT_SOURCE_DIR}/Benchmarking/benchmarking.cpp ${SOURCE_FILES})
-target_link_libraries(benchmarking ${Boost_LIBRARIES})
+#target_link_libraries(benchmarking ${Boost_LIBRARIES})
 
 # Add an executable for Unit Testing
 add_executable(unittest ${SOURCE_FILES_UNIT_TESTS} ${SOURCE_FILES})
-target_link_libraries(unittest ${Boost_LIBRARIES})
-
-# Add an executable for running simulations and link docopt to it
-add_executable(stospa ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp ${SOURCE_FILES})
-target_link_libraries(stospa docopt ${Boost_LIBRARIES})
+#target_link_libraries(unittest ${Boost_LIBRARIES})
 
 # Generate a list of source files in Simulations directory
 file(GLOB SIM_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/" "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/*cpp")
