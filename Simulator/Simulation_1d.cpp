@@ -1,6 +1,8 @@
 
 #include "Simulation_1d.hpp"
 
+// TODO: create a new constructor that takes in a parameters object.
+
 Simulation_1d::Simulation_1d(unsigned num_runs,
                              unsigned num_species,
                              string num_method,
@@ -22,6 +24,40 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     mTotalNumVoxels = num_voxels;
     mDomainBounds = domain_bounds;
     mBC = move(boundary_condition);
+
+    // Simulation attributes that will change with each time step
+    mNumJumps = vector<unsigned>(mNumRuns, 0);
+    mTime = 0.0;
+
+    // Simulation attributes that will remain constant throughout the simulation
+    m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelSize = m_h;
+    mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
+    mDiffusionCoefficients.resize(mNumSpecies);
+
+    mGrids.resize(mNumRuns);
+    for (unsigned run=0; run < mNumRuns; run++)
+    {
+        mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
+    }
+}
+
+Simulation_1d::Simulation_1d(Parameters params)
+{
+    // First check the input parameters
+    assert(params.GetNumRuns() > 0);
+    assert(params.GetNumSpecies() > 0);
+    assert(params.GetNumVoxels() > 0);
+    assert(params.GetDomainBounds().size() == 2);
+
+    // Input parameters
+    mNumRuns = params.GetNumRuns();
+    mNumSpecies = params.GetNumSpecies();
+    mNumMethod = params.GetNumMethod();
+    mNumVoxels = {params.GetNumVoxels(), 1};
+    mTotalNumVoxels = mNumVoxels[0];
+    mDomainBounds = params.GetDomainBounds();
+    mBC = params.GetBC();
 
     // Simulation attributes that will change with each time step
     mNumJumps = vector<unsigned>(mNumRuns, 0);

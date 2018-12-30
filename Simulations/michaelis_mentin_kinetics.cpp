@@ -19,7 +19,6 @@ static const char USAGE[] =
 
     Usage:
       MichaelisMentinKinetics [options]
-      MichaelisMentinKinetics -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -35,7 +34,7 @@ static const char USAGE[] =
       --kappa=<kappa>                               The voxel aspect ratio [default: 1.0].
       --alpha=<alpha>                               Value of alpha [default: 0.0].
       --beta=<beta>                                 Value of beta [default: 0.0,0.0].
-      --Diff=<Diff>                                 The diffusion coefficients [default: 1.0,1.0,1.0,1.0].
+      --diff=<diff>                                 The diffusion coefficients [default: 1.0,1.0,1.0,1.0].
       --k_0=<k_0>                                   0 -> S reaction rate [default: 0.25].
       --k_1=<k_1>                                   E + S -> C reaction rate [default: 1.0].
       --k_2=<k_2>                                   C -> E + S reaction rate [default: 1.0].
@@ -72,13 +71,6 @@ int main(int argc, const char** argv)
     unsigned e_t = p.GetInitialNum()[0];
     p.Add("e_t", to_string(e_t));
 
-    // Calculate the number of steps that will need to be taken
-    auto num_steps = unsigned(p.GetEndTime() / p.GetTimeStep());
-
-    // Create a pointer to an AbstractSimulation
-    unique_ptr<AbstractSimulation> sim_full;
-    unique_ptr<AbstractSimulation> sim_reduced;
-
     // Get the file name
     string file_name_full = "michaelis_mentin_full";
     string file_name_reduced = "michaelis_mentin_reduced";
@@ -89,22 +81,19 @@ int main(int argc, const char** argv)
     }
 
     /*
-     * First we simulate the full system.
+     * First we setup the full system.
      */
 
-    p.SetNumSpecies(4);
-
     // Point the pointer to the object
+    p.SetNumSpecies(4);
+    unique_ptr<AbstractSimulation> sim_full;
     if (p.GetNumDims()== 1)
     {
-        sim_full = make_unique<Simulation_1d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC());
+        sim_full = make_unique<Simulation_1d>(p);
     }
     else
     {
-        auto sim2d = make_unique<Simulation_2d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa());
-        sim2d->SetAlpha(p.GetAlpha());
-        sim2d->SetBeta(p.GetBeta());
-        sim_full = move(sim2d);
+        sim_full = make_unique<Simulation_2d>(p);
     }
 
     for (unsigned i=0; i < p.GetNumSpecies(); i++)
@@ -124,23 +113,22 @@ int main(int argc, const char** argv)
     // Check that the directory exists and that the no file is being over-written.
     string path_to_file_full = update_path(p.GetSaveDir(), file_name_full, p.GetStartIndex());
     p.Save(path_to_file_full);
+    sim_full->Run(path_to_file_full, p.GetEndTime(), p.GetTimeStep());
 
     /*
      * Now we setup the reduced system.
      */
-    p.SetNumSpecies(2);
 
     // Point the pointer to the object
+    p.SetNumSpecies(2);
+    unique_ptr<AbstractSimulation> sim_reduced;
     if (p.GetNumDims()== 1)
     {
-        sim_reduced = make_unique<Simulation_1d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC());
+        sim_reduced = make_unique<Simulation_1d>(p);
     }
     else
     {
-        auto sim2d = make_unique<Simulation_2d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa());
-        sim2d->SetAlpha(p.GetAlpha());
-        sim2d->SetBeta(p.GetBeta());
-        sim_reduced = move(sim2d);
+        sim_reduced = make_unique<Simulation_2d>(p);
     }
 
     // Setup the number of molecules
@@ -157,33 +145,8 @@ int main(int argc, const char** argv)
 
     // Check that the directory exists and that the no file is being over-written.
     string path_to_file_reduced = update_path(p.GetSaveDir(), file_name_reduced, p.GetStartIndex());
-    p.Save(path_to_file_reduced);
+    p.Save(path_to_file_reduced);        // Setup the reaction rates
+    sim_reduced->Run(path_to_file_reduced, p.GetEndTime(), p.GetTimeStep());
 
-    // Initialise progress object
-    Progress prog(num_steps);
-
-    for (unsigned i = 0; i < num_steps; i++)
-    {
-        sim_full->Advance(p.GetTimeStep(), i);
-        sim_reduced->Advance(p.GetTimeStep(), i);
-
-        for (unsigned species=0; species < sim_full->GetNumSpecies(); species++)
-        {
-            // Save the stochastic simulation
-            save_vector(sim_full->GetAverageNumMolecules(species), path_to_file_full);
-        }
-
-        for (unsigned species=0; species < sim_reduced->GetNumSpecies(); species++)
-        {
-            // Save the stochastic simulation
-            save_vector(sim_reduced->GetAverageNumMolecules(species), path_to_file_reduced);
-        }
-
-        // Show progress of the simulation
-        prog.Show();
-    }
-
-    // Add the simulation name to the log file
-    cout << "Data saved in " << path_to_file_full << endl;
-    cout << "Data saved in " << path_to_file_reduced << endl;
+    return 0;
 }

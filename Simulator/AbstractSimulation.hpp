@@ -26,6 +26,7 @@
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
+#include "Parameters.hpp"
 #include "Extrande.hpp"
 
 using namespace std;
@@ -296,6 +297,8 @@ public:
      * @return relative_error
      */
     double GetRelativeError(const vector<double>& analytic, unsigned species=0);
+
+    void Run(const string& output, const double& endtime, const double& timestep);
 
 };
 

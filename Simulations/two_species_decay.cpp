@@ -12,7 +12,6 @@ static const char USAGE[] =
 
     Usage:
       TwoSpeciesDecayDist [options]
-      TwoSpeciesDecayDist -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -48,11 +47,7 @@ int main(int argc, const char** argv)
     if (args["--append"]) { file_name += ("_" + args["--append"].asString()); }
 
     double k_2 = stod(args["--k_2"].asString());                        // production of species 0
-    p.SetProd({k_2, 0});
-
     double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
-    auto two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
-    p.AddAdditionalReactions(two_species_decay->GetReactionName(), two_species_decay->GetRateConstant());
 
     auto mean_a = unsigned(k_2 * pow(p.GetDomainBounds()[1] - p.GetDomainBounds()[0], 2) / k_1);
     p.Add("means", to_string(mean_a));
@@ -62,27 +57,18 @@ int main(int argc, const char** argv)
         p.SetInitailNum({mean_a/p.GetNumVoxels(), 1});
     }
 
-    // Calculate the number of steps that will need to be taken
-    auto num_steps = unsigned(p.GetEndTime() / p.GetTimeStep());
-
     // Create a vector to store the values
     vector<unsigned> stationary_dist(5 * mean_a, 0);
 
-    // Create a pointer to an AbstractSimulation
-    unique_ptr<AbstractSimulation> sim;
-
     // Point the pointer to the object
+    unique_ptr<AbstractSimulation> sim;
     if (p.GetNumDims() == 1)
     {
-        sim = make_unique<Simulation_1d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC());
+        sim = make_unique<Simulation_1d>(p);
     }
     else
     {
-        auto sim2d = make_unique<Simulation_2d>(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa());
-        sim2d->SetAlpha(p.GetAlpha());
-        sim2d->SetBeta(p.GetBeta());
-        sim = move(sim2d);
-
+        sim = make_unique<Simulation_2d>(p);
     }
 
     // Setup the number of molecules
@@ -92,10 +78,16 @@ int main(int argc, const char** argv)
     // Setup the reaction rates
     sim->SetDiffusionRate(p.GetDiff()[0], 0);
     sim->SetDiffusionRate(p.GetDiff()[1], 1);
+
+    p.SetProd({k_2, 0});
     sim->AddReaction(make_unique<Production>(k_2, 0));
+
+    unique_ptr<AbstractReaction> two_species_decay = make_unique<TwoSpeciesDecay>(k_1);
+    p.AddReaction(two_species_decay);
     sim->AddReaction(move(two_species_decay));
 
     // Initialise progress object
+    auto num_steps = unsigned(p.GetEndTime() / p.GetTimeStep());
     Progress prog(num_steps);
 
     for (unsigned i = 0; i < num_steps; i++)
@@ -122,7 +114,7 @@ int main(int argc, const char** argv)
     save_vector(stationary_dist, path_to_file);
 
     // Add the simulation name to the log file
-    cout << "Data saved in " << path_to_file << endl;
+    prog.End(path_to_file);
 
     return 0;
 }

@@ -351,3 +351,28 @@ vector<double> get_midpoint(const vector<double>& domain_bounds, const unsigned&
     }
     return midpoint;
 }
+
+void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep)
+{
+    // Initialise progress object
+    auto num_steps = unsigned(endtime/timestep);
+    Progress prog(num_steps);
+
+    unique_ptr<ofstream> p_output = make_unique<ofstream>(output, ios::app);
+
+    // Run the SSA
+    for (unsigned i=0; i < num_steps; i++)
+    {
+        // Move to the next time step
+        this->Advance(i*timestep);
+
+        for (unsigned species=0; species < mNumSpecies; species++)
+        {
+            // Save the stochastic simulation state
+            save_vector(this->GetAverageNumMolecules(species), p_output);
+        }
+        prog.Show();
+    }
+
+    prog.End(output);
+}

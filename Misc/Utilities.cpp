@@ -179,3 +179,8 @@ void Progress::Reset()
 {
     mCurrentStep = 0;
 }
+
+void Progress::End(string path_to_file)
+{
+    cout << "Data saved in " << path_to_file << endl;
+}

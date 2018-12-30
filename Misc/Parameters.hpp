@@ -14,6 +14,7 @@
 #include <iterator>
 #include "Version.hpp"
 #include "Utilities.hpp"
+#include "AbstractReaction.hpp"
 #include "docopt.h"
 
 using namespace std;
@@ -61,7 +62,7 @@ private:
 
     vector<unsigned> mInitialNum;
 
-    unsigned mTruncOrder=100;
+    unsigned mTruncOrder=0;
 
     string mSaveDir=SAVE_DIR;
 
@@ -169,7 +170,9 @@ public:
 
     unsigned GetStartIndex();
 
-    void AddAdditionalReactions(string name, double rate);
+    void AddReaction(string name, double rate);
+
+    void AddReaction(const unique_ptr<AbstractReaction> &p_reaction);
 
 };
 

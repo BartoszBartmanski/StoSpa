@@ -12,7 +12,6 @@ static const char USAGE[] =
 
     Usage:
       error_against_kappa [options]
-      error_against_kappa -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -140,7 +139,7 @@ int main(int argc, const char** argv)
     }
 
     // Add the simulation name to the log file
-    cout << "Data saved in " << path_to_file << endl;
+    prog.End(path_to_file);
 
     return 0;
 }

@@ -13,7 +13,6 @@ static const char USAGE[] =
 
     Usage:
       error_against_alpha [options]
-      error_against_alpha -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -77,7 +76,7 @@ int main(int argc, const char** argv)
     unsigned num_sets = num_points / num_threads;
 
     // Create vector of futures
-    vector<future<double>> futures(p.GetNumThreads());
+    vector<future<double>> futures(num_threads);
     vector<Simulation_2d> sims;
 
     // Initialise progress object
@@ -90,7 +89,7 @@ int main(int argc, const char** argv)
         for (unsigned i=0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
-            sims.emplace_back(Simulation_2d(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa()));
+            sims.emplace_back(Simulation_2d(p));
             sims.back().SetAlpha(alpha[k]);
             sims.back().SetDiffusionRate(p.GetDiff()[0], 0);
             sims.back().AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
@@ -126,7 +125,7 @@ int main(int argc, const char** argv)
     save_vector(error, path_to_file);
 
     // Add the simulation name to the log file
-    cout << "Data saved in " << path_to_file << endl;
+    prog.End(path_to_file);
 
     return 0;
 }

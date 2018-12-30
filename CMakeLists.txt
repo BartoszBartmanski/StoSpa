@@ -3,12 +3,20 @@ cmake_minimum_required(VERSION 3.5)
 # Project name
 project(StoSpa)
 
+# Set the default build type to be Release
+if (NOT EXISTS ${CMAKE_BINARY_DIR}/CMakeCache.txt)
+    if (NOT CMAKE_BUILD_TYPE)
+        set(CMAKE_BUILD_TYPE "Release" CACHE STRING "" FORCE)
+    endif()
+endif()
+
+# Check if the default save dir exists. If not then source files directory is used.
 set(SAVE_DIR "/scratch/bartmanski/Data/" CACHE STRING "Directory where to save data.")
 if(EXISTS ${SAVE_DIR})
     message(STATUS "Save dir: ${SAVE_DIR}")
 else(EXISTS ${SAVE_DIR})
     message(STATUS "${SAVE_DIR} is not a valid path!")
-    set(SAVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}")
+    set(SAVE_DIR "${CMAKE_CURRENT_SOURCE_DIR}" CACHE STRING "Directory where to save data." FORCE)
     message(STATUS "Save dir: ${SAVE_DIR}")
 endif(EXISTS ${SAVE_DIR})
 

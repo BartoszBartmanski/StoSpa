@@ -27,6 +27,7 @@ public:
                   unsigned num_voxels,
                   vector<double> domain_bounds,
                   string boundary_condition);
+    explicit Simulation_1d(Parameters params);
 
     Simulation_1d(const Simulation_1d&) = delete; //move only type
     Simulation_1d& operator=(const Simulation_1d&) = delete; //move only type

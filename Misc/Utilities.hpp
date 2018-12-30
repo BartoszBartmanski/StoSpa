@@ -125,6 +125,12 @@ public:
      */
     void Reset();
 
+    /**
+     * Outputs where the simulation was saved
+     * @param path_to_file
+     */
+    void End(string path_to_file);
+
 };
 
 #endif //STOCHASTIC_DIFFUSION_UTILITIES_HPP

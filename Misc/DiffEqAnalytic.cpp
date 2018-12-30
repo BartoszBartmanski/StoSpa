@@ -4,8 +4,6 @@
 
 #include "DiffEqAnalytic.hpp"
 
-// TODO: template over the dimensionality of the domain?
-
 DiffEqAnalytic::DiffEqAnalytic(unsigned num_dims,
                                double time,
                                vector<double> x_0,

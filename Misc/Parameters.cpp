@@ -190,7 +190,7 @@ void Parameters::Save(const string& path_to_file)
         oss.clear();
         oss.str("");
     }
-    if (mTruncOrder) { info << "# truncation_order = " << mTruncOrder << endl; }
+    if (mTruncOrder > 0) { info << "# truncation_order = " << mTruncOrder << endl; }
     if (!mDiff.empty())
     {
         mDiff.resize(mNumSpecies);
@@ -467,7 +467,12 @@ unsigned Parameters::GetStartIndex()
     return mStartIndex;
 }
 
-void Parameters::AddAdditionalReactions(string name, double rate)
+void Parameters::AddReaction(string name, double rate)
 {
     mAdditionalReactions[name] = rate;
+}
+
+void Parameters::AddReaction(const unique_ptr<AbstractReaction> &p_reaction)
+{
+    mAdditionalReactions[p_reaction->GetReactionName()] = p_reaction->GetRateConstant();
 }
