@@ -13,7 +13,9 @@
 #include <sstream>
 #include <iterator>
 #include "Version.hpp"
-
+#include "Utilities.hpp"
+#include "AbstractReaction.hpp"
+#include "docopt.h"
 
 using namespace std;
 
@@ -24,35 +26,33 @@ private:
 
     string mCommand;
 
-    unsigned mNumThreads;
+    unsigned mNumPoints=1;
 
-    unsigned mNumRuns;
+    unsigned mNumThreads=1;
 
-    unsigned mNumDims;
+    unsigned mNumRuns=1;
 
-    unsigned mNumSpecies;
+    unsigned mNumDims=1;
+
+    unsigned mNumSpecies=1;
 
     string mNumMethod;
 
-    unsigned mNumVoxels;
+    unsigned mNumVoxels=1;
 
     vector<double> mDomainBounds;
 
-    double m_h;
-
     string mBC;
 
-    double mKappa;
+    double mKappa=-1;
 
-    vector<double> mAlpha;
+    double mAlpha=-1;
 
     vector<double> mBeta;
 
-    double mEndTime;
+    double mEndTime=0;
 
-    double mTimeStep;
-
-    unsigned mNumPoints;
+    double mTimeStep=0;
 
     vector<double> mDiff;
 
@@ -60,22 +60,25 @@ private:
 
     vector<double> mProd;
 
-    vector<unsigned> mInitialNumMolecules;
+    vector<unsigned> mInitialNum;
 
-    unsigned mTruncOrder;
+    unsigned mTruncOrder=0;
+
+    string mSaveDir=SAVE_DIR;
+
+    unsigned mStartIndex=0;
 
     map<string, double> mAdditionalReactions;
 
     map<string, string> mOther;
 
-
 public:
-
-    Parameters();
+    Parameters() = default;
+    explicit Parameters(map<string, docopt::value> cl_input);
 
     ~Parameters() = default;
 
-    void Add(const string& name, const string& value);
+    void Add(string name, string value);
 
     void Save(const string& path_to_file);
 
@@ -83,49 +86,93 @@ public:
 
     void SetCommand(string command);
 
-    void SetNumThreads(unsigned num_threads);
+    void SetNumPoints(unsigned value);
 
-    void SetNumRuns(unsigned num_runs);
+    unsigned GetNumPoints();
 
-    void SetNumDims(unsigned num_dims);
+    void SetNumThreads(unsigned value);
 
-    void SetNumSpecies(unsigned num_species);
+    unsigned GetNumThreads();
 
-    void SetNumMethod(string num_method);
+    void SetNumRuns(unsigned value);
 
-    void SetNumVoxels(unsigned num_voxels);
+    unsigned GetNumRuns();
 
-    void SetDomainBounds(vector<double> domain_bounds);
+    void SetNumDims(unsigned value);
 
-    void SetBC(string bc);
+    unsigned GetNumDims();
 
-    void SetKappa(double kappa);
+    void SetNumSpecies(unsigned value);
 
-    void SetAlpha(double alpha);
+    unsigned GetNumSpecies();
 
-    void SetBeta(vector<double> beta);
+    void SetNumMethod(string value);
 
-    void SetEndTime(double end_time);
+    string GetNumMethod();
 
-    void SetTimeStep(double time_step);
+    void SetNumVoxels(unsigned value);
 
-    void SetNumPoints(unsigned num_points);
+    unsigned GetNumVoxels();
 
-    void SetDiff(vector<double> diff);
-    void SetDiff(double diff);
+    void SetDomainBounds(vector<double> values);
 
-    void SetDecay(vector<double> decay);
-    void SetDecay(double decay);
+    vector<double> GetDomainBounds();
 
-    void SetProd(vector<double> prod);
-    void SetProd(double prod);
+    void SetBC(string value);
 
-    void SetInitialNumMolecules(unsigned num_molecules);
-    void SetInitialNumMolecules(vector<unsigned> num_molecules);
+    string GetBC();
 
-    void SetTruncOrder(unsigned trunc_order);
+    void SetKappa(double value);
 
-    void AddAdditionalReactions(string name, double rate);
+    double GetKappa();
+
+    void SetAlpha(double value);
+
+    double GetAlpha();
+
+    void SetBeta(vector<double> values);
+
+    vector<double> GetBeta();
+
+    void SetEndTime(double value);
+
+    double GetEndTime();
+
+    void SetTimeStep(double value);
+
+    double GetTimeStep();
+
+    void SetDiff(vector<double> values);
+
+    vector<double> GetDiff();
+
+    void SetDecay(vector<double> values);
+
+    vector<double> GetDecay();
+
+    void SetProd(vector<double> values);
+
+    vector<double> GetProd();
+
+    void SetInitailNum(vector<unsigned> values);
+
+    vector<unsigned> GetInitialNum();
+
+    void SetTruncOrder(unsigned value);
+
+    unsigned GetTruncOrder();
+
+    void SetSaveDir(string value);
+
+    string GetSaveDir();
+
+    void SetStartIndex(unsigned value);
+
+    unsigned GetStartIndex();
+
+    void AddReaction(string name, double rate);
+
+    void AddReaction(const unique_ptr<AbstractReaction> &p_reaction);
 
 };
 

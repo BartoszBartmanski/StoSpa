@@ -1,7 +1,6 @@
 #include <iostream>
 #include <future>
 #include "docopt.h"
-#include "SimFunctions.hpp"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Simulation_2d.hpp"
@@ -13,7 +12,6 @@ static const char USAGE[] =
 
     Usage:
       error_against_beta [options]
-      error_against_beta -h | --help
 
     Options:
       -h --help                                     Show this screen.
@@ -40,82 +38,20 @@ int main(int argc, const char** argv)
 {
     // Get command line input
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
-
-    // Create a parameters object - used to order the parameters order in the comments of the data files
-    Parameters params;
-    params.SetComments("Data for a plot of values of error against values of beta in the 2d simulations with beta being varied.");
-    params.SetCommand(arr_to_str(argc, argv));
-    params.SetNumDims(2);
-
-    // Get the save directory
-    string dir_name = SAVE_DIR;
-    if (args["--dir_name"]) { dir_name = args["--dir_name"].asString(); }
+    Parameters p(args);
+    p.SetComments("Data for a plot of values of error against values of beta in the 2d simulations with beta being varied.");
+    p.SetCommand(arr_to_str(argc, argv));
+    p.SetNumDims(2);
+    p.SetNumMethod("fet");
 
     // Name the file
     string file_name = "error_against_beta";
     if (args["--append"]) { file_name += ("_" + args["--append"].asString()); }
 
-    // Get the start index of the file extension
-    auto start_index = unsigned(stoi(args["--start_index"].asString()));
-
-    // Get the number of runs
-    auto num_runs = unsigned(stoi(args["--num_runs"].asString()));
-    params.SetNumRuns(num_runs);
-
-    unsigned num_species = 1;
-    params.SetNumSpecies(num_species);
-
-    string method = "fet";
-    params.SetNumMethod(method);
-
-    // Get the number of voxels
-    auto num_voxels = unsigned(stoi(args["--num_voxels"].asString()));
-    params.SetNumVoxels(num_voxels);
-
-    // Get the domain bounds
-    vector<double> domain_bounds = split_stod(args["--domain_bounds"].asString());
-    params.SetDomainBounds(domain_bounds);
-
-    // Get the initial number of molecules
-    auto initial_num = unsigned(stoi(args["--initial_num"].asString()));
-    params.SetInitialNumMolecules(initial_num);
-
-    // Get the boundary condition for the domain
-    string bc = args["--bc"].asString();
-    params.SetBC(bc);
-
-    // Get the end time of the simulation
-    double end_time = stod(args["--end_time"].asString());
-    params.SetEndTime(end_time);
-
-    // Get the diffusion coefficient
-    double diff = stod(args["--diff"].asString());
-    params.SetDiff(diff);
-
-    // Get the decay rate
-    double decay = stod(args["--decay"].asString());
-    params.SetDecay(decay);
-
-    // Get the production rate
-    double prod = stod(args["--prod"].asString());
-    params.SetProd(prod);
-
-    // Get the voxel aspect ratio
-    double kappa = unsigned(stod(args["--kappa"].asString())*num_voxels)/double(num_voxels);
-    params.SetKappa(kappa);
-
-    // Get the number of points of alpha for which to run the simulation
-    unsigned num_points = unsigned(stoi(args["--num_points"].asString()));
-    params.SetNumPoints(num_points);
-
-    // Get the truncation order for the analytic solution
-    unsigned trunc_order = unsigned(stoi(args["--trunc_order"].asString()));
-    params.SetTruncOrder(trunc_order);
-
-    // Get the number of cores
-    unsigned num_threads = unsigned(stoi(args["--num_threads"].asString()));
-    num_threads = unsigned(gcd(num_points*num_points, num_threads));
-    params.SetNumThreads(num_threads);
+    // Calculate the number of sets of parallel simulations
+    unsigned num_points = p.GetNumPoints();
+    unsigned num_threads = p.GetNumThreads();
+    unsigned num_sets = num_points*num_points / num_threads;
 
     // Create vectors of values of beta_x and beta_y
     vector<double> beta = linspace(0.0, 1.0, num_points);
@@ -135,30 +71,27 @@ int main(int argc, const char** argv)
     vector<long double> error(num_points*num_points);
 
     // Calculate the initial position of the molecules.
-    vector<double> mid_point = get_midpoint(domain_bounds, num_voxels, kappa);
+    vector<double> mid_point = get_midpoint(p.GetDomainBounds(), p.GetNumVoxels(), p.GetKappa());
 
     // Calculate the analytical solution
-    DiffEqAnalytic analytic = DiffEqAnalytic(2,
-                                             end_time,
-                                             mid_point,
-                                             domain_bounds,
-                                             {num_voxels, unsigned(kappa*num_voxels)},
-                                             initial_num,
-                                             diff,
-                                             decay,
-                                             prod,
-                                             trunc_order);
+    DiffEqAnalytic analytic(2,
+                            p.GetEndTime(),
+                            mid_point,
+                            p.GetDomainBounds(),
+                            {p.GetNumVoxels(), unsigned(p.GetKappa()*p.GetNumVoxels())},
+                            p.GetInitialNum()[0],
+                            p.GetDiff()[0],
+                            p.GetDecay()[0],
+                            p.GetProd()[0],
+                            p.GetTruncOrder());
     vector<double> sol = analytic.GetAnalytic();
-
-    // Calculate the number of sets of parallel simulations
-    unsigned num_sets = num_points*num_points / num_threads;
 
     // Create vector of futures and simulations
     vector<future<double>> futures(num_threads);
     vector<Simulation_2d> sims;
 
     // Initialise progress object
-    Progress p(num_points*num_points);
+    Progress prog(num_points *num_points);
 
     // Run the simulations and calculate the error
     for (unsigned set=0; set < num_sets; set++)
@@ -167,17 +100,17 @@ int main(int argc, const char** argv)
         for (unsigned i = 0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
-            sims.emplace_back(Simulation_2d(num_runs, num_species, method, num_voxels, domain_bounds, kappa, bc));
+            sims.emplace_back(Simulation_2d(p));
             sims.back().SetBeta({beta_x[k], beta_y[k]});
-            sims.back().SetDiffusionRate(diff, 0);
-            sims.back().AddReaction(make_unique<Decay>(decay, 0));
-            sims.back().AddReaction(make_unique<Production>(prod, 0));
-            sims.back().SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), initial_num, 0);
+            sims.back().SetDiffusionRate(p.GetDiff()[0], 0);
+            sims.back().AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
+            sims.back().AddReaction(make_unique<Production>(p.GetProd()[0], 0));
+            sims.back().SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
         }
 
         for (unsigned i = 0; i < num_threads; i++)
         {
-            futures[i] = async(launch::async, get_error, ref(sims[i]), sol, end_time);
+            futures[i] = async(launch::async, get_error, ref(sims[i]), sol, p.GetEndTime());
         }
 
         for (unsigned i=0; i < num_threads; i++)
@@ -186,18 +119,18 @@ int main(int argc, const char** argv)
             error[k] = futures[i].get();
 
             // Show progress of the simulation
-            p.Show();
+            prog.Show();
         }
     }
 
     // Check that the directory exists and that the no file is being over-written.
-    string path_to_file = update_path(dir_name, file_name, start_index);
+    string path_to_file = update_path(p.GetSaveDir(), file_name, p.GetStartIndex());
 
     // Save the information about this plot in the same file as the data
-    params.Add("row 1", "values of beta_x");
-    params.Add("row 2", "values of beta_y");
-    params.Add("row 3", "values of error");
-    params.Save(path_to_file);
+    p.Add("row 1", "values of beta_x");
+    p.Add("row 2", "values of beta_y");
+    p.Add("row 3", "values of error");
+    p.Save(path_to_file);
 
     // Save the data
     save_vector(beta_x, path_to_file);
@@ -205,7 +138,7 @@ int main(int argc, const char** argv)
     save_vector(error, path_to_file);
 
     // Add the simulation name to the log file
-    cout << "Data saved in " << path_to_file << endl;
+    prog.End(path_to_file);
 
     return 0;
 }

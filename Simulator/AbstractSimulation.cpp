@@ -332,3 +332,47 @@ double AbstractSimulation::GetRelativeError(const vector<double>& analytic, unsi
 
     return error;
 }
+
+double get_error(AbstractSimulation& sim, const vector<double>& analytic, double end_time)
+{
+    sim.Advance(end_time);
+    return sim.GetError(analytic);
+}
+
+vector<double> get_midpoint(const vector<double>& domain_bounds, const unsigned& num_voxels, const double& kappa)
+{
+    vector<unsigned> voxels = {num_voxels, unsigned(kappa*num_voxels)};
+    vector<double> midpoint(2);
+
+    for (unsigned i=0; i < 2; i++)
+    {
+        double size = (domain_bounds[1] - domain_bounds[0]) / voxels[i];
+        midpoint[i] = (voxels[i]/2 + 0.5 ) * size;
+    }
+    return midpoint;
+}
+
+void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep)
+{
+    // Initialise progress object
+    auto num_steps = unsigned(endtime/timestep);
+    Progress prog(num_steps);
+
+    unique_ptr<ofstream> p_output = make_unique<ofstream>(output, ios::app);
+
+    // Run the SSA
+    for (unsigned i=0; i < num_steps; i++)
+    {
+        // Move to the next time step
+        this->Advance(i*timestep);
+
+        for (unsigned species=0; species < mNumSpecies; species++)
+        {
+            // Save the stochastic simulation state
+            save_vector(this->GetAverageNumMolecules(species), p_output);
+        }
+        prog.Show();
+    }
+
+    prog.End(output);
+}

@@ -37,7 +37,8 @@ public:
      * @param boundary_condition - reflective or periodic boundary condition
      */
     Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
-                  vector<double> domain_bounds, double ratio, string boundary_condition);
+                  vector<double> domain_bounds, string boundary_condition, double ratio);
+    explicit Simulation_2d(Parameters params);
 
     Simulation_2d(const Simulation_2d&) = delete; //move only type
     Simulation_2d& operator=(const Simulation_2d&) = delete; //move only type
