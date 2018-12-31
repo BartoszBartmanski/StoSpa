@@ -89,7 +89,7 @@ int main(int argc, const char** argv)
 
     // Collect the data
     #pragma omp parallel for num_threads(p.GetNumThreads())
-    for (unsigned i=0; i < num_points; i++)
+    for (unsigned i=0; i < error.size(); i++)
     {
         Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa());
         sim.SetBeta({beta_x[i], beta_y[i]});
