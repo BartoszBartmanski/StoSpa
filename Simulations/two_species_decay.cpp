@@ -19,7 +19,7 @@ static const char USAGE[] =
       --time_step=<time_step>                       Length of the time step [default: 0.5].
       -d --num_dims=<num_dims>                      Number of dimensions of the domain [default: 1]
       --num_method=<num_method>                     The method of derivation of jump coefficients [default: fem].
-      --num_voxels=<num_voxels>                     Number of voxels. [default: 1]
+      --num_voxels=<num_voxels>                     Number of voxels. [default: 50]
       --domain_bounds=<domain_bounds>               The bounds of the domain. [default: 0.0,1.0]
       --bc=<bc>                                     The boundary condition [default: reflective].
       --kappa=<kappa>                               The voxel aspect ratio [default: 1.0].
@@ -41,6 +41,7 @@ int main(int argc, const char** argv)
     Parameters p(args);
     p.SetComments("Data for a stationary distribution for two-species-decay reaction given the following parameters.");
     p.SetCommand(arr_to_str(argc, argv));
+    p.SetNumSpecies(2);
 
     // Get the file name
     string file_name = "two_species_decay_dist";

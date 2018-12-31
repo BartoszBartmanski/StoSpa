@@ -44,9 +44,9 @@ private:
 
     string mBC;
 
-    double mKappa=-1;
+    double mKappa=0.0;
 
-    double mAlpha=-1;
+    double mAlpha=0.0;
 
     vector<double> mBeta;
 

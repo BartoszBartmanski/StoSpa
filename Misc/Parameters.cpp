@@ -136,7 +136,6 @@ Parameters::Parameters(map<string, docopt::value> cl_input)
             mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
             mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
         }
-
     }
 }
 

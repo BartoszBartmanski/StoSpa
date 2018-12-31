@@ -42,6 +42,7 @@ int main(int argc, const char** argv)
     p.SetComments("Data for a plot of values of error against values of beta in the 2d simulations with beta being varied.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumDims(2);
+    p.SetAlpha(0);
     p.SetNumMethod("fet");
 
     // Name the file
@@ -100,8 +101,8 @@ int main(int argc, const char** argv)
         for (unsigned i = 0; i < num_threads; i++)
         {
             unsigned k = set * num_threads + i;
+            p.SetBeta({beta_x[k], beta_y[k]});
             sims.emplace_back(Simulation_2d(p));
-            sims.back().SetBeta({beta_x[k], beta_y[k]});
             sims.back().SetDiffusionRate(p.GetDiff()[0], 0);
             sims.back().AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sims.back().AddReaction(make_unique<Production>(p.GetProd()[0], 0));
@@ -130,6 +131,7 @@ int main(int argc, const char** argv)
     p.Add("row 1", "values of beta_x");
     p.Add("row 2", "values of beta_y");
     p.Add("row 3", "values of error");
+    p.SetBeta({});
     p.Save(path_to_file);
 
     // Save the data

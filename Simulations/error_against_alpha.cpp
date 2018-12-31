@@ -40,9 +40,11 @@ int main(int argc, const char** argv)
     // Get command line input
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
     Parameters p(args);
+
     p.SetComments("Data for a plot of values of error against values of alpha in the 2d simulations with alpha being varied.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumDims(2);
+    p.SetBeta({0.0,0.0});
     p.SetNumMethod("fdm");
 
     // Name the file

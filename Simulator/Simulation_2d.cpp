@@ -19,7 +19,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mDomainBounds = domain_bounds;
     mBC = move(boundary_condition);
 
-    // Additional input paramdoubleeters (due to working in 2d)
+    // Additional input parameters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
 
     // Simulation attributes that will change with each time step
@@ -48,7 +48,8 @@ Simulation_2d::Simulation_2d(Parameters params)
     assert(params.GetNumVoxels() > 0);
     assert(params.GetDomainBounds().size() == 2);
     assert(params.GetKappa() > 0.0);
-    assert(params.GetAlpha() > 0.0);
+    assert(params.GetAlpha() >= 0.0);
+    assert(params.GetBeta().size() == 2);
     assert(params.GetBeta()[0] >= 0.0 and params.GetBeta()[0] <= 1.0);
     assert(params.GetBeta()[1] >= 0.0 and params.GetBeta()[1] <= 1.0);
 
@@ -61,7 +62,7 @@ Simulation_2d::Simulation_2d(Parameters params)
     mDomainBounds = params.GetDomainBounds();
     mBC = params.GetBC();
 
-    // Additional input paramdoubleeters (due to working in 2d)
+    // Additional input parameters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
     mAlpha = params.GetAlpha();
     mBetaX = params.GetBeta()[0];
