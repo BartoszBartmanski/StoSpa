@@ -261,7 +261,7 @@ class Sim(object):
         # 0th index - species
         # 1st index - time point
         # rest - spatial indices
-        new_shape = [self.num_species, self.num_time_steps] + self.num_voxels[:self.num_dims]
+        new_shape = [self.num_species, self.num_time_steps] + [self.num_voxels[1], self.num_voxels[0]][:self.num_dims]
         self.stochastic = np.array(self.stochastic).reshape(new_shape)
 
         if self.h is None:
