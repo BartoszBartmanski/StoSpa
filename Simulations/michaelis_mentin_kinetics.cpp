@@ -4,6 +4,7 @@
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
+#include "Simulator.hpp"
 #include "Production.hpp"
 #include "MichaelisMentin.hpp"
 #include "MichaelisMentinReduced.hpp"
@@ -86,15 +87,7 @@ int main(int argc, const char** argv)
 
     // Point the pointer to the object
     p.SetNumSpecies(4);
-    unique_ptr<AbstractSimulation> sim_full;
-    if (p.GetNumDims()== 1)
-    {
-        sim_full = make_unique<Simulation_1d>(p);
-    }
-    else
-    {
-        sim_full = make_unique<Simulation_2d>(p);
-    }
+    auto sim_full = simulator(p);
 
     for (unsigned i=0; i < p.GetNumSpecies(); i++)
     {
@@ -121,15 +114,7 @@ int main(int argc, const char** argv)
 
     // Point the pointer to the object
     p.SetNumSpecies(2);
-    unique_ptr<AbstractSimulation> sim_reduced;
-    if (p.GetNumDims()== 1)
-    {
-        sim_reduced = make_unique<Simulation_1d>(p);
-    }
-    else
-    {
-        sim_reduced = make_unique<Simulation_2d>(p);
-    }
+    auto sim_reduced = simulator(p);
 
     // Setup the number of molecules
     sim_reduced->SetInitialState(p.GetInitialNum()[1] * ones(sim_reduced->GetNumVoxels()), 0);

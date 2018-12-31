@@ -7,6 +7,7 @@
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
+#include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
 #include "Schnakenberg.hpp"
@@ -59,15 +60,7 @@ int main(int argc, const char** argv)
     if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
 
     // Initialise the simulation object
-    unique_ptr<AbstractSimulation> sim;
-    if (p.GetNumDims() == 1)
-    {
-        sim = make_unique<Simulation_1d>(p);
-    }
-    else
-    {
-        sim = make_unique<Simulation_2d>(p);
-    }
+    auto sim = simulator(p);
 
     // Setup the number of molecules
     sim->SetInitialState(p.GetInitialNum()[0] * ones(sim->GetNumVoxels()), 0);

@@ -4,6 +4,7 @@
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Simulation_2d.hpp"
+#include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
 

@@ -5,6 +5,7 @@
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
+#include "Simulator.hpp"
 #include "TwoSpeciesDecay.hpp"
 
 static const char USAGE[] =
@@ -62,15 +63,7 @@ int main(int argc, const char** argv)
     vector<unsigned> stationary_dist(5 * mean_a, 0);
 
     // Point the pointer to the object
-    unique_ptr<AbstractSimulation> sim;
-    if (p.GetNumDims() == 1)
-    {
-        sim = make_unique<Simulation_1d>(p);
-    }
-    else
-    {
-        sim = make_unique<Simulation_2d>(p);
-    }
+    auto sim = simulator(p);
 
     // Setup the number of molecules
     sim->SetInitialState(p.GetInitialNum()[0] * ones(sim->GetNumVoxels()), 0);

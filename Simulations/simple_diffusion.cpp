@@ -7,6 +7,7 @@
 #include "Parameters.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
+#include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
 
@@ -67,16 +68,7 @@ int main(int argc, const char** argv)
     p.Add("data_type", "molecules");
 
     // Declare a pointer for the simulation object
-    unique_ptr<AbstractSimulation> sim;
-
-    if (p.GetNumDims() == 1)
-    {
-        sim = make_unique<Simulation_1d>(p);
-    }
-    else
-    {
-        sim = make_unique<Simulation_2d>(p);
-    }
+    auto sim = simulator(p);
 
     // Setup the number of molecules
     if (initial_pos.empty()) { initial_pos = floor_div(sim->GetNumVoxels(), 2); }
