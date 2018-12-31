@@ -61,7 +61,6 @@ int main(int argc, const char** argv)
     p.SetComments("Data for a plot of values of error against values of kappa in the 2d simulations with kappa being varied.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumDims(2);
-    p.SetNumThreads(4);
 
     // Name the file
     string file_name = "error_against_kappa";
