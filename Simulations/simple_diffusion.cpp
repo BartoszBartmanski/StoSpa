@@ -51,6 +51,7 @@ int main(int argc, const char** argv)
     p.SetComments("Data for the simulation.");
     p.SetCommand(arr_to_str(argc, argv));
     p.SetNumSpecies(1);
+    p.Add("data_type", "molecules");
 
     // Declare the simulation name
     string sim_name = "sim_" + to_string(p.GetNumDims()) + "d";
@@ -63,9 +64,6 @@ int main(int argc, const char** argv)
         initial_pos = split<unsigned>(args["--initial_pos"].asString());
         p.Add("initial_pos", args["--initial_pos"].asString());
     }
-
-    // The data saved will be number of molecules, so save this as well
-    p.Add("data_type", "molecules");
 
     // Declare a pointer for the simulation object
     auto sim = simulator(p);

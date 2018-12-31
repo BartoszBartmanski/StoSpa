@@ -86,7 +86,7 @@ int main(int argc, const char** argv)
 
     for (unsigned i = 0; i < num_steps; i++)
     {
-        sim->Advance(p.GetTimeStep(), i);
+        sim->Advance(i*p.GetTimeStep());
         unsigned total = sim->GetTotalMolecules();
         if (total < stationary_dist.size())
         {

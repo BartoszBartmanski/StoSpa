@@ -39,6 +39,14 @@ if(USE_WERROR)
     set(WARNING_FLAGS "${WARNING_FLAGS}-Werror ")
 endif()
 
+# Add OpenMP to parallise some simulations
+find_package(OpenMP)
+if (OPENMP_FOUND)
+    set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${OpenMP_C_FLAGS}")
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} ${OpenMP_CXX_FLAGS}")
+    set (CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS} ${OpenMP_EXE_LINKER_FLAGS}")
+endif()
+
 # Projects need c++14 standard - for make_unique and make_shared
 set(CMAKE_CXX_STANDARD 14)
 
@@ -80,8 +88,8 @@ if(Boost_FOUND)
 endif()
 
 # Add threads library and set threads flag on
-set(THREADS_PREFER_PTHREAD_FLAG ON)
-find_package(Threads REQUIRED)
+#set(THREADS_PREFER_PTHREAD_FLAG ON)
+#find_package(Threads REQUIRED)
 
 # Add all the source files
 include_directories(Simulator Reactions Misc Simulations Tests)
@@ -108,5 +116,5 @@ file(GLOB SIM_SOURCES RELATIVE "${CMAKE_CURRENT_SOURCE_DIR}/Simulations/" "${CMA
 foreach( sim_source ${SIM_SOURCES} )
     string( REPLACE ".cpp" "" sim_exec ${sim_source} )
     add_executable( ${sim_exec} ${CMAKE_CURRENT_SOURCE_DIR}/Simulations/${sim_source} ${SOURCE_FILES})
-    target_link_libraries(${sim_exec} docopt Threads::Threads)
+    target_link_libraries(${sim_exec} docopt)
 endforeach( sim_source ${SIM_SOURCES} )

@@ -1,5 +1,4 @@
 #include <iostream>
-#include <future>
 #include "docopt.h"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
@@ -33,6 +32,7 @@ static const char USAGE[] =
       --initial_num=<val>                           Initial number of molecules [default: 5000000].
       --num_points=<points>                         Number of points of kappa for which to run the simulation. [default: 10]
       --trunc_order=<trunc>                         The truncation order of analytic solution. [default: 1000]
+      -j --num_threads=<num_threads>                Number of threads to be used. [default: 1]
 )";
 
 int main(int argc, const char** argv)
@@ -71,8 +71,10 @@ int main(int argc, const char** argv)
 
     vector<string> methods = {"fem", "fdm", "fvm", "fet"};
     vector<vector<double>> error(methods.size());
-    vector<future<double>> futures(methods.size());
-    vector<Simulation_2d> sims;
+    for (unsigned i=0; i<methods.size(); i++)
+    {
+        error[i] = vector<double>(num_points, 0);
+    }
 
     // Initialise progress object
     Progress prog(num_points);
@@ -80,7 +82,6 @@ int main(int argc, const char** argv)
     // Collect the data
     for (unsigned i=0; i < num_points; i++)
     {
-
         vector<double> mid_point = get_midpoint(p.GetDomainBounds(), p.GetNumVoxels(), kappa[i]);
 
         DiffEqAnalytic analytic(2,
@@ -95,26 +96,17 @@ int main(int argc, const char** argv)
                                 p.GetTruncOrder());
         vector<double> sol = analytic.GetAnalytic();
 
-        sims.clear();
-        for (const string& method : methods)
+        #pragma omp parallel for num_threads(p.GetNumThreads())
+        for (unsigned j=0; j<methods.size(); j++)
         {
-            sims.emplace_back(Simulation_2d(p.GetNumRuns(), p.GetNumSpecies(), method, p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), kappa[i]));
-            sims.back().SetAlpha(p.GetAlpha());
-            sims.back().SetBeta(p.GetBeta());
-            sims.back().SetDiffusionRate(p.GetDiff()[0], 0);
-            sims.back().AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
-            sims.back().AddReaction(make_unique<Production>(p.GetProd()[0], 0));
-            sims.back().SetInitialNumMolecules(floor_div(sims.back().GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
-        }
-
-        for (unsigned j=0; j< methods.size(); j++)
-        {
-            futures[j] = async(launch::async, get_error, ref(sims[j]), sol, p.GetEndTime());
-        }
-
-        for (unsigned j=0; j< methods.size(); j++)
-        {
-            error[j].push_back(futures[j].get());
+            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), methods[j], p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), kappa[i]);
+            sim.SetAlpha(p.GetAlpha());
+            sim.SetBeta(p.GetBeta());
+            sim.SetDiffusionRate(p.GetDiff()[0], 0);
+            sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
+            sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
+            sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
+            error[j][i] = sim.GetError(sol);
         }
 
         // Show progress of the simulation
