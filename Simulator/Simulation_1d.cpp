@@ -1,8 +1,6 @@
 
 #include "Simulation_1d.hpp"
 
-// TODO: create a new constructor that takes in a parameters object.
-
 Simulation_1d::Simulation_1d(unsigned num_runs,
                              unsigned num_species,
                              string num_method,
