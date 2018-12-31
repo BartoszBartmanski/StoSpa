@@ -33,9 +33,17 @@ public:
         assert(num_species == 2);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         return mRateConstant * grid.voxels[0][voxel_index] * grid.voxels[1][voxel_index] / grid.voxelSize;
+    }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        unsigned future_0 = grid.voxels[0][voxel_index] - 1;
+        unsigned future_1 = grid.voxels[1][voxel_index];
+
+        return mRateConstant * future_0 * future_1 / grid.voxelSize;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override

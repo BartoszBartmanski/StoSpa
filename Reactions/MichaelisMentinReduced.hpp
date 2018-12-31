@@ -43,12 +43,22 @@ public:
         assert(num_species == 2);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * mTotalEnzyme * grid.voxels[0][voxel_index] / (grid.voxels[0][voxel_index] + grid.voxelSize * mKm);
 
         return propensity;
     }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        unsigned future_0 = grid.voxels[0][voxel_index] - 1;
+
+        double propensity = mRateConstant * mTotalEnzyme * future_0 / (future_0 + grid.voxelSize * mKm);
+
+        return propensity;
+    }
+
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {

@@ -6,6 +6,7 @@
 #define STOSPA_SIMULATION_2D_HPP
 
 #include "AbstractSimulation.hpp"
+#include "JumpRates.hpp"
 
 using namespace std;
 
@@ -35,52 +36,15 @@ public:
      * @param domain_bounds - bounds of the domain
      * @param boundary_condition - reflective or periodic boundary condition
      */
-    Simulation_2d(unsigned num_runs,
-                  unsigned num_species,
-                  string num_method,
-                  unsigned num_voxels,
-                  vector<double> domain_bounds,
-                  string boundary_condition,
-                  double ratio=1.0,
-                  double alpha=0.0,
-                  double beta_x=0.5,
-                  double beta_y=0.5);
+    Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
+                  vector<double> domain_bounds, string boundary_condition, double ratio);
+    explicit Simulation_2d(Parameters params);
 
-    /** Empty constructor */
-    Simulation_2d() = default;
-
-    /** Default destructor. */
+    Simulation_2d(const Simulation_2d&) = delete; //move only type
+    Simulation_2d& operator=(const Simulation_2d&) = delete; //move only type
+    Simulation_2d(Simulation_2d&&) = default;
+    Simulation_2d& operator=(Simulation_2d&&) = default;
     ~Simulation_2d() override = default;
-
-    /**
-     * Calculates the total propensity for a single molecule associated with diffusion according to the FET method.
-     * @return value of lambda_0 in FET
-     */
-    double GetLambdaDiffusion(unsigned species=0, unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_1, which is the probability of moving in the x-direction.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_1
-     */
-    double GetTheta1(unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_2, which is the probability of moving diagonally.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_2
-     */
-    double GetTheta2(unsigned truncation_order=1000);
-
-    /**
-     * Calculates the value of theta_3, which is the probability of moving diagonally.
-     * @param species - index of the species
-     * @param truncation_order - index up to which to truncate the infinite series
-     * @return value of theta_3
-     */
-    double GetTheta3(unsigned truncation_order=1000);
 
     /**
      * Returns the aspect ratio of voxels (horizontal length divided by the vertical voxel length).
@@ -89,29 +53,35 @@ public:
     double GetVoxelRatio();
 
     /**
-     * Returns the value of alpha (used in fdm derived jump coefficients).
+     * Set the value of alpha (parameter in FDM derivation)
+     * @param value
+     */
+    void SetAlpha(double value);
+
+    /**
+     * Returns the value of alpha (used in fdm derived jump rates).
      * @return a double
      */
     double GetAlpha();
 
     /**
-     * Returns the value of beta_x (used in fet derived jump coefficients).
-     * @return a double
+     * Set the values of beta_x and beta_y (parameters in FET derivation)
+     * @param values
      */
-    double GetBetaX();
+    void SetBeta(vector<double> values);
 
     /**
-     * Returns the value of beta_y (used in fet derived jump coefficients).
+     * Returns the values of beta_x and beta_y (parameters in FET derivation)
      * @return a double
      */
-    double GetBetaY();
+    vector<double> GetBeta();
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
-     * @param diffusion
+     * @param diff
      * @param species
      */
-    void SetDiffusionRate(double diffusion_coefficient, unsigned species) override;
+    void SetDiffusionRate(double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index

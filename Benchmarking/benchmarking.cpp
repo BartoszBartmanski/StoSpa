@@ -15,8 +15,6 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     vector<double> bounds = {0.0, 20.0};
     string bc = "reflective";
     double kappa = 1.0;
-    double alpha = 0;
-    vector<double> beta = {0, 0};
 
     // Point the pointer to the object
     if (num_dims == 1)
@@ -25,7 +23,7 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     }
     else
     {
-        sim = make_unique<Simulation_2d>(num_runs, num_species, method, num_voxels, bounds, bc, kappa, alpha, beta[0], beta[1]);
+        sim = make_unique<Simulation_2d>(num_runs, num_species, method, num_voxels, bounds, bc, kappa);
     }
 
     sim->SetDiffusionRate(1.0, 0);

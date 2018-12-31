@@ -1,9 +1,0 @@
-gallifrey /home/bartosz/Dropbox/DPhil/Data/
-loopy-de-loop.maths.ox.ac.uk /scratch/bartmanski/Data/
-action-man.maths.ox.ac.uk /scratch/bartmanski/Data/
-cyclops.maths.ox.ac.uk /scratch/bartmanski/Data/
-forge.maths.ox.ac.uk /scratch/bartmanski/Data/
-gambit.maths.ox.ac.uk /scratch/bartmanski/Data/
-nitro.maths.ox.ac.uk /scratch/bartmanski/Data/
-phantom.maths.ox.ac.uk /scratch/bartmanski/Data/
-wolverine.maths.ox.ac.uk /scratch/bartmanski/Data/

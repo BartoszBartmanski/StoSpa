@@ -36,9 +36,16 @@ public:
         assert(num_species > 0);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] * (grid.voxels[mSpeciesIndex][voxel_index] - 1) / grid.voxelSize;
+
+        return propensity;
+    }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        double propensity = mRateConstant * (grid.voxels[mSpeciesIndex][voxel_index] - 2) * (grid.voxels[mSpeciesIndex][voxel_index] - 3) / grid.voxelSize;
 
         return propensity;
     }

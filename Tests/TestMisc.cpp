@@ -22,15 +22,6 @@ TEST_CASE("Test Grids.*pp")
         }
     }
 
-    SECTION("Check time increments")
-    {
-        double inf = numeric_limits<double>::infinity();
-        for (const double& voxel : grid.time_increments)
-        {
-            REQUIRE(voxel == inf);
-        }
-    }
-
 }
 
 TEST_CASE("Test Useful.*pp")
@@ -64,12 +55,6 @@ TEST_CASE("Test Useful.*pp")
         REQUIRE(files.size() >= 3);
         REQUIRE(files[0] == ".");
         REQUIRE(files[1] == "..");
-    }
-
-    SECTION("Check get_dir function")
-    {
-        string test = get_dir();
-        REQUIRE(check_dir(test));
     }
 
     SECTION("Check split function")

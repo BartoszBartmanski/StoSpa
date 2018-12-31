@@ -2,28 +2,24 @@
 // Created by bartosz on 20/04/18.
 //
 
-#ifndef STOSPA_DECAY_HPP
-#define STOSPA_DECAY_HPP
+#ifndef STOSPA_NONE_HPP
+#define STOSPA_NONE_HPP
 
 #include <AbstractReaction.hpp>
 
-class Decay : public AbstractReaction
+class Extrande : public AbstractReaction
 {
-    unsigned mSpeciesIndex;
 public:
-    explicit Decay(double reaction_rate, unsigned species)
+    explicit Extrande()
     {
-        assert(reaction_rate >= 0);
+        // Rate constant here being actual total propensity in a voxel
+        mRateConstant = 0;
 
-        mRateConstant = reaction_rate;
-        mSpeciesIndex = species;
-
-        mReactionName = "Decay";
+        mReactionName = "Extrande";
     }
 
     void SetRateConstant(double rate_constant) override
     {
-        assert(rate_constant > 0);
         mRateConstant = rate_constant;
     }
 
@@ -34,17 +30,21 @@ public:
 
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
-        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];
+        (void)grid;
+        (void)voxel_index;
+        return mRateConstant;
     }
 
     double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
-        return mRateConstant * (grid.voxels[mSpeciesIndex][voxel_index] - 1);
+        (void)grid;
+        (void)voxel_index;
+        return 0;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
     {
-        grid.voxels[mSpeciesIndex][voxel_index] -= 1;
+        (void)grid;
         return voxel_index;
     }
 };

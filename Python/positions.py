@@ -3,28 +3,6 @@
 import numpy as np
 
 
-def flip_array(vec, new_shape):
-    if isinstance(new_shape, int):
-        new_shape = [1, new_shape]
-    else:
-        new_shape = list(new_shape)
-
-    # Turn vec into numpy array and get its shape
-    vec = np.array(vec)
-    shape = vec.shape
-
-    # Get a temporary shape to flip the array
-    assert np.prod(shape) % np.prod(new_shape) == 0, "Can't reorder the array!"
-    temp_shape = new_shape + [int(np.prod(shape)/np.prod(new_shape))]
-
-    # Cut the list
-    vec = np.array(vec[:np.prod(new_shape)])
-    # Flip the order
-    vec = np.flip(vec.reshape(temp_shape), axis=0).reshape(shape)
-
-    return vec
-
-
 class Positions(object):
     def __init__(self, num_axes, fig_params, from_top=False):
 
@@ -71,13 +49,36 @@ class Positions(object):
                 self.__cols__.append(j)
 
         if from_top:
-            self.__positions__ = flip_array(self.__positions__,
-                                            self.__num_axes__)
+            self.__positions__ = self.flip_array(self.__positions__,
+                                                 self.__num_axes__)
         else:
-            self.__rows__ = flip_array(self.__rows__, self.__num_axes__)
-            self.__cols__ = flip_array(self.__cols__, self.__num_axes__)
+            self.__rows__ = self.flip_array(self.__rows__, self.__num_axes__)
+            self.__cols__ = self.flip_array(self.__cols__, self.__num_axes__)
 
-    def get_position(self, idx):
+    @staticmethod
+    def flip_array(vec, new_shape):
+        if isinstance(new_shape, int):
+            new_shape = [1, new_shape]
+        else:
+            new_shape = list(new_shape)
+
+        # Turn vec into numpy array and get its shape
+        vec = np.array(vec)
+        shape = vec.shape
+
+        # Get a temporary shape to flip the array
+        m = "Can't reorder the array!"
+        assert np.prod(shape) % np.prod(new_shape) == 0, m
+        temp_shape = new_shape + [int(np.prod(shape)/np.prod(new_shape))]
+
+        # Cut the list
+        vec = np.array(vec[:np.prod(new_shape)])
+        # Flip the order
+        vec = np.flip(vec.reshape(temp_shape), axis=0).reshape(shape)
+
+        return vec
+
+    def get_position(self, idx=0):
         return self.__positions__[idx]
 
     def get_width(self):
@@ -91,6 +92,9 @@ class Positions(object):
 
     def get_free_height(self):
         return np.array([0, self.__free_h__, 0, 0])
+
+    def get_fig_size(self):
+        return [self.__fig_w__, self.__fig_h__]
 
     def get_row(self, idx):
         return self.__rows__[idx]
@@ -123,13 +127,19 @@ class Positions(object):
             if self.__rows__[i] in rows:
                 self.__positions__[i] += shift
 
-    def get_adj_position(self, idx, width, height, shift_x=0.0, shift_y=0.0):
+    def get_adj_position(self, idx, shift_x=0.0, shift_y=0.0,
+                         width=None, height=None):
         new_position = self.__positions__[idx].copy()
+        if width is None:
+            width = self.__w__ * self.__fig_w__
+        if height is None:
+            height = self.__h__ * self.__fig_h__
 
-        shift_x /= self.__fig_w__
-        shift_y /= self.__fig_h__
         width /= self.__fig_w__
         height /= self.__fig_h__
+        shift_x /= self.__fig_w__
+        shift_y /= self.__fig_h__
+
         new_position[2] = width
         new_position[3] = height
 

@@ -18,12 +18,16 @@
 #include <sstream>
 #include <map>
 #include <memory>
+#include <utility>
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
+#include "DiffusionReflectiveExp.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
+#include "Parameters.hpp"
+#include "Extrande.hpp"
 
 using namespace std;
 
@@ -33,6 +37,15 @@ protected:
 
     /** Helper constants */
     double inf;
+
+    /** Whether the times until the next reactions have been set. */
+    bool mTimesSet;
+
+    /** Whether to use the extrande algorithm. */
+    bool mExtrande;
+
+    /** Index of the Extrande reaction in the mReactions vector. */
+    unsigned mExtrandeIndex;
 
     /** Number of runs of this simulation */
     unsigned mNumRuns;
@@ -52,19 +65,16 @@ protected:
     vector<double> mDomainBounds;
 
     /** Map that contains additional reactions. */
-    vector<shared_ptr<AbstractReaction>> mReactions;
+    vector<unique_ptr<AbstractReaction>> mReactions;
 
     /** Boundary condition. */
     string mBC = "reflective";
-
-    /** Current time of the specific run of the simulation. */
-    vector<double> mCurrentTime;
 
     /** Current time for all the runs. */
     double mTime;
 
     /** Number of jumps at the at time in the simulation. */
-    unsigned mNumJumps;
+    vector<unsigned> mNumJumps;
 
     /** Voxel width in one dimension and voxel height in two dimensions. */
     double m_h;
@@ -78,33 +88,43 @@ protected:
     /** A vector of grids, each of which consists of an array for voxels and an array for time increments. */
     vector<Grid> mGrids;
 
+    /** Seed used for generating a random number. */
+    unsigned mSeed;
+
     /** For generating random numbers */
     mt19937 mGen;
 
     /** Uniform distribution. */
     uniform_real_distribution<double> mUniform;
 
-    /** vector of all propensities. */
-    vector<double> mPropensities;
-
     /** Vector of the diffusion coefficients. */
     vector<double> mDiffusionCoefficients;
 
-    /** Calculates the total propensity for a specified voxel. */
-    inline double GetTotalPropensity(const unsigned& run, const int& voxel_index);
-
     inline unsigned NextReaction(const unsigned& run, const int& voxel_index);
 
-    inline double Exponential(double propensity);
+    inline double Exponential(const double& propensity);
+
+    inline void UpdateTotalPropensity(const unsigned& run, const int& voxel_index);
+
+    inline void UpdateTime(const unsigned& run, const int& voxel_index);
 
 public:
 
     /** Default constructor. */
     AbstractSimulation();
 
-
     /** Default destructor. */
     virtual ~AbstractSimulation()= default;
+    AbstractSimulation(const AbstractSimulation&) = delete; //move only type
+    AbstractSimulation& operator=(const AbstractSimulation&) = delete; //move only type
+    AbstractSimulation(AbstractSimulation&&) = default;
+    AbstractSimulation& operator=(AbstractSimulation&&) = default;
+
+    void SetSeed(unsigned number);
+
+    unsigned GetSeed();
+
+    void UseExtrande();
 
     /**
      * SSA loop. A single molecule jump or a single reaction.
@@ -151,13 +171,7 @@ public:
      * @param reaction_name
      * @param rate_constant
      */
-    void AddReaction(shared_ptr<AbstractReaction> reaction);
-
-    /**
-     * Returns a vector of pointers to additional reactions.
-     * @return mAdditionalReactions
-     */
-    vector<shared_ptr<AbstractReaction>> GetReactions();
+    void AddReaction(unique_ptr<AbstractReaction>&& reaction);
 
     /**
      * Returns the current state of the mVoxels
@@ -165,13 +179,6 @@ public:
      * @return mVoxels associated with the specified species
      */
     vector<unsigned> GetVoxels(unsigned species=0, unsigned run=0);
-
-    /**
-     * Returns the current state of the mTimeIncrements
-     * @param species - index of the species
-     * @return mTimeIncrements[run]
-     */
-    vector<double> GetTimeIncrements(unsigned run=0);
 
     /**
      * Returns the concentration of the specified species.
@@ -232,7 +239,7 @@ public:
      * Returns the total number of reactions that have taken place.
      * @return mNumJumps
      */
-    unsigned GetNumJumps();
+    unsigned GetNumJumps(unsigned run);
 
     /**
      * Returns the number of voxels along each direction.
@@ -291,6 +298,9 @@ public:
      */
     double GetRelativeError(const vector<double>& analytic, unsigned species=0);
 
+    void Run(const string& output, const double& endtime, const double& timestep);
+
 };
+
 
 #endif //STOSPA_ABSTRACTSIMULATION_HPP

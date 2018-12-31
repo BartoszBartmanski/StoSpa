@@ -1,0 +1,14 @@
+{
+    "aspect": 1.0,
+    "dpi": 600.0,
+    "fig_size": 4.0,
+    "file_type": "png",
+    "font_size": 10.0,
+    "primary_color": "blue",
+    "primary_colormap": "viridis",
+    "rep": "bar",
+    "secondary_color": "green",
+    "secondary_colormap": "Greys",
+    "tertiary_color": "red",
+    "tertiary_colormap": "Greys"
+}

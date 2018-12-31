@@ -66,16 +66,9 @@ string arr_to_str(int num, const char** array);
  * @param separator - character that is used as a separation
  * @return vector of strings that results from the separating the original string
  */
-vector<string> split(const string &input, char separator=',');
-vector<double> split_stod(const string &input, char separator=',');
-vector<unsigned> split_stou(const string &input, char separator=',');
 
-/**
- * Asks a yes or no question
- * @param q - question to be asked
- * @return returns either "y" or "n"
- */
-string question(const string& q="");
+template<typename T=string>
+vector<T> split(const string &input, char separator=',');
 
 /**
  * Checks whether the given path is valid.
@@ -83,19 +76,6 @@ string question(const string& q="");
  * @return boolean variable indicating whether the path is valid.
  */
 bool check_dir(string path);
-
-/**
- * Returns the name of the current machine
- * @return a string
- */
-string get_hostname();
-
-/**
- * Returns the path to the standard directory for a given machine based on a text file or asks for the save location.
- * @param filename - name of the file that contains the save locations
- * @return string for the path to the save directory
- */
-string get_dir(string filename="machines.txt");
 
 /**
  * Returns a list of files or directories for the given path
@@ -119,7 +99,7 @@ private:
     /** Total number of steps that need to be taken to finish the simulation. */
     unsigned mNumSteps;
 
-    unsigned mCurrentStep=0;
+    unsigned mCurrentStep;
 
 public:
     /**
@@ -138,6 +118,18 @@ public:
      * @param step - the index of the current step.
      */
     void Show();
+
+    /**
+     * Resets the counters
+     * @return
+     */
+    void Reset();
+
+    /**
+     * Outputs where the simulation was saved
+     * @param path_to_file
+     */
+    void End(string path_to_file);
 
 };
 

@@ -2,13 +2,15 @@
 // Created by bartosz on 21/04/18.
 //
 
-#ifndef STOSPA_DIFFUSIONREFLECTIVE_HPP
-#define STOSPA_DIFFUSIONREFLECTIVE_HPP
+#ifndef STOSPA_DIFFUSIONREFLECTIVEEXP_HPP
+#define STOSPA_DIFFUSIONREFLECTIVEEXP_HPP
 
 #include <AbstractReaction.hpp>
 
-class DiffusionReflective : public AbstractReaction
+class DiffusionReflectiveExp : public AbstractReaction
 {
+    double mGrowthRate;
+
     unsigned mSpeciesIndex;
 
     vector<int> mUnflattenedIndex;
@@ -16,12 +18,13 @@ class DiffusionReflective : public AbstractReaction
     vector<int> mDirection;
 
 public:
-    DiffusionReflective(double reaction_rate, unsigned species, vector<int> direction)
+    DiffusionReflectiveExp(double reaction_rate, unsigned species, vector<int> direction, double growth_rate)
     {
         assert(reaction_rate >= 0);
-        mReactionName = "DiffusionReflective";
+        mReactionName = "DiffusionReflectiveExp";
 
         mRateConstant = reaction_rate;
+        mGrowthRate = growth_rate;
         mSpeciesIndex = species;
 
         if (direction.size() == 1)
@@ -45,12 +48,14 @@ public:
 
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
-        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];;
+        double time = grid.time;
+        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] / exp(mGrowthRate * time);
     }
 
     double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
-        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index];
+        double time = grid.time;
+        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] / exp(mGrowthRate * time);
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
@@ -77,4 +82,4 @@ public:
 };
 
 
-#endif //STOSPA_DIFFUSIONREFLECTIVE_HPP
+#endif //STOSPA_DIFFUSIONREFLECTIVEEXP_HPP

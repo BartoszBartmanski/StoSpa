@@ -8,16 +8,17 @@
 #include <vector>
 #include <limits>
 #include <cassert>
+#include <boost/heap/fibonacci_heap.hpp>
 
 using namespace std;
 
 class Grid
 {
 public:
-    /** Infinity. */
-    double inf = numeric_limits<double>::infinity();
 
     double voxelSize=1.0;
+
+    double time=0.0;
 
     vector<unsigned> numVoxels;
 
@@ -26,7 +27,12 @@ public:
     vector<vector<unsigned>> voxels;
 
     /** Vector of times until the next reaction for each voxel. */
-    vector<double> time_increments;
+    boost::heap::fibonacci_heap<pair<double, unsigned>> next_reaction_time;
+
+    vector<boost::heap::fibonacci_heap<pair<double, unsigned>>::handle_type> handles;
+
+    /** Vector of bounds for the total propensities. */
+    vector<double> a_0;
 
     /** Constructor. */
     Grid(unsigned num_species, double voxel_size, unsigned num_voxels_x, unsigned int num_voxels_y=1);

@@ -36,9 +36,17 @@ public:
         assert(num_species == 4);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * grid.voxels[0][voxel_index] * grid.voxels[1][voxel_index] / grid.voxelSize;
+
+        return propensity;
+    }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        unsigned future = grid.voxels[2][voxel_index] + 1;
+        double propensity = mRateConstant * future;
 
         return propensity;
     }
@@ -76,9 +84,17 @@ public:
         assert(num_species == 4);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * grid.voxels[2][voxel_index];
+
+        return propensity;
+    }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        unsigned future = grid.voxels[2][voxel_index] - 1;
+        double propensity = mRateConstant * future;
 
         return propensity;
     }
@@ -117,9 +133,17 @@ public:
         assert(num_species == 4);
     }
 
-    double GetPropensity(Grid& grid, const int& voxel_index) override
+    double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * grid.voxels[2][voxel_index];
+
+        return propensity;
+    }
+
+    double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
+    {
+        unsigned future = grid.voxels[2][voxel_index] - 1;
+        double propensity = mRateConstant * future;
 
         return propensity;
     }

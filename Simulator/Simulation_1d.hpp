@@ -27,21 +27,22 @@ public:
                   unsigned num_voxels,
                   vector<double> domain_bounds,
                   string boundary_condition);
+    explicit Simulation_1d(Parameters params);
 
-    /** Empty constructor */
-    Simulation_1d() = default;
-
-    /** Default destructor. */
+    Simulation_1d(const Simulation_1d&) = delete; //move only type
+    Simulation_1d& operator=(const Simulation_1d&) = delete; //move only type
+    Simulation_1d(Simulation_1d&&) = default;
+    Simulation_1d& operator=(Simulation_1d&&) = default;
     ~Simulation_1d() override = default;
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
-     * @param diffusion
+     * @param diff
      * @param decay
      * @param production
      * @param species
      */
-    void SetDiffusionRate(double diffusion_coefficient, unsigned species) override;
+    void SetDiffusionRate(double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
