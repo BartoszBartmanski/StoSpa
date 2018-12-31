@@ -35,6 +35,24 @@ static const char USAGE[] =
       -j --num_threads=<num_threads>                Number of threads to be used. [default: 1]
 )";
 
+vector<double> get_kappa(unsigned num_points, unsigned num_voxels)
+{
+    // Get rid of the duplicate kappa values in the vector that holds the values
+    vector<double> tmp_kappa = linspace(1.0, 1.4, num_points);
+    vector<double> kappa(1, 1.0);
+
+    for (unsigned i=1; i < tmp_kappa.size(); i++)
+    {
+        double next_kappa =  unsigned(tmp_kappa[i]*num_voxels)/double(num_voxels);
+        if (next_kappa != kappa.back())
+        {
+            kappa.push_back(next_kappa);
+        }
+    }
+
+    return kappa;
+}
+
 int main(int argc, const char** argv)
 {
     // Get command line input
@@ -49,37 +67,24 @@ int main(int argc, const char** argv)
     string file_name = "error_against_kappa";
     if (args["--append"]) { file_name += ("_" + args["--append"].asString()); }
 
-    // Get the number of points of kappa for which to run the simulation
-    unsigned num_points = p.GetNumPoints();
-
-    // Get rid of the duplicate kappa values in the vector that holds the values
-    vector<double> tmp_kappa = linspace(1.0, 1.4, num_points);
-    vector<double> kappa(1, 1.0);
-
-    for (unsigned i=1; i < tmp_kappa.size(); i++)
-    {
-        double next_kappa =  unsigned(tmp_kappa[i]*p.GetNumVoxels())/double(p.GetNumVoxels());
-        if (next_kappa != kappa.back())
-        {
-            kappa.push_back(next_kappa);
-        }
-    }
-
-    // Correct the num_points variable
-    num_points = unsigned(kappa.size());
+    // Get vector of values of kappa and correct the number of points variable
+    vector<double> kappa = get_kappa(p.GetNumPoints(), p.GetNumVoxels());
+    auto num_points = unsigned(kappa.size());
     p.SetNumPoints(num_points);
 
+    // Initialise the containers
     vector<string> methods = {"fem", "fdm", "fvm", "fet"};
-    vector<vector<double>> error(methods.size());
-    for (unsigned i=0; i<methods.size(); i++)
+    map<string, vector<double>> error;
+    for (const auto& method : methods)
     {
-        error[i] = vector<double>(num_points, 0);
+        error[method] = vector<double>(num_points, 0);
     }
 
     // Initialise progress object
     Progress prog(num_points);
 
     // Collect the data
+    #pragma omp parallel for num_threads(p.GetNumThreads())
     for (unsigned i=0; i < num_points; i++)
     {
         vector<double> mid_point = get_midpoint(p.GetDomainBounds(), p.GetNumVoxels(), kappa[i]);
@@ -96,17 +101,17 @@ int main(int argc, const char** argv)
                                 p.GetTruncOrder());
         vector<double> sol = analytic.GetAnalytic();
 
-        #pragma omp parallel for num_threads(p.GetNumThreads())
-        for (unsigned j=0; j<methods.size(); j++)
+        for (const auto& method : methods)
         {
-            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), methods[j], p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), kappa[i]);
+            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), method, p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), kappa[i]);
             sim.SetAlpha(p.GetAlpha());
             sim.SetBeta(p.GetBeta());
             sim.SetDiffusionRate(p.GetDiff()[0], 0);
             sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
             sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
-            error[j][i] = sim.GetError(sol);
+            sim.Advance(p.GetEndTime());
+            error[method][i] = sim.GetError(sol);
         }
 
         // Show progress of the simulation
@@ -118,18 +123,18 @@ int main(int argc, const char** argv)
 
     // Save the information about this plot in the same file as the data
     p.Add("row 1", "values of kappa");
-    for (unsigned j=0; j< methods.size(); j++)
-    {
-        p.Add("row " + to_string(j+2), "values of error using " + methods[j]);
-    }
+    p.Add("row 2", "values of error using fem");
+    p.Add("row 3", "values of error using fdm");
+    p.Add("row 4", "values of error using fvm");
+    p.Add("row 5", "values of error using fet");
     p.Save(path_to_file);
 
     // Save the data
     save_vector(kappa, path_to_file);
-    for (unsigned j=0; j< methods.size(); j++)
-    {
-        save_vector(error[j], path_to_file);
-    }
+    save_vector(error["fem"], path_to_file);
+    save_vector(error["fdm"], path_to_file);
+    save_vector(error["fvm"], path_to_file);
+    save_vector(error["fet"], path_to_file);
 
     // Add the simulation name to the log file
     prog.End(path_to_file);
