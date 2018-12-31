@@ -134,7 +134,6 @@ Parameters::Parameters(map<string, docopt::value> cl_input)
         if (cl_input["--num_threads"])
         {
             mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
-            mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
         }
     }
 }
@@ -255,7 +254,6 @@ void Parameters::SetCommand(string command)
 void Parameters::SetNumPoints(unsigned value)
 {
     mNumPoints = value;
-    mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
 }
 
 unsigned Parameters::GetNumPoints()
@@ -266,7 +264,6 @@ unsigned Parameters::GetNumPoints()
 void Parameters::SetNumThreads(unsigned value)
 {
     mNumThreads = value;
-    mNumThreads = unsigned(gcd(mNumPoints, mNumThreads));
 }
 
 unsigned Parameters::GetNumThreads()

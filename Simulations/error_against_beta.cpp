@@ -1,5 +1,4 @@
 #include <iostream>
-#include <future>
 #include "docopt.h"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
@@ -39,6 +38,9 @@ int main(int argc, const char** argv)
 {
     // Get command line input
     map<string, docopt::value> args = docopt::docopt(USAGE, {argv + 1, argv + argc}, true);
+    string file_name = "error_against_beta";
+    if (args["--append"]) { file_name += ("_" + args["--append"].asString()); }
+
     Parameters p(args);
     p.SetComments("Data for a plot of values of error against values of beta in the 2d simulations with beta being varied.");
     p.SetCommand(arr_to_str(argc, argv));
@@ -46,14 +48,8 @@ int main(int argc, const char** argv)
     p.SetAlpha(0);
     p.SetNumMethod("fet");
 
-    // Name the file
-    string file_name = "error_against_beta";
-    if (args["--append"]) { file_name += ("_" + args["--append"].asString()); }
-
     // Calculate the number of sets of parallel simulations
     unsigned num_points = p.GetNumPoints();
-    unsigned num_threads = p.GetNumThreads();
-    unsigned num_sets = num_points*num_points / num_threads;
 
     // Create vectors of values of beta_x and beta_y
     vector<double> beta = linspace(0.0, 1.0, num_points);
@@ -88,41 +84,23 @@ int main(int argc, const char** argv)
                             p.GetTruncOrder());
     vector<double> sol = analytic.GetAnalytic();
 
-    // Create vector of futures and simulations
-    vector<future<double>> futures(num_threads);
-    vector<Simulation_2d> sims;
-
     // Initialise progress object
     Progress prog(num_points *num_points);
 
-    // Run the simulations and calculate the error
-    for (unsigned set=0; set < num_sets; set++)
+    // Collect the data
+    #pragma omp parallel for num_threads(p.GetNumThreads())
+    for (unsigned i=0; i < error.size(); i++)
     {
-        sims.clear();
-        for (unsigned i = 0; i < num_threads; i++)
-        {
-            unsigned k = set * num_threads + i;
-            p.SetBeta({beta_x[k], beta_y[k]});
-            sims.emplace_back(Simulation_2d(p));
-            sims.back().SetDiffusionRate(p.GetDiff()[0], 0);
-            sims.back().AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
-            sims.back().AddReaction(make_unique<Production>(p.GetProd()[0], 0));
-            sims.back().SetInitialNumMolecules(floor_div(sims[i].GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
-        }
+        Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumMethod(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), p.GetKappa());
+        sim.SetBeta({beta_x[i], beta_y[i]});
+        sim.SetDiffusionRate(p.GetDiff()[0], 0);
+        sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
+        sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
+        sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
+        sim.Advance(p.GetEndTime());
+        error[i] = sim.GetError(sol);
 
-        for (unsigned i = 0; i < num_threads; i++)
-        {
-            futures[i] = async(launch::async, get_error, ref(sims[i]), sol, p.GetEndTime());
-        }
-
-        for (unsigned i=0; i < num_threads; i++)
-        {
-            unsigned k = set * num_threads + i;
-            error[k] = futures[i].get();
-
-            // Show progress of the simulation
-            prog.Show();
-        }
+        prog.Show();
     }
 
     // Check that the directory exists and that the no file is being over-written.
@@ -132,7 +110,6 @@ int main(int argc, const char** argv)
     p.Add("row 1", "values of beta_x");
     p.Add("row 2", "values of beta_y");
     p.Add("row 3", "values of error");
-    p.SetBeta({});
     p.Save(path_to_file);
 
     // Save the data
