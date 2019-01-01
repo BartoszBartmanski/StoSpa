@@ -10,12 +10,15 @@
 #include <algorithm>
 #include <cassert>
 #include <vector>
+#include <string>
 
 using namespace std;
 
 class JumpRate
 {
 protected:
+
+    string mMethod;
 
     double mKappa = 1.0;
 
@@ -26,6 +29,8 @@ public:
     virtual ~JumpRate()= default;
 
     double GetLambda(vector<int> direction);
+
+    string GetMethod();
 
     virtual double GetLambda0()=0;
 

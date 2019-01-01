@@ -22,8 +22,14 @@ double JumpRate::GetLambda(vector<int> direction)
     return value;
 }
 
+string JumpRate::GetMethod()
+{
+    return mMethod;
+}
+
 FDM::FDM(double kappa, double length, double alpha)
 {
+    mMethod = "fdm";
     mKappa = kappa;
     mH = length;
 
@@ -56,6 +62,7 @@ FEM::FEM(double kappa, double length)
 {
     // Check that the parameters satisfy the discrete maximum principle
     assert(kappa >= 1.0/sqrt(2) and kappa <= sqrt(2));
+    mMethod = "fem";
     mKappa = kappa;
     mH = length;
 }
@@ -82,6 +89,7 @@ double FEM::GetLambda3()
 
 FVM::FVM(double kappa, double length)
 {
+    mMethod = "fvm";
     mKappa = kappa;
     mH = length;
 }
@@ -108,6 +116,7 @@ double FVM::GetLambda3()
 
 FET::FET(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
 {
+    mMethod = "fet";
     mTruncOrder = truncation_order;
     mKappa = kappa;
     mH = length;
@@ -212,6 +221,7 @@ double FET::GetLambda3()
 
 FETUniform::FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
 {
+    mMethod = "fetU";
     mTruncOrder = truncation_order;
     mKappa = kappa;
     mH = length;

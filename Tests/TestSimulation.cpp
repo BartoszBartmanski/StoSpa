@@ -117,12 +117,12 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim_diff.SetDiffusionRate(1.0, 0);
         sim_diff.SetInitialNumMolecules({10}, 10000, 0);
         sim_diff.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
-                                                 sim_diff.GetDomainBounds(),
-                                                 sim_diff.GetNumVoxels(),
-                                                 sim_diff.GetInitialTotalMolecules(),
-                                                 sim_diff.GetDiffusionCoefficient(),
-                                                 0.0, 0.0, 100);
+        DiffEqAnalytic analytic(1, end_time, {10},
+                                sim_diff.GetDomainBounds(),
+                                sim_diff.GetNumVoxels(),
+                                sim_diff.GetInitialTotalMolecules(),
+                                sim_diff.GetDiffusionCoefficient(),
+                                0.0, 0.0, 100);
         REQUIRE(sim_diff.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -133,12 +133,12 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim_decay.AddReaction(make_unique<Decay>(1.0, 0));
         sim_decay.SetInitialNumMolecules({10}, 10000, 0);
         sim_decay.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
-                                                 sim_decay.GetDomainBounds(),
-                                                 sim_decay.GetNumVoxels(),
-                                                 sim_decay.GetInitialTotalMolecules(),
-                                                 sim_decay.GetDiffusionCoefficient(),
-                                                 decay_rate, 0.0, 100);
+        DiffEqAnalytic analytic(1, end_time, {10},
+                                sim_decay.GetDomainBounds(),
+                                sim_decay.GetNumVoxels(),
+                                sim_decay.GetInitialTotalMolecules(),
+                                sim_decay.GetDiffusionCoefficient(),
+                                decay_rate, 0.0, 100);
         REQUIRE(sim_decay.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -149,12 +149,12 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim_prod.AddReaction(make_unique<Production>(10.0, 0));
         sim_prod.SetInitialNumMolecules({10}, 10000, 0);
         sim_prod.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
-                                                 sim_prod.GetDomainBounds(),
-                                                 sim_prod.GetNumVoxels(),
-                                                 sim_prod.GetInitialTotalMolecules(),
-                                                 sim_prod.GetDiffusionCoefficient(),
-                                                 0.0, prod_rate, 100);
+        DiffEqAnalytic analytic(1, end_time, {10},
+                                sim_prod.GetDomainBounds(),
+                                sim_prod.GetNumVoxels(),
+                                sim_prod.GetInitialTotalMolecules(),
+                                sim_prod.GetDiffusionCoefficient(),
+                                0.0, prod_rate, 100);
         REQUIRE(sim_prod.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -166,12 +166,12 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim_all.AddReaction(make_unique<Production>(10.0, 0));
         sim_all.SetInitialNumMolecules({10}, 10000, 0);
         sim_all.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
-                                                 sim_all.GetDomainBounds(),
-                                                 sim_all.GetNumVoxels(),
-                                                 sim_all.GetInitialTotalMolecules(),
-                                                 sim_all.GetDiffusionCoefficient(),
-                                                 decay_rate, prod_rate, 100);
+        DiffEqAnalytic analytic(1, end_time, {10},
+                                sim_all.GetDomainBounds(),
+                                sim_all.GetNumVoxels(),
+                                sim_all.GetInitialTotalMolecules(),
+                                sim_all.GetDiffusionCoefficient(),
+                                decay_rate, prod_rate, 100);
         REQUIRE(sim_all.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -181,12 +181,12 @@ TEST_CASE("Test Simulation_1d.*pp")
         sim_rel.SetDiffusionRate(1.0, 0);
         sim_rel.SetInitialNumMolecules({10}, 10000, 0);
         sim_rel.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(1, end_time, {10},
-                                                 sim_rel.GetDomainBounds(),
-                                                 sim_rel.GetNumVoxels(),
-                                                 sim_rel.GetInitialTotalMolecules(),
-                                                 sim_rel.GetDiffusionCoefficient(),
-                                                 0.0, 0.0, 100);
+        DiffEqAnalytic analytic(1, end_time, {10},
+                                sim_rel.GetDomainBounds(),
+                                sim_rel.GetNumVoxels(),
+                                sim_rel.GetInitialTotalMolecules(),
+                                sim_rel.GetDiffusionCoefficient(),
+                                0.0, 0.0, 100);
         REQUIRE(sim_rel.GetRelativeError(analytic.GetAnalytic()) < 0.1);
     }
 
@@ -320,12 +320,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim_diff.SetDiffusionRate(1.0, 0);
         sim_diff.SetInitialNumMolecules({sim_diff.GetNumVoxels()[0] / 2, sim_diff.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_diff.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
-                                                 sim_diff.GetDomainBounds(),
-                                                 sim_diff.GetNumVoxels(),
-                                                 sim_diff.GetInitialTotalMolecules(),
-                                                 sim_diff.GetDiffusionCoefficient(),
-                                                 0.0, 0.0, 100);
+        DiffEqAnalytic analytic(2, end_time, {10, 10},
+                                sim_diff.GetDomainBounds(),
+                                sim_diff.GetNumVoxels(),
+                                sim_diff.GetInitialTotalMolecules(),
+                                sim_diff.GetDiffusionCoefficient(),
+                                0.0, 0.0, 100);
         REQUIRE(sim_diff.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -336,12 +336,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim_decay.AddReaction(make_unique<Decay>(1.0, 0));
         sim_decay.SetInitialNumMolecules({sim_decay.GetNumVoxels()[0] / 2, sim_decay.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_decay.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
-                                                 sim_decay.GetDomainBounds(),
-                                                 sim_decay.GetNumVoxels(),
-                                                 sim_decay.GetInitialTotalMolecules(),
-                                                 sim_decay.GetDiffusionCoefficient(),
-                                                 decay_rate, 0.0, 100);
+        DiffEqAnalytic analytic(2, end_time, {10, 10},
+                                sim_decay.GetDomainBounds(),
+                                sim_decay.GetNumVoxels(),
+                                sim_decay.GetInitialTotalMolecules(),
+                                sim_decay.GetDiffusionCoefficient(),
+                                decay_rate, 0.0, 100);
         REQUIRE(sim_decay.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -352,12 +352,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim_prod.AddReaction(make_unique<Production>(10.0, 0));
         sim_prod.SetInitialNumMolecules({sim_prod.GetNumVoxels()[0] / 2, sim_prod.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_prod.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
-                                                 sim_prod.GetDomainBounds(),
-                                                 sim_prod.GetNumVoxels(),
-                                                 sim_prod.GetInitialTotalMolecules(),
-                                                 sim_prod.GetDiffusionCoefficient(),
-                                                 0.0, prod_rate, 100);
+        DiffEqAnalytic analytic(2, end_time, {10, 10},
+                                sim_prod.GetDomainBounds(),
+                                sim_prod.GetNumVoxels(),
+                                sim_prod.GetInitialTotalMolecules(),
+                                sim_prod.GetDiffusionCoefficient(),
+                                0.0, prod_rate, 100);
         REQUIRE(sim_prod.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -369,12 +369,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim_all.AddReaction(make_unique<Decay>(1.0, 0));
         sim_all.SetInitialNumMolecules({sim_all.GetNumVoxels()[0] / 2, sim_all.GetNumVoxels()[1] / 2}, 10000, 0);
         sim_all.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
-                                                 sim_all.GetDomainBounds(),
-                                                 sim_all.GetNumVoxels(),
-                                                 sim_all.GetInitialTotalMolecules(),
-                                                 sim_all.GetDiffusionCoefficient(),
-                                                 decay_rate, prod_rate, 100);
+        DiffEqAnalytic analytic(2, end_time, {10, 10},
+                                sim_all.GetDomainBounds(),
+                                sim_all.GetNumVoxels(),
+                                sim_all.GetInitialTotalMolecules(),
+                                sim_all.GetDiffusionCoefficient(),
+                                decay_rate, prod_rate, 100);
         REQUIRE(sim_all.GetError(analytic.GetAnalytic()) < 0.03);
     }
 
@@ -384,12 +384,12 @@ TEST_CASE("Test Simulation_2d.*pp")
         sim_rel.SetDiffusionRate(1.0, 0);
         sim_rel.SetInitialNumMolecules({10, 10}, 10000, 0);
         sim_rel.Advance(end_time);
-        DiffEqAnalytic analytic = DiffEqAnalytic(2, end_time, {10, 10},
-                                                 sim_rel.GetDomainBounds(),
-                                                 sim_rel.GetNumVoxels(),
-                                                 sim_rel.GetInitialTotalMolecules(),
-                                                 sim_rel.GetDiffusionCoefficient(),
-                                                 0.0, 0.0, 100);
+        DiffEqAnalytic analytic(2, end_time, {10, 10},
+                                sim_rel.GetDomainBounds(),
+                                sim_rel.GetNumVoxels(),
+                                sim_rel.GetInitialTotalMolecules(),
+                                sim_rel.GetDiffusionCoefficient(),
+                                0.0, 0.0, 100);
         REQUIRE(sim_rel.GetRelativeError(analytic.GetAnalytic()) < 0.2);
     }
 
