@@ -1,9 +1,6 @@
 #include <iostream>
-#include <algorithm>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "Production.hpp"
 #include "MichaelisMentin.hpp"

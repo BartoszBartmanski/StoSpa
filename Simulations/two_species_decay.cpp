@@ -1,10 +1,7 @@
 #include <iostream>
-#include <algorithm>
 #include <Production.hpp>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "TwoSpeciesDecay.hpp"
 

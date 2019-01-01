@@ -2,7 +2,6 @@
 #include "catch.hpp"
 #include "Simulation_1d.hpp"
 #include "Simulation_2d.hpp"
-#include "JumpRates.hpp"
 #include "DiffEqAnalytic.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"

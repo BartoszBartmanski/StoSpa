@@ -5,8 +5,6 @@
 #include <iostream>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"

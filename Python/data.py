@@ -1,11 +1,11 @@
 #!/usr/bin/python3
 
-import sys
-import os
 import numpy as np
+import os
+import sys
+from matplotlib import tri
 from scipy import fftpack as fft
 from scipy import ndimage
-from matplotlib import tri
 
 
 def analytic_solution(num_dims,

@@ -1,16 +1,16 @@
 #!/usr/bin/python3
 
-from data import Data
 import numpy as np
-from os import path
-from matplotlib import pyplot as plt
 from matplotlib import animation
 from matplotlib import figure
 from matplotlib import gridspec
+from matplotlib import pyplot as plt
 from matplotlib import tri
-from mpl_toolkits.mplot3d import Axes3D
 from matplotlib.ticker import LinearLocator, FormatStrFormatter
+from mpl_toolkits.mplot3d import Axes3D
+from os import path
 
+from data import Data
 
 ints = (int, np.int, np.int8, np.int16, np.int32, np.int64)
 floats = (float, np.float, np.float16, np.float32, np.float64, np.float128)

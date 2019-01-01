@@ -12,10 +12,11 @@ Options:
     --sep                     Whether to use a separate figure for each file.
 """
 
-from docopt import docopt
-import scipy.misc as misc
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+import scipy.misc as misc
+
+from docopt import docopt
 
 
 def get_mean(file_name):

@@ -18,9 +18,10 @@ Options:
 
 """
 
-from matplotlib import pyplot as plt
-from docopt import docopt
 import numpy as np
+from matplotlib import pyplot as plt
+
+from docopt import docopt
 
 
 class JumpRate(object):

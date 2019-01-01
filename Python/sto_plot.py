@@ -66,14 +66,14 @@ Options:
 
 """
 
-import pickle
 import os
-from parameters import Parameters
-from data import get_data
-from plot import *
-from docopt import docopt
+import pickle
 from scipy import misc
 
+from data import get_data
+from docopt import docopt
+from parameters import Parameters
+from plot import *
 
 if __name__ == '__main__':
 
