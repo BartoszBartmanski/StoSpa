@@ -6,9 +6,10 @@
 #define STOSPA_JUMPRATES_HPP
 
 
-#include "cmath"
-#include "algorithm"
-#include "cassert"
+#include <cmath>
+#include <algorithm>
+#include <cassert>
+#include <vector>
 
 using namespace std;
 
@@ -23,6 +24,8 @@ public:
     JumpRate() = default;
 
     virtual ~JumpRate()= default;
+
+    double GetLambda(vector<int> direction);
 
     virtual double GetLambda0()=0;
 

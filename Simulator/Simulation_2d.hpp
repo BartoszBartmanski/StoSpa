@@ -77,6 +77,12 @@ public:
     vector<double> GetBeta();
 
     /**
+     * Returns pointer to JumpRate object that can give jump rates in specified directions.
+     * @return unique_ptr<JumpRate>
+     */
+    unique_ptr<JumpRate> GetJumpRates();
+
+    /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diff
      * @param species

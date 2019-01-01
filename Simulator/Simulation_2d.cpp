@@ -16,7 +16,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mNumVoxels = {num_voxels, unsigned(ratio * num_voxels)};
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
     mNumMethod = move(num_method);
-    mDomainBounds = domain_bounds;
+    mDomainBounds = move(domain_bounds);
     mBC = move(boundary_condition);
 
     // Additional input parameters (due to working in 2d)
@@ -118,12 +118,8 @@ vector<double> Simulation_2d::GetBeta()
     return {mBetaX, mBetaY};
 }
 
-void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
+unique_ptr<JumpRate> Simulation_2d::GetJumpRates()
 {
-    // Check for sensible input
-    assert(diff >= 0.0);
-    assert(species < mNumSpecies);
-
     unique_ptr<JumpRate> jump_rate;
     if (mNumMethod == "fdm")
     {
@@ -150,50 +146,35 @@ void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
         throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
     }
 
+    return move(jump_rate);
+}
+
+void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
+{
+    // Check for sensible input
+    assert(diff >= 0.0);
+    assert(species < mNumSpecies);
+
     mDiffusionCoefficients[species] = diff;
 
+    auto jump_rate = this->GetJumpRates();
     vector<vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
-    if (mBC == "reflective")
-    {
-        for (auto direction : directions)
-        {
-            if (direction[1] == 0)  // Horizontal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda1(), species, direction));
-            }
-            else if (direction[0] == 0)  // Vertical jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda3(), species, direction));
-            }
-            else  // Diagonal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda2(), species, direction));
-            }
-        }
-    }
-    else if (mBC == "periodic")
-    {
-        for (auto direction : directions)
-        {
-            if (direction[1] == 0)  // Horizontal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda1(), species, direction));
-            }
-            else if (direction[0] == 0)  // Vertical jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda3(), species, direction));
-            }
-            else  // Diagonal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda2(), species, direction));
-            }
-        }
-    }
-    else
-    {
-        throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
-    }
 
+    for (auto direction : directions)
+    {
+        if (mBC == "reflective")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "periodic")
+        {
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda(direction), species, direction));
+        }
+        else
+        {
+            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        }
+    }
 }
 
 void Simulation_2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)

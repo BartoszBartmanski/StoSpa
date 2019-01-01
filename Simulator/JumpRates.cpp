@@ -4,6 +4,24 @@
 
 #include "JumpRates.hpp"
 
+double JumpRate::GetLambda(vector<int> direction)
+{
+    double value;
+    if (direction[1] == 0)  // Horizontal jumps
+    {
+        value = this->GetLambda1();
+    }
+    else if (direction[0] == 0)  // Vertical jumps
+    {
+        value = this->GetLambda3();
+    }
+    else  // Diagonal jumps
+    {
+        value = this->GetLambda2();
+    }
+    return value;
+}
+
 FDM::FDM(double kappa, double length, double alpha)
 {
     mKappa = kappa;
