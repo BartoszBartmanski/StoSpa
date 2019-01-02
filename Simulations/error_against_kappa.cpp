@@ -102,10 +102,10 @@ int main(int argc, const char** argv)
 
         for (const auto& method : methods)
         {
-            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), method, p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(), kappa[i]);
-            sim.SetAlpha(p.GetAlpha());
-            sim.SetBeta(p.GetBeta());
-            sim.SetDiffusionRate(p.GetDiff()[0], 0);
+            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(),
+                              kappa[i]);
+            unique_ptr<JumpRate> jump_rate = get_jump_rates(method, sim.GetVoxelDims(), p.GetAlpha(), p.GetBeta());
+            sim.SetDiffusionRate(move(jump_rate), p.GetDiff()[0], 0);
             sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
             sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);

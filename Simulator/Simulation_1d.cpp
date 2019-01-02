@@ -1,11 +1,7 @@
 
 #include "Simulation_1d.hpp"
 
-Simulation_1d::Simulation_1d(unsigned num_runs,
-                             unsigned num_species,
-                             string num_method,
-                             unsigned num_voxels,
-                             vector<double> domain_bounds,
+Simulation_1d::Simulation_1d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
                              string boundary_condition)
 {
     // First check the input parameters
@@ -17,10 +13,9 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     // Input parameters
     mNumRuns = num_runs;
     mNumSpecies = num_species;
-    mNumMethod = move(num_method);
     mNumVoxels = {num_voxels, 1};
     mTotalNumVoxels = num_voxels;
-    mDomainBounds = domain_bounds;
+    mDomainBounds = move(domain_bounds);
     mBC = move(boundary_condition);
 
     // Simulation attributes that will change with each time step
@@ -28,8 +23,9 @@ Simulation_1d::Simulation_1d(unsigned num_runs,
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
-    mVoxelSize = m_h;
+    mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mVoxelSize};
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 
@@ -51,7 +47,6 @@ Simulation_1d::Simulation_1d(Parameters params)
     // Input parameters
     mNumRuns = params.GetNumRuns();
     mNumSpecies = params.GetNumSpecies();
-    mNumMethod = params.GetNumMethod();
     mNumVoxels = {params.GetNumVoxels(), 1};
     mTotalNumVoxels = mNumVoxels[0];
     mDomainBounds = params.GetDomainBounds();
@@ -62,8 +57,9 @@ Simulation_1d::Simulation_1d(Parameters params)
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
-    mVoxelSize = m_h;
+    mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mVoxelSize};
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 
@@ -74,34 +70,33 @@ Simulation_1d::Simulation_1d(Parameters params)
     }
 }
 
-void Simulation_1d::SetDiffusionRate(double diff, unsigned int species)
+void Simulation_1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
 {
     // Check for sensible input
     assert(diff >= 0.0);
     assert(species < mNumSpecies);
 
     mDiffusionCoefficients[species] = diff;
-    double lambda = diff / pow(m_h, 2);
 
-    vector<vector<int>> directions = {{-1}, {1}};
-    if (mBC == "reflective")
+    vector<vector<int>> directions = {{-1,0}, {1,0}};
+    for (auto direction : directions)
     {
-        mReactions.emplace_back(make_unique<DiffusionReflective>(lambda, species, directions[0]));
-        mReactions.emplace_back(make_unique<DiffusionReflective>(lambda, species, directions[1]));
-    }
-    else if (mBC == "periodic")
-    {
-        mReactions.emplace_back(make_unique<DiffusionPeriodic>(lambda, species, directions[0]));
-        mReactions.emplace_back(make_unique<DiffusionPeriodic>(lambda, species, directions[1]));
-    }
-    else if (mBC == "Exponential")
-    {
-        mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(lambda, species, directions[0], 1.0));
-        mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(lambda, species, directions[1], 1.0));
-    }
-    else
-    {
-        throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        if (mBC == "reflective")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "periodic")
+        {
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "Exponential")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(diff * method->GetLambda(direction), species, direction, 1.0));
+        }
+        else
+        {
+            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        }
     }
 }
 

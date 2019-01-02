@@ -10,10 +10,8 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            mExtrandeIndex(0),
                                            mNumRuns(1),
                                            mNumSpecies(1),
-                                           mNumMethod("fdm"),
                                            mTotalNumVoxels(1),
                                            mTime(0),
-                                           m_h(0),
                                            mVoxelSize(0)
 {
     mNumJumps = vector<unsigned>(mNumRuns, 0);
@@ -231,14 +229,14 @@ double AbstractSimulation::GetCurrentTime()
     return mTime;
 }
 
-double AbstractSimulation::GetSpacing()
-{
-    return m_h;
-}
-
 double AbstractSimulation::GetVoxelSize()
 {
     return mVoxelSize;
+}
+
+vector<double> AbstractSimulation::GetVoxelDims()
+{
+    return mVoxelDims;
 }
 
 unsigned AbstractSimulation::GetInitialTotalMolecules(unsigned int species)
@@ -274,11 +272,6 @@ unsigned AbstractSimulation::GetNumRuns()
 unsigned AbstractSimulation::GetNumSpecies()
 {
     return mNumSpecies;
-}
-
-string AbstractSimulation::GetNumMethod()
-{
-    return mNumMethod;
 }
 
 vector<double> AbstractSimulation::GetDomainBounds()

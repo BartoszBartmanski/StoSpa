@@ -81,8 +81,7 @@ int main(int argc, const char** argv)
     for (unsigned i=0; i < num_points; i++)
     {
         Simulation_2d sim(p);
-        sim.SetAlpha(alpha[i]);
-        sim.SetDiffusionRate(p.GetDiff()[0], 0);
+        sim.SetDiffusionRate(make_unique<FDM>(sim.GetVoxelDims(), alpha[i]), p.GetDiff()[0], 0);
         sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
         sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
         sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);

@@ -22,16 +22,45 @@ double JumpRate::GetLambda(vector<int> direction)
     return value;
 }
 
+JumpRate1d::JumpRate1d(vector<double> voxel_dims)
+{
+    assert(!voxel_dims.empty());
+    mH = voxel_dims[0];
+}
+
+double JumpRate1d::GetLambda0()
+{
+    double lambda_0 = 2.0 / pow(mH, 2);
+    return lambda_0;
+}
+
+double JumpRate1d::GetLambda1()
+{
+    double lambda_1 = 1.0 / pow(mH, 2);
+    return lambda_1;
+}
+
+double JumpRate1d::GetLambda2()
+{
+    return 0.0;
+}
+
+double JumpRate1d::GetLambda3()
+{
+    return 0.0;
+}
+
 string JumpRate::GetMethod()
 {
     return mMethod;
 }
 
-FDM::FDM(double kappa, double length, double alpha)
+FDM::FDM(vector<double> voxel_dims, double alpha)
 {
+    assert(voxel_dims.size() == 2);
     mMethod = "fdm";
-    mKappa = kappa;
-    mH = length;
+    mKappa = voxel_dims[0]/voxel_dims[1];
+    mH = voxel_dims[1];
 
     double upper_bound = min(mKappa, 1.0/mKappa);
     assert(alpha >= 0.0 and alpha <= upper_bound and upper_bound <= 1.0);
@@ -58,13 +87,15 @@ double FDM::GetLambda3()
     return (pow(mKappa, 2) - mKappa * mAlpha) / pow(mKappa * mH, 2);
 }
 
-FEM::FEM(double kappa, double length)
+FEM::FEM(vector<double> voxel_dims)
 {
     // Check that the parameters satisfy the discrete maximum principle
-    assert(kappa >= 1.0/sqrt(2) and kappa <= sqrt(2));
+    assert(voxel_dims.size() == 2);
     mMethod = "fem";
-    mKappa = kappa;
-    mH = length;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
+
+    assert(mKappa >= 1.0/sqrt(2) and mKappa <= sqrt(2));
 }
 
 double FEM::GetLambda0()
@@ -87,11 +118,12 @@ double FEM::GetLambda3()
     return (2.0 * pow(mKappa, 2) - 1) / (3.0 * pow(mKappa * mH, 2));
 }
 
-FVM::FVM(double kappa, double length)
+FVM::FVM(vector<double> voxel_dims)
 {
+    assert(voxel_dims.size() == 2);
     mMethod = "fvm";
-    mKappa = kappa;
-    mH = length;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
 }
 
 double FVM::GetLambda0()
@@ -114,14 +146,35 @@ double FVM::GetLambda3()
     return 1.0 / pow(mH, 2);
 }
 
-FET::FET(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
+FET::FET(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order)
 {
+    assert(voxel_dims.size() == 2);
+    assert(beta_x >= 0.0 and beta_x <= 1.0);
+    assert(beta_y >= 0.0 and beta_y <= 1.0);
     mMethod = "fet";
     mTruncOrder = truncation_order;
-    mKappa = kappa;
-    mH = length;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
     mBetaX = beta_x;
     mBetaY = beta_y;
+    mLambda0 = GetLambda0();
+    mTheta1 = GetTheta1();
+    mTheta3 = GetTheta3();
+    mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+}
+
+FET::FET(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order)
+{
+    assert(voxel_dims.size() == 2);
+    assert(beta.size() == 2);
+    assert(beta[0] >= 0.0 and beta[0] <= 1.0);
+    assert(beta[1] >= 0.0 and beta[1] <= 1.0);
+    mMethod = "fet";
+    mTruncOrder = truncation_order;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
+    mBetaX = beta[0];
+    mBetaY = beta[1];
     mLambda0 = GetLambda0();
     mTheta1 = GetTheta1();
     mTheta3 = GetTheta3();
@@ -219,14 +272,37 @@ double FET::GetLambda3()
 }
 
 
-FETUniform::FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
+FETUniform::FETUniform(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order)
 {
+    assert(voxel_dims.size() == 2);
+    assert(beta_x >= 0.0 and beta_x <= 1.0);
+    assert(beta_y >= 0.0 and beta_y <= 1.0);
+
     mMethod = "fetU";
     mTruncOrder = truncation_order;
-    mKappa = kappa;
-    mH = length;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
     mBetaX = beta_x;
     mBetaY = beta_y;
+    mLambda0 = GetLambda0();
+    mTheta1 = GetTheta1();
+    mTheta3 = GetTheta3();
+    mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+}
+
+FETUniform::FETUniform(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order)
+{
+    assert(voxel_dims.size() == 2);
+    assert(beta.size() == 2);
+    assert(beta[0] >= 0.0 and beta[0] <= 1.0);
+    assert(beta[1] >= 0.0 and beta[1] <= 1.0);
+
+    mMethod = "fetU";
+    mTruncOrder = truncation_order;
+    mKappa = voxel_dims[0] / voxel_dims[1];
+    mH = voxel_dims[1];
+    mBetaX = beta[0];
+    mBetaY = beta[1];
     mLambda0 = GetLambda0();
     mTheta1 = GetTheta1();
     mTheta3 = GetTheta3();

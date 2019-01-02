@@ -136,6 +136,13 @@ Parameters::Parameters(map<string, docopt::value> cl_input)
             mNumThreads = unsigned(stoi(cl_input["--num_threads"].asString()));
         }
     }
+
+    assert(mDomainBounds.size() == 2);
+    mH = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels);
+    if (mNumDims == 2)
+    {
+        mH /= mKappa;
+    }
 }
 
 void Parameters::Add(string name, string value)
@@ -330,6 +337,16 @@ void Parameters::SetDomainBounds(vector<double> values)
 vector<double> Parameters::GetDomainBounds()
 {
     return mDomainBounds;
+}
+
+void Parameters::SetH(double value)
+{
+    mH = value;
+}
+
+double Parameters::GetH()
+{
+    return mH;
 }
 
 void Parameters::SetBC(string value)
