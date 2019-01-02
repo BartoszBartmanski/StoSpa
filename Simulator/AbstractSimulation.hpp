@@ -131,10 +131,9 @@ public:
 
     /**
      * Method that will invoke SSA loop
-     * @param iterator
-     * @param time_step
+     * @param time_point
      */
-    void Advance(const double& time_step, const unsigned& iterator=1);
+    void Advance(const double &time_point);
 
     /** Method to occupy the grid with the time increments at the beginning of the simulation. */
     void SetupTimeIncrements();

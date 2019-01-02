@@ -19,13 +19,14 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     if (num_dims == 1)
     {
         sim = make_unique<Simulation_1d>(num_runs, num_species, num_voxels, bounds, bc);
+        sim->SetDiffusionRate(make_unique<JumpRate1d>(sim->GetVoxelDims()), 1.0, 0);
     }
     else
     {
         sim = make_unique<Simulation_2d>(num_runs, num_species, num_voxels, bounds, bc, kappa);
+        sim->SetDiffusionRate(make_unique<FVM>(sim->GetVoxelDims()), 1.0, 0);
     }
 
-    sim->SetDiffusionRate(make_unique<FVM>(sim->GetVoxelDims()), 1.0, 0);
     sim->SetInitialNumMolecules(floor_div(sim->GetNumVoxels(), 2), 1000, 0);
 
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();

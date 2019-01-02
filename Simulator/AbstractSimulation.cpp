@@ -153,14 +153,14 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
     if (mGrids[run].time < inf)
     {
         // Determine which reaction happens next and update the molecule numbers accordingly
-        unsigned reaction = NextReaction(run, voxel_index);
+        unsigned reaction = this->NextReaction(run, voxel_index);
         auto jump_index = unsigned(mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index));
 
         // Update the times until the next reaction
-        UpdateTime(run, voxel_index);
+        this->UpdateTime(run, voxel_index);
         if (jump_index != voxel_index)
         {
-            UpdateTime(run, jump_index);
+            this->UpdateTime(run, jump_index);
         }
 
         // Update the number of jumps variable
@@ -170,7 +170,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 }
 
 
-void AbstractSimulation::Advance(const double& time_step, const unsigned& iterator)
+void AbstractSimulation::Advance(const double &time_point)
 {
     if (!mTimesSet)
     {
@@ -179,12 +179,12 @@ void AbstractSimulation::Advance(const double& time_step, const unsigned& iterat
 
     for (unsigned run=0; run < mNumRuns; run++)
     {
-        while (mGrids[run].time < iterator * time_step)
+        while (mGrids[run].time < time_point)
         {
             SSA_loop(run);
         }
     }
-    mTime = iterator * time_step;
+    mTime = time_point;
 }
 
 vector<unsigned> AbstractSimulation::GetVoxels(unsigned int species, unsigned int run)
@@ -338,7 +338,7 @@ void AbstractSimulation::Run(const string &output, const double &endtime, const 
     for (unsigned i=0; i < num_steps; i++)
     {
         // Move to the next time step
-        this->Advance(i*timestep);
+        this->Advance(i * timestep);
 
         for (unsigned species=0; species < mNumSpecies; species++)
         {
