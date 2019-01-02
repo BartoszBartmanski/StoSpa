@@ -10,7 +10,6 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     unique_ptr<AbstractSimulation> sim;
 
     unsigned num_species = 1;
-    string method = "fdm";
     unsigned num_voxels = 21;
     vector<double> bounds = {0.0, 20.0};
     string bc = "reflective";
@@ -19,14 +18,14 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     // Point the pointer to the object
     if (num_dims == 1)
     {
-        sim = make_unique<Simulation_1d>(num_runs, num_species, method, num_voxels, bounds, bc);
+        sim = make_unique<Simulation_1d>(num_runs, num_species, num_voxels, bounds, bc);
     }
     else
     {
-        sim = make_unique<Simulation_2d>(num_runs, num_species, method, num_voxels, bounds, bc, kappa);
+        sim = make_unique<Simulation_2d>(num_runs, num_species, num_voxels, bounds, bc, kappa);
     }
 
-    sim->SetDiffusionRate(1.0, 0);
+    sim->SetDiffusionRate(make_unique<FVM>(kappa, bounds[1]/num_voxels), 1.0, 0);
     sim->SetInitialNumMolecules(floor_div(sim->GetNumVoxels(), 2), 1000, 0);
 
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();

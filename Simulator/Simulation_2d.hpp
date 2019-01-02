@@ -14,30 +14,22 @@ class Simulation_2d : public AbstractSimulation
 {
 protected:
 
+    vector<double> mVoxelDims;
+
     /** Ratio of horizontal spacing to the vertical spacing between voxels. */
     double mRatio=1.0;
-
-    /** Free parameter for FDM method derivation of jump coefficients. */
-    double mAlpha=0.0;
-
-    /** Free parameter in the x-direction for FET method derivation of jump coefficients. */
-    double mBetaX=0.5;
-
-    /** Free parameter in the y-direction for FET method derivation of jump coefficients. */
-    double mBetaY=0.5;
 
 public:
 
     /**
      * Constructor.
      * @param num_species - number of species
-     * @param num_method - numerical method from which the jump coefficients are derived
      * @param num_voxels - number of voxels present in the simulation
      * @param domain_bounds - bounds of the domain
      * @param boundary_condition - reflective or periodic boundary condition
      */
-    Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
-                  vector<double> domain_bounds, string boundary_condition, double ratio);
+    Simulation_2d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
+                  string boundary_condition, double ratio);
     explicit Simulation_2d(Parameters params);
 
     Simulation_2d(const Simulation_2d&) = delete; //move only type
@@ -52,42 +44,14 @@ public:
      */
     double GetVoxelRatio();
 
-    /**
-     * Set the value of alpha (parameter in FDM derivation)
-     * @param value
-     */
-    void SetAlpha(double value);
-
-    /**
-     * Returns the value of alpha (used in fdm derived jump rates).
-     * @return a double
-     */
-    double GetAlpha();
-
-    /**
-     * Set the values of beta_x and beta_y (parameters in FET derivation)
-     * @param values
-     */
-    void SetBeta(vector<double> values);
-
-    /**
-     * Returns the values of beta_x and beta_y (parameters in FET derivation)
-     * @return a double
-     */
-    vector<double> GetBeta();
-
-    /**
-     * Returns pointer to JumpRate object that can give jump rates in specified directions.
-     * @return unique_ptr<JumpRate>
-     */
-    unique_ptr<JumpRate> GetJumpRates();
+    vector<double> GetVoxelDims();
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diff
      * @param species
      */
-    void SetDiffusionRate(double diff, unsigned species) override;
+    void SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index

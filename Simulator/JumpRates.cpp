@@ -22,6 +22,33 @@ double JumpRate::GetLambda(vector<int> direction)
     return value;
 }
 
+JumpRate1d::JumpRate1d(double length)
+{
+    mH = length;
+}
+
+double JumpRate1d::GetLambda0()
+{
+    double lambda_0 = 2.0 / pow(mH, 2);
+    return lambda_0;
+}
+
+double JumpRate1d::GetLambda1()
+{
+    double lambda_1 = 1.0 / pow(mH, 2);
+    return lambda_1;
+}
+
+double JumpRate1d::GetLambda2()
+{
+    return 0.0;
+}
+
+double JumpRate1d::GetLambda3()
+{
+    return 0.0;
+}
+
 string JumpRate::GetMethod()
 {
     return mMethod;
@@ -116,12 +143,31 @@ double FVM::GetLambda3()
 
 FET::FET(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
 {
+    assert(beta_x >= 0.0 and beta_x <= 1.0);
+    assert(beta_y >= 0.0 and beta_y <= 1.0);
     mMethod = "fet";
     mTruncOrder = truncation_order;
     mKappa = kappa;
     mH = length;
     mBetaX = beta_x;
     mBetaY = beta_y;
+    mLambda0 = GetLambda0();
+    mTheta1 = GetTheta1();
+    mTheta3 = GetTheta3();
+    mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+}
+
+FET::FET(double kappa, double length, vector<double> beta, unsigned truncation_order)
+{
+    assert(beta.size() == 2);
+    assert(beta[0] >= 0.0 and beta[0] <= 1.0);
+    assert(beta[1] >= 0.0 and beta[1] <= 1.0);
+    mMethod = "fet";
+    mTruncOrder = truncation_order;
+    mKappa = kappa;
+    mH = length;
+    mBetaX = beta[0];
+    mBetaY = beta[1];
     mLambda0 = GetLambda0();
     mTheta1 = GetTheta1();
     mTheta3 = GetTheta3();
@@ -221,12 +267,31 @@ double FET::GetLambda3()
 
 FETUniform::FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order)
 {
+    assert(beta_x >= 0.0 and beta_x <= 1.0);
+    assert(beta_y >= 0.0 and beta_y <= 1.0);
     mMethod = "fetU";
     mTruncOrder = truncation_order;
     mKappa = kappa;
     mH = length;
     mBetaX = beta_x;
     mBetaY = beta_y;
+    mLambda0 = GetLambda0();
+    mTheta1 = GetTheta1();
+    mTheta3 = GetTheta3();
+    mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+}
+
+FETUniform::FETUniform(double kappa, double length, vector<double> beta, unsigned truncation_order)
+{
+    assert(beta.size() == 2);
+    assert(beta[0] >= 0.0 and beta[0] <= 1.0);
+    assert(beta[1] >= 0.0 and beta[1] <= 1.0);
+    mMethod = "fetU";
+    mTruncOrder = truncation_order;
+    mKappa = kappa;
+    mH = length;
+    mBetaX = beta[0];
+    mBetaY = beta[1];
     mLambda0 = GetLambda0();
     mTheta1 = GetTheta1();
     mTheta3 = GetTheta3();
