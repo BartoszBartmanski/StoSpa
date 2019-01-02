@@ -63,7 +63,10 @@ FDM::FDM(vector<double> voxel_dims, double alpha)
     mH = voxel_dims[1];
 
     double upper_bound = min(mKappa, 1.0/mKappa);
-    assert(alpha >= 0.0 and alpha <= upper_bound and upper_bound <= 1.0);
+    if (alpha <= 0.0 or alpha >= upper_bound)
+    {
+        throw runtime_error("Parameter alpha is not within a suitable range!");
+    }
     mAlpha = alpha;
 }
 
