@@ -2,7 +2,6 @@
 // Created by bartosz on 02/01/19.
 //
 
-#include <iostream>
 #include "Simulator.hpp"
 
 int main(int argc, const char** argv)
