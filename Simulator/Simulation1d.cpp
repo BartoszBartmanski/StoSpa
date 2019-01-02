@@ -1,7 +1,7 @@
 
-#include "Simulation_1d.hpp"
+#include "Simulation1d.hpp"
 
-Simulation_1d::Simulation_1d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
+Simulation1d::Simulation1d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
                              string boundary_condition)
 {
     // First check the input parameters
@@ -36,7 +36,7 @@ Simulation_1d::Simulation_1d(unsigned num_runs, unsigned num_species, unsigned n
     }
 }
 
-Simulation_1d::Simulation_1d(Parameters params)
+Simulation1d::Simulation1d(Parameters params)
 {
     // First check the input parameters
     assert(params.GetNumRuns() > 0);
@@ -70,7 +70,7 @@ Simulation_1d::Simulation_1d(Parameters params)
     }
 }
 
-void Simulation_1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
+void Simulation1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
 {
     // Check for sensible input
     assert(diff >= 0.0);
@@ -100,7 +100,7 @@ void Simulation_1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff,
     }
 }
 
-void Simulation_1d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
+void Simulation1d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -115,7 +115,7 @@ void Simulation_1d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigne
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_1d::SetInitialState(vector<vector<unsigned>> initial_state, unsigned species)
+void Simulation1d::SetInitialState(vector<vector<unsigned>> initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -132,7 +132,7 @@ void Simulation_1d::SetInitialState(vector<vector<unsigned>> initial_state, unsi
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_1d::SetInitialState(vector<vector<int>> initial_state, unsigned species)
+void Simulation1d::SetInitialState(vector<vector<int>> initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);

@@ -53,7 +53,7 @@ int main(int argc, const char** argv)
     p.SetBC("Exponential");
 
     // Declare a pointer for the simulation object
-    Simulation_1d sim(p);
+    Simulation1d sim(p);
     sim.UseExtrande();
 
     sim.SetInitialNumMolecules({0}, p.GetInitialNum()[0], 0);

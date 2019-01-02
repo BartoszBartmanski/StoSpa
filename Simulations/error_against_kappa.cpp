@@ -2,7 +2,7 @@
 #include "docopt.h"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
-#include "Simulation_2d.hpp"
+#include "Simulation2d.hpp"
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
@@ -102,9 +102,9 @@ int main(int argc, const char** argv)
 
         for (const auto& method : methods)
         {
-            Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(),
+            Simulation2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(),
                               kappa[i]);
-            unique_ptr<JumpRate> jump_rate = get_jump_rates(method, sim.GetVoxelDims(), p.GetAlpha(), p.GetBeta());
+            unique_ptr<JumpRate> jump_rate = get_jump_rates(sim.GetVoxelDims(), method, p.GetAlpha(), p.GetBeta());
             sim.SetDiffusionRate(move(jump_rate), p.GetDiff()[0], 0);
             sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));

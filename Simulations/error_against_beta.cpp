@@ -2,7 +2,7 @@
 #include "docopt.h"
 #include "Parameters.hpp"
 #include "DiffEqAnalytic.hpp"
-#include "Simulation_2d.hpp"
+#include "Simulation2d.hpp"
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
@@ -91,7 +91,7 @@ int main(int argc, const char** argv)
     #pragma omp parallel for num_threads(p.GetNumThreads())
     for (unsigned i=0; i < error.size(); i++)
     {
-        Simulation_2d sim(p);
+        Simulation2d sim(p);
         sim.SetDiffusionRate(make_unique<FET>(sim.GetVoxelDims(), beta_x[i], beta_y[i]), p.GetDiff()[0], 0);
         sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
         sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));

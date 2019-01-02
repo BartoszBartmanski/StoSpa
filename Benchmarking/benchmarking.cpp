@@ -1,8 +1,8 @@
 
 #include <chrono>
 #include "Version.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
+#include "Simulation1d.hpp"
+#include "Simulation2d.hpp"
 
 void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
 {
@@ -18,12 +18,12 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
     // Point the pointer to the object
     if (num_dims == 1)
     {
-        sim = make_unique<Simulation_1d>(num_runs, num_species, num_voxels, bounds, bc);
+        sim = make_unique<Simulation1d>(num_runs, num_species, num_voxels, bounds, bc);
         sim->SetDiffusionRate(make_unique<JumpRate1d>(sim->GetVoxelDims()), 1.0, 0);
     }
     else
     {
-        sim = make_unique<Simulation_2d>(num_runs, num_species, num_voxels, bounds, bc, kappa);
+        sim = make_unique<Simulation2d>(num_runs, num_species, num_voxels, bounds, bc, kappa);
         sim->SetDiffusionRate(make_unique<FVM>(sim->GetVoxelDims()), 1.0, 0);
     }
 

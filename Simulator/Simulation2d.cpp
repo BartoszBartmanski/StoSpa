@@ -1,6 +1,6 @@
-#include "Simulation_2d.hpp"
+#include "Simulation2d.hpp"
 
-Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
+Simulation2d::Simulation2d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
                              string boundary_condition, double ratio)
 {
     // First check the input parameters
@@ -41,7 +41,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, unsigned n
 
 }
 
-Simulation_2d::Simulation_2d(Parameters params)
+Simulation2d::Simulation2d(Parameters params)
 {
     // First check the input parameters
     assert(params.GetNumRuns() > 0);
@@ -85,12 +85,12 @@ Simulation_2d::Simulation_2d(Parameters params)
 
 }
 
-double Simulation_2d::GetVoxelRatio()
+double Simulation2d::GetVoxelRatio()
 {
     return mRatio;
 }
 
-void Simulation_2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
+void Simulation2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
 {
     // Check for sensible input
     assert(diff >= 0.0);
@@ -117,7 +117,7 @@ void Simulation_2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff,
     }
 }
 
-void Simulation_2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
+void Simulation2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -133,7 +133,7 @@ void Simulation_2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigne
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_2d::SetInitialState(vector<vector<unsigned> > initial_state, unsigned species)
+void Simulation2d::SetInitialState(vector<vector<unsigned> > initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -158,7 +158,7 @@ void Simulation_2d::SetInitialState(vector<vector<unsigned> > initial_state, uns
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_2d::SetInitialState(vector<vector<int> > initial_state, unsigned species)
+void Simulation2d::SetInitialState(vector<vector<int> > initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
