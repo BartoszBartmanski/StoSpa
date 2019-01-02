@@ -133,7 +133,7 @@ public:
      * Method that will invoke SSA loop
      * @param time_point
      */
-    void Advance(const double &time_point);
+    void Advance(const double& time_point, const unsigned& threads=1);
 
     /** Method to occupy the grid with the time increments at the beginning of the simulation. */
     void SetupTimeIncrements();
@@ -145,7 +145,7 @@ public:
      * @param production
      * @param species
      */
-    virtual void SetDiffusionRate(unique_ptr<JumpRate> &&method, double diffusion_coefficient, unsigned species) =0;
+    virtual void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species) =0;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
@@ -289,7 +289,7 @@ public:
      */
     double GetRelativeError(const vector<double>& analytic, unsigned species=0);
 
-    void Run(const string& output, const double& endtime, const double& timestep);
+    void Run(const string& output, const double& endtime, const double& timestep, const unsigned& threads=1);
 
 };
 

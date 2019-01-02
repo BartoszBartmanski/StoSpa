@@ -170,13 +170,14 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 }
 
 
-void AbstractSimulation::Advance(const double &time_point)
+void AbstractSimulation::Advance(const double &time_point, const unsigned& threads)
 {
     if (!mTimesSet)
     {
         SetupTimeIncrements();
     }
 
+    #pragma omp parallel for num_threads(threads)
     for (unsigned run=0; run < mNumRuns; run++)
     {
         while (mGrids[run].time < time_point)
@@ -326,7 +327,7 @@ double AbstractSimulation::GetRelativeError(const vector<double>& analytic, unsi
     return error;
 }
 
-void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep)
+void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep, const unsigned& threads)
 {
     // Initialise progress object
     auto num_steps = unsigned(endtime/timestep);
@@ -338,7 +339,7 @@ void AbstractSimulation::Run(const string &output, const double &endtime, const 
     for (unsigned i=0; i < num_steps; i++)
     {
         // Move to the next time step
-        this->Advance(i * timestep);
+        this->Advance(i * timestep, threads);
 
         for (unsigned species=0; species < mNumSpecies; species++)
         {
