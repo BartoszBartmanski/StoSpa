@@ -53,35 +53,37 @@ vector<double> get_midpoint(const vector<double>& domain_bounds, const unsigned&
  * @return unique_ptr<JumpRate>
  */
 
-unique_ptr<JumpRate> get_jump_rate(unsigned dim, const string& num_method, double kappa, double h, double alpha, vector<double> beta)
+unique_ptr<JumpRate> get_jump_rates(const string &num_method, vector<double> voxel_dims, double alpha,
+                                    vector<double> beta)
 {
+    assert(!voxel_dims.empty());
     unique_ptr<JumpRate> jump_rate;
 
-    if (dim == 1)
+    if (voxel_dims.size() == 1)
     {
-        jump_rate = make_unique<JumpRate1d>(h);
+        jump_rate = make_unique<JumpRate1d>(voxel_dims);
     }
     else
     {
         if (num_method == "fdm")
         {
-            jump_rate = make_unique<FDM>(kappa, h, alpha);
+            jump_rate = make_unique<FDM>(voxel_dims, alpha);
         }
         else if (num_method == "fem")
         {
-            jump_rate = make_unique<FEM>(kappa, h);
+            jump_rate = make_unique<FEM>(voxel_dims);
         }
         else if (num_method == "fvm")
         {
-            jump_rate = make_unique<FVM>(kappa, h);
+            jump_rate = make_unique<FVM>(voxel_dims);
         }
         else if (num_method == "fet")
         {
-            jump_rate = make_unique<FET>(kappa, h, beta, 1000);
+            jump_rate = make_unique<FET>(voxel_dims, beta, 1000);
         }
         else if (num_method == "fetU")
         {
-            jump_rate = make_unique<FETUniform>(kappa, h, beta, 1000);
+            jump_rate = make_unique<FETUniform>(voxel_dims, beta, 1000);
         }
         else
         {
@@ -91,9 +93,22 @@ unique_ptr<JumpRate> get_jump_rate(unsigned dim, const string& num_method, doubl
 
     return move(jump_rate);
 }
-unique_ptr<JumpRate> get_jump_rate(Parameters params)
+unique_ptr<JumpRate> get_jump_rates(Parameters &params)
 {
-    return move(get_jump_rate(params.GetNumDims(), params.GetNumMethod(), params.GetKappa(), params.GetH(), params.GetAlpha(), params.GetBeta()));
+    double domain_size = params.GetDomainBounds()[1] - params.GetDomainBounds()[0];
+    vector<double> voxel_dims;
+    double h_x = domain_size/params.GetNumVoxels();
+
+    if (params.GetNumDims() == 1)
+    {
+        voxel_dims = {h_x};
+    }
+    else
+    {
+        voxel_dims = {h_x, h_x / params.GetKappa()};
+    }
+
+    return move(get_jump_rates(params.GetNumMethod(), voxel_dims, params.GetAlpha(), params.GetBeta()));
 }
 
 #endif //STOSPA_SIMFUNCTIONS_HPP

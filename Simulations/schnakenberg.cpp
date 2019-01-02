@@ -65,8 +65,8 @@ int main(int argc, const char** argv)
     sim->SetInitialState(p.GetInitialNum()[1] * ones(sim->GetNumVoxels()), 1);
 
     // Setup the reaction rates
-    sim->SetDiffusionRate(get_jump_rate(p), p.GetDiff()[0], 0);
-    sim->SetDiffusionRate(get_jump_rate(p), p.GetDiff()[1], 1);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 1);
     sim->AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
 
     p.SetProd(p.GetProd()/sim->GetVoxelSize());

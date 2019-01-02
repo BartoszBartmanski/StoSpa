@@ -90,11 +90,6 @@ double Simulation_2d::GetVoxelRatio()
     return mRatio;
 }
 
-vector<double> Simulation_2d::GetVoxelDims()
-{
-    return mVoxelDims;
-}
-
 void Simulation_2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
 {
     // Check for sensible input

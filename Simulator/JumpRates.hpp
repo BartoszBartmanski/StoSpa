@@ -45,7 +45,7 @@ public:
 class JumpRate1d : public JumpRate
 {
 public:
-    explicit JumpRate1d(double length);
+    explicit JumpRate1d(vector<double> voxel_dims);
 
     double GetLambda0() override;
 
@@ -63,7 +63,7 @@ private:
     double mAlpha = 0.0;
 
 public:
-    FDM(double kappa, double length, double alpha);
+    FDM(vector<double> voxel_dims, double alpha);
 
     double GetLambda0() override;
 
@@ -78,7 +78,7 @@ public:
 class FEM : public JumpRate
 {
 public:
-    FEM(double kappa, double length);
+    explicit FEM(vector<double> voxel_dims);
 
     double GetLambda0() override;
 
@@ -93,7 +93,7 @@ public:
 class FVM : public JumpRate
 {
 public:
-    FVM(double kappa, double length);
+    explicit FVM(vector<double> voxel_dims);
 
     double GetLambda0() override;
 
@@ -125,8 +125,8 @@ protected:
 public:
     FET() = default;
 
-    FET(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order=1000);
-    FET(double kappa, double length, vector<double> beta, unsigned truncation_order=1000);
+    FET(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order=1000);
+    FET(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order=1000);
 
     virtual double GetTheta1();
 
@@ -147,8 +147,8 @@ public:
 class FETUniform : public FET
 {
 public:
-    FETUniform(double kappa, double length, double beta_x, double beta_y, unsigned truncation_order=1000);
-    FETUniform(double kappa, double length, vector<double> beta, unsigned truncation_order=1000);
+    FETUniform(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order=1000);
+    FETUniform(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order=1000);
 
     double GetTheta1() override;
 

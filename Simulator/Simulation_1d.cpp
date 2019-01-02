@@ -24,6 +24,8 @@ Simulation_1d::Simulation_1d(unsigned num_runs, unsigned num_species, unsigned n
 
     // Simulation attributes that will remain constant throughout the simulation
     mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mVoxelSize};
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 
@@ -56,6 +58,8 @@ Simulation_1d::Simulation_1d(Parameters params)
 
     // Simulation attributes that will remain constant throughout the simulation
     mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mVoxelSize};
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 

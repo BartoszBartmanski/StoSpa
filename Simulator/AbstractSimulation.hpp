@@ -74,6 +74,9 @@ protected:
     /** Number of jumps at the at time in the simulation. */
     vector<unsigned> mNumJumps;
 
+    /** Vector of lengths of the voxel in every direction. */
+    vector<double> mVoxelDims;
+
     /** Voxel size (not necessarily the same as the voxel spacing) */
     double mVoxelSize;
 
@@ -204,16 +207,16 @@ public:
     double GetCurrentTime();
 
     /**
-     * Returns spacing in the simulation (either the voxel size in 1d or the vertical voxel size in 2d).
-     * @return mSpacing
-     */
-    double GetSpacing();
-
-    /**
      * Returns voxel size
      * @return mVoxelSize
      */
     double GetVoxelSize();
+
+    /**
+     * Returns vector of lengths of a voxel.
+     * @return mVoxelDims
+     */
+    vector<double> GetVoxelDims();
 
     /**
      * Returns the total number of molecules in the simulation of the specified species.

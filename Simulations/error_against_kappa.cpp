@@ -104,7 +104,7 @@ int main(int argc, const char** argv)
         {
             Simulation_2d sim(p.GetNumRuns(), p.GetNumSpecies(), p.GetNumVoxels(), p.GetDomainBounds(), p.GetBC(),
                               kappa[i]);
-            unique_ptr<JumpRate> jump_rate = get_jump_rate(2, method, sim.GetVoxelRatio(), sim.GetVoxelDims()[1], p.GetAlpha(), p.GetBeta());
+            unique_ptr<JumpRate> jump_rate = get_jump_rates(method, sim.GetVoxelDims(), p.GetAlpha(), p.GetBeta());
             sim.SetDiffusionRate(move(jump_rate), p.GetDiff()[0], 0);
             sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));

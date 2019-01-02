@@ -67,8 +67,8 @@ int main(int argc, const char** argv)
     sim->SetInitialNumMolecules({0, 0}, p.GetInitialNum()[1], 1);
 
     // Setup the reaction rates
-    sim->SetDiffusionRate(get_jump_rate(p), p.GetDiff()[0], 0);
-    sim->SetDiffusionRate(get_jump_rate(p), p.GetDiff()[1], 1);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 1);
 
     p.SetProd({k_2, 0});
     sim->AddReaction(make_unique<Production>(k_2, 0));

@@ -58,7 +58,7 @@ int main(int argc, const char** argv)
 
     sim.SetInitialNumMolecules({0}, p.GetInitialNum()[0], 0);
 
-    sim.SetDiffusionRate(get_jump_rate(p), p.GetDiff()[0], 0);
+    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters

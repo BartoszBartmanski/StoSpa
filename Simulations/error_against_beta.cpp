@@ -92,7 +92,7 @@ int main(int argc, const char** argv)
     for (unsigned i=0; i < error.size(); i++)
     {
         Simulation_2d sim(p);
-        sim.SetDiffusionRate(make_unique<FET>(sim.GetVoxelRatio(), sim.GetVoxelDims()[1], beta_x[i], beta_y[i]), p.GetDiff()[0], 0);
+        sim.SetDiffusionRate(make_unique<FET>(sim.GetVoxelDims(), beta_x[i], beta_y[i]), p.GetDiff()[0], 0);
         sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
         sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
         sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);

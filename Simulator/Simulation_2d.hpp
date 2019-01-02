@@ -14,8 +14,6 @@ class Simulation_2d : public AbstractSimulation
 {
 protected:
 
-    vector<double> mVoxelDims;
-
     /** Ratio of horizontal spacing to the vertical spacing between voxels. */
     double mRatio=1.0;
 
@@ -43,8 +41,6 @@ public:
      * @return a double
      */
     double GetVoxelRatio();
-
-    vector<double> GetVoxelDims();
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).

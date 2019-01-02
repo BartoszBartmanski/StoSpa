@@ -234,6 +234,11 @@ double AbstractSimulation::GetVoxelSize()
     return mVoxelSize;
 }
 
+vector<double> AbstractSimulation::GetVoxelDims()
+{
+    return mVoxelDims;
+}
+
 unsigned AbstractSimulation::GetInitialTotalMolecules(unsigned int species)
 {
     return mTotalNumMolecules[species];
