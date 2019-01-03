@@ -17,37 +17,6 @@
 using namespace std;
 
 /**
- * Prints a vector
- * @param vec - vector to be printed
- * @param name - name of the vector
- */
-void print_array(vector<double> vec, string name="vector");
-void print_array(vector<unsigned> vec, string name="vector");
-void print_array(vector<int> vec, string name="vector");
-
-/**
- * Prints a matrix
- * @param matrix - matrix to be printed
- * @param name - name of the matrix
- */
-void print_array(vector<vector<double>> matrix, string name="matrix");
-void print_array(vector<vector<unsigned>> matrix, string name="matrix");
-void print_array(vector<vector<int>> matrix, string name="matrix");
-
-/**
- * Saves the vector to a given file. Adds to the file if the file exists already.
- * @param vec - vector to be saved
- * @param path_to_file - path to the file
- */
-void save_vector(vector<double> vec, string path_to_file);
-void save_vector(vector<long double> vec, string path_to_file);
-void save_vector(vector<unsigned> vec, string path_to_file);
-
-void save_vector(vector<double> vec, const unique_ptr<ofstream>& handle);
-void save_vector(vector<long double> vec, const unique_ptr<ofstream>& handle);
-void save_vector(vector<unsigned> vec, const unique_ptr<ofstream>& handle);
-
-/**
  * Produces a vector of linearly spaced points from the given lower bound to the given upper bound.
  * @param a - lower bound
  * @param b - upper bound
@@ -66,54 +35,95 @@ vector<vector<unsigned>> ones(unsigned num_cols, unsigned num_rows);
 vector<vector<unsigned>> ones(vector<unsigned> shape);
 
 /**
+ * Prints a vector
+ * @param vec - vector to be printed
+ * @param name - name of the vector
+ */
+template<typename T>
+void print_array(vector<T> vec, const string& name="vector")
+{
+    cout << endl << name << " = ";
+
+    for (T elem : vec)
+    {
+        cout << elem << " ";
+    }
+    cout << endl;
+}
+
+/**
+ * Prints a matrix
+ * @param matrix - matrix to be printed
+ * @param name - name of the matrix
+ */
+template<typename T>
+void print_array(vector<vector<T>> matrix, const string& name="matrix")
+{
+    cout << endl << name << " = " << endl;
+    for (const vector<double>& row : matrix)
+    {
+        for (double elem : row)
+        {
+            cout << elem << " ";
+        }
+        cout << endl;
+    }
+    cout << endl;
+}
+
+/**
+ * Saves the vector to a given file. Adds to the file if the file exists already.
+ * @param vec - vector to be saved
+ * @param path_to_file - path to the file
+ */
+template<typename T>
+void save_vector(const vector<T>& vec, const string& path_to_file)
+{
+    ofstream vec_file(path_to_file, ios_base::app);
+    ostream_iterator<T> output_iterator(vec_file, " ");
+    copy(vec.begin(), vec.end(), output_iterator);
+    vec_file << endl;
+    vec_file.close();
+}
+
+template<typename T>
+void save_vector(const vector<T>& vec, const unique_ptr<ofstream>& handle)
+{
+    ostream_iterator<T> output_iterator(*handle, " ");
+    copy(vec.begin(), vec.end(), output_iterator);
+    *handle << endl;
+}
+
+/**
  * Sum of all the elements in a vector.
  * @param vec - vector for which to sum all the elements
  * @return sum of all the elements of the vector
  */
-double vec_sum(vector<double> vec);
-unsigned vec_sum(vector<unsigned> vec);
+template<typename T>
+T vec_sum(const vector<T>& vec)
+{
+    T sum = 0.0;
+    for (T elem : vec)
+    {
+        sum += elem;
+    }
 
-/**
- * Adds two vectors together
- * @param vec1 - first vector in the sum
- * @param vec2 - second vector in the sum
- * @return sum of two vectors
- */
-vector<double> add(const vector<double>& vec1, const vector<double>& vec2);
-vector<unsigned> add(const vector<unsigned>& vec1, const vector<unsigned>& vec2);
-vector<int> add(const vector<int>& vec1, const vector<int>& vec2);
+    return sum;
+}
 
 /**
  * Finds the smallest element in a vector
  * @param vec - vector in which to find the minimum
- * @return the smallest element in a vector
+ * @return a pair of the value and the index of the smallest element
  */
-double find_min(vector<double> vec);
-unsigned find_min(vector<unsigned> vec);
-
-/**
- * Finds the smallest element in a matrix
- * @param matrix - the matrix in which to find the smallest element
- * @return the smallest element in the given matrix
- */
-double find_min(vector<vector<double>> matrix);
-unsigned find_min(vector<vector<unsigned>> matrix);
-
-/**
- * Finds the index of the smallest element
- * @param vec - vector in which to find the smallest element
- * @return the index of the smallest element in a vector
- */
-unsigned find_min_index(vector<double> vec);
-unsigned find_min_index(vector<unsigned> vec);
-
-/**
- * Finds the index of the smallest element
- * @param matrix - matrix in which to find the smallest element
- * @return the index of the smallest element in a matrix
- */
-vector<unsigned> find_min_index(vector<vector<double>> matrix);
-vector<unsigned> find_min_index(vector<vector<unsigned>> matrix);
+template<typename T>
+pair<T, unsigned> find_min(const vector<T>& vec)
+{
+    auto result = min_element(vec.begin(), vec.end());
+    unsigned index = unsigned(distance(vec.begin(), result));
+    auto val_idx = make_pair(*result, index);
+    return val_idx;
+}
 
 /**
  * Checks whether two vectors are equal
