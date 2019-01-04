@@ -10,6 +10,31 @@ using the Extrande algorithm.
 
 ## Installation
 
+First, clone this repository to your computer by running.
+```
+git clone https://github.com/BartoszBartmanski/StoSpa.git
+```
+
+To install we have to make a directory for the executables. Go to the directory
+where StoSpa was cloned to. Then execute the following commands
+```
+cd StoSpa
+mkdir build
+cd build
+```
+which will create a directory for the executables.
+
+Now we use cmake to build a makefile.
+```
+cmake ../
+```
+Next, we compile whichever simulation we want or we can compile all of the executables
+```
+make all
+```
+which will create an executable for each of the files present in Simulations directory.
+
+
 ## Example
 
 Below we go through a simulation example.cpp (present in Simulations directory).
@@ -21,30 +46,30 @@ First, we add the header that enables us to run simulations.
 Next, at the start of the main function, we define the variables needed 
 for the simulation.
 ```
-	string sim_name = "example.dat";
-	unsigned num_runs = 1;
-	unsigned num_species = 1;
-	unsigned num_voxels = 10;
-	vector<double> domain_bounds = {0, 1.0};
-	string bc = "reflective";
-	double diff = 2.0;
-	double end_time = 5.0;
-	double time_step = 0.01;
+string sim_name = "example.dat";
+unsigned num_runs = 1;
+unsigned num_species = 1;
+unsigned num_voxels = 10;
+vector<double> domain_bounds = {0, 1.0};
+string bc = "reflective";
+double diff = 2.0;
+double end_time = 5.0;
+double time_step = 0.01;
 ```
 To run a simulation, we need to initialise a Simulation object (either 
 Simulation1d or Simulation2d).
 ```
-	Simulation1d sim(num_runs, num_species, num_voxels, domain_bounds, bc);
+Simulation1d sim(num_runs, num_species, num_voxels, domain_bounds, bc);
 ```
 We can set a number of molecules in the first compartment as follows
 ```
-	sim.SetInitialNumMolecules({0}, 1000, 0);
+sim.SetInitialNumMolecules({0}, 1000, 0);
 ```
 where we place a thousand molecules (second argument) of first species (third argument) 
 into the first voxel (first argument).
 Lastly, we run the simulation using the member function Run.
 ```
-	sim.Run(sim_name, end_time, time_step);
+sim.Run(sim_name, end_time, time_step);
 ```
 
 
