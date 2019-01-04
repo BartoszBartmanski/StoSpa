@@ -15,7 +15,7 @@ int main(int argc, const char** argv)
     unsigned num_voxels = 10;
     vector<double> domain_bounds = {0, 1.0};
     string bc = "reflective";
-    double diff = 2.0;
+    double diff = 0.1;
     double end_time = 5.0;
     double time_step = 0.01;
 
