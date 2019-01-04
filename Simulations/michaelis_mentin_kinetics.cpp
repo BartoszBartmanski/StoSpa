@@ -1,9 +1,6 @@
 #include <iostream>
-#include <algorithm>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "Production.hpp"
 #include "MichaelisMentin.hpp"
@@ -94,7 +91,7 @@ int main(int argc, const char** argv)
         // Setup the number of molecules
         sim_full->SetInitialState(p.GetInitialNum()[i] * ones(sim_full->GetNumVoxels()), i);
         // Setup the reaction rates
-        sim_full->SetDiffusionRate(p.GetDiff()[i], i);
+        sim_full->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[i], i);
     }
 
     sim_full->AddReaction(make_unique<MichaelisMentin_I>(k_1));
@@ -120,8 +117,8 @@ int main(int argc, const char** argv)
     sim_reduced->SetInitialState(p.GetInitialNum()[1] * ones(sim_reduced->GetNumVoxels()), 0);
     sim_reduced->SetInitialState(p.GetInitialNum()[3] * ones(sim_reduced->GetNumVoxels()), 1);
     // Setup the reaction rates
-    sim_reduced->SetDiffusionRate(p.GetDiff()[1], 0);
-    sim_reduced->SetDiffusionRate(p.GetDiff()[3], 1);
+    sim_reduced->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 0);
+    sim_reduced->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[3], 1);
 
     sim_reduced->AddReaction(make_unique<Production>(k_0, 0));
 

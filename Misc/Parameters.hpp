@@ -42,6 +42,8 @@ private:
 
     vector<double> mDomainBounds;
 
+    double mH=1.0;
+
     string mBC;
 
     double mKappa=0.0;
@@ -117,6 +119,10 @@ public:
     void SetDomainBounds(vector<double> values);
 
     vector<double> GetDomainBounds();
+
+    void SetH(double value);
+
+    double GetH();
 
     void SetBC(string value);
 

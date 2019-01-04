@@ -5,8 +5,6 @@
 #include <iostream>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
@@ -39,6 +37,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --prod=<prod>                                 Rate of production [default: 0.0].
       --initial_num=<num>                           Initial number of molecules [default: 1000].
       --initial_pos=<pos>                           Initial position (in indices) of the molecules.
+      -j --num_threads=<num>                        Number of threads for parallelisation [default: 1].
 
 )";
 
@@ -73,14 +72,14 @@ int main(int argc, const char** argv)
     sim->SetInitialNumMolecules(initial_pos, p.GetInitialNum()[0], 0);
 
     // Setup the reaction rates (diffusion, decay and production)
-    sim->SetDiffusionRate(p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
     sim->AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
     sim->AddReaction(make_unique<Production>(p.GetProd()[0], 0));
 
     // Check whether this file name already exists and alter it appropriately
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());
     p.Save(path_to_file);
-    sim->Run(path_to_file, p.GetEndTime(), p.GetTimeStep());
+    sim->Run(path_to_file, p.GetEndTime(), p.GetTimeStep(), p.GetNumThreads());
 
     return 0;
 }

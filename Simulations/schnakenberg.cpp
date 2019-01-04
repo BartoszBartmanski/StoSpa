@@ -5,8 +5,6 @@
 #include <iostream>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
@@ -67,8 +65,8 @@ int main(int argc, const char** argv)
     sim->SetInitialState(p.GetInitialNum()[1] * ones(sim->GetNumVoxels()), 1);
 
     // Setup the reaction rates
-    sim->SetDiffusionRate(p.GetDiff()[0], 0);
-    sim->SetDiffusionRate(p.GetDiff()[1], 1);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 1);
     sim->AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
 
     p.SetProd(p.GetProd()/sim->GetVoxelSize());

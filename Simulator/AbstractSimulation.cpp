@@ -10,10 +10,8 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            mExtrandeIndex(0),
                                            mNumRuns(1),
                                            mNumSpecies(1),
-                                           mNumMethod("fdm"),
                                            mTotalNumVoxels(1),
                                            mTime(0),
-                                           m_h(0),
                                            mVoxelSize(0)
 {
     mNumJumps = vector<unsigned>(mNumRuns, 0);
@@ -155,14 +153,14 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
     if (mGrids[run].time < inf)
     {
         // Determine which reaction happens next and update the molecule numbers accordingly
-        unsigned reaction = NextReaction(run, voxel_index);
+        unsigned reaction = this->NextReaction(run, voxel_index);
         auto jump_index = unsigned(mReactions[reaction]->UpdateGrid(mGrids[run], voxel_index));
 
         // Update the times until the next reaction
-        UpdateTime(run, voxel_index);
+        this->UpdateTime(run, voxel_index);
         if (jump_index != voxel_index)
         {
-            UpdateTime(run, jump_index);
+            this->UpdateTime(run, jump_index);
         }
 
         // Update the number of jumps variable
@@ -172,21 +170,22 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 }
 
 
-void AbstractSimulation::Advance(const double& time_step, const unsigned& iterator)
+void AbstractSimulation::Advance(const double &time_point, const unsigned& threads)
 {
     if (!mTimesSet)
     {
         SetupTimeIncrements();
     }
 
+    #pragma omp parallel for num_threads(threads)
     for (unsigned run=0; run < mNumRuns; run++)
     {
-        while (mGrids[run].time < iterator * time_step)
+        while (mGrids[run].time < time_point)
         {
             SSA_loop(run);
         }
     }
-    mTime = iterator * time_step;
+    mTime = time_point;
 }
 
 vector<unsigned> AbstractSimulation::GetVoxels(unsigned int species, unsigned int run)
@@ -231,14 +230,14 @@ double AbstractSimulation::GetCurrentTime()
     return mTime;
 }
 
-double AbstractSimulation::GetSpacing()
-{
-    return m_h;
-}
-
 double AbstractSimulation::GetVoxelSize()
 {
     return mVoxelSize;
+}
+
+vector<double> AbstractSimulation::GetVoxelDims()
+{
+    return mVoxelDims;
 }
 
 unsigned AbstractSimulation::GetInitialTotalMolecules(unsigned int species)
@@ -274,11 +273,6 @@ unsigned AbstractSimulation::GetNumRuns()
 unsigned AbstractSimulation::GetNumSpecies()
 {
     return mNumSpecies;
-}
-
-string AbstractSimulation::GetNumMethod()
-{
-    return mNumMethod;
 }
 
 vector<double> AbstractSimulation::GetDomainBounds()
@@ -333,7 +327,7 @@ double AbstractSimulation::GetRelativeError(const vector<double>& analytic, unsi
     return error;
 }
 
-void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep)
+void AbstractSimulation::Run(const string &output, const double &endtime, const double &timestep, const unsigned& threads)
 {
     // Initialise progress object
     auto num_steps = unsigned(endtime/timestep);
@@ -345,7 +339,7 @@ void AbstractSimulation::Run(const string &output, const double &endtime, const 
     for (unsigned i=0; i < num_steps; i++)
     {
         // Move to the next time step
-        this->Advance(i*timestep);
+        this->Advance(i * timestep, threads);
 
         for (unsigned species=0; species < mNumSpecies; species++)
         {

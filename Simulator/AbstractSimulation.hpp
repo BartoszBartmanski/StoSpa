@@ -28,6 +28,7 @@
 #include "Utilities.hpp"
 #include "Parameters.hpp"
 #include "Extrande.hpp"
+#include "JumpRates.hpp"
 
 using namespace std;
 
@@ -53,9 +54,6 @@ protected:
     /** Number of species in the simulation. */
     unsigned mNumSpecies;
 
-    /** Numerical method from which jump coefficients are derived. */
-    string mNumMethod;
-
     /** Number of voxels in the simulation. */
     vector<unsigned> mNumVoxels;
 
@@ -76,8 +74,8 @@ protected:
     /** Number of jumps at the at time in the simulation. */
     vector<unsigned> mNumJumps;
 
-    /** Voxel width in one dimension and voxel height in two dimensions. */
-    double m_h;
+    /** Vector of lengths of the voxel in every direction. */
+    vector<double> mVoxelDims;
 
     /** Voxel size (not necessarily the same as the voxel spacing) */
     double mVoxelSize;
@@ -133,10 +131,9 @@ public:
 
     /**
      * Method that will invoke SSA loop
-     * @param iterator
-     * @param time_step
+     * @param time_point
      */
-    void Advance(const double& time_step, const unsigned& iterator=1);
+    void Advance(const double& time_point, const unsigned& threads=1);
 
     /** Method to occupy the grid with the time increments at the beginning of the simulation. */
     void SetupTimeIncrements();
@@ -148,7 +145,7 @@ public:
      * @param production
      * @param species
      */
-    virtual void SetDiffusionRate(double diffusion_coefficient, unsigned species)=0;
+    virtual void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species) =0;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
@@ -209,16 +206,16 @@ public:
     double GetCurrentTime();
 
     /**
-     * Returns spacing in the simulation (either the voxel size in 1d or the vertical voxel size in 2d).
-     * @return mSpacing
-     */
-    double GetSpacing();
-
-    /**
      * Returns voxel size
      * @return mVoxelSize
      */
     double GetVoxelSize();
+
+    /**
+     * Returns vector of lengths of a voxel.
+     * @return mVoxelDims
+     */
+    vector<double> GetVoxelDims();
 
     /**
      * Returns the total number of molecules in the simulation of the specified species.
@@ -260,12 +257,6 @@ public:
     unsigned GetNumSpecies();
 
     /**
-     * Returns the numerical method used to derive the values of lambda associated with diffusion.
-     * @return mNumMethod
-     */
-    string GetNumMethod();
-
-    /**
      * Returns the domain bounds.
      * @return mDomainBounds
      */
@@ -298,7 +289,7 @@ public:
      */
     double GetRelativeError(const vector<double>& analytic, unsigned species=0);
 
-    void Run(const string& output, const double& endtime, const double& timestep);
+    void Run(const string& output, const double& endtime, const double& timestep, const unsigned& threads=1);
 
 };
 

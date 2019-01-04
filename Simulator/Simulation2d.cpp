@@ -1,7 +1,7 @@
-#include "Simulation_2d.hpp"
+#include "Simulation2d.hpp"
 
-Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num_method, unsigned num_voxels,
-                             vector<double> domain_bounds, string boundary_condition, double ratio)
+Simulation2d::Simulation2d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
+                             string boundary_condition, double ratio)
 {
     // First check the input parameters
     assert(num_runs > 0);
@@ -15,11 +15,10 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mNumSpecies = num_species;
     mNumVoxels = {num_voxels, unsigned(ratio * num_voxels)};
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
-    mNumMethod = move(num_method);
-    mDomainBounds = domain_bounds;
+    mDomainBounds = move(domain_bounds);
     mBC = move(boundary_condition);
 
-    // Additional input parameters (due to working in 2d)
+    // Correction to mRatio
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
 
     // Simulation attributes that will change with each time step
@@ -27,8 +26,10 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[1]);
-    mVoxelSize = pow(m_h, 2) * mRatio;
+    double domain_size = mDomainBounds[1] - mDomainBounds[0];
+    mVoxelDims = {domain_size/mNumVoxels[0], domain_size/mNumVoxels[1]};
+    mVoxelSize = mVoxelDims[0] * mVoxelDims[1];
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 
@@ -40,7 +41,7 @@ Simulation_2d::Simulation_2d(unsigned num_runs, unsigned num_species, string num
 
 }
 
-Simulation_2d::Simulation_2d(Parameters params)
+Simulation2d::Simulation2d(Parameters params)
 {
     // First check the input parameters
     assert(params.GetNumRuns() > 0);
@@ -58,23 +59,21 @@ Simulation_2d::Simulation_2d(Parameters params)
     mNumSpecies = params.GetNumSpecies();
     mNumVoxels = {params.GetNumVoxels(), unsigned(params.GetKappa() * params.GetNumVoxels())};
     mTotalNumVoxels = mNumVoxels[0] * mNumVoxels[1];
-    mNumMethod = params.GetNumMethod();
     mDomainBounds = params.GetDomainBounds();
     mBC = params.GetBC();
 
     // Additional input parameters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
-    mAlpha = params.GetAlpha();
-    mBetaX = params.GetBeta()[0];
-    mBetaY = params.GetBeta()[1];
 
     // Simulation attributes that will change with each time step
     mNumJumps = vector<unsigned>(mNumRuns, 0);
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    m_h = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[1]);
-    mVoxelSize = pow(m_h, 2) * mRatio;
+    double domain_size = mDomainBounds[1] - mDomainBounds[0];
+    mVoxelDims = {domain_size/mNumVoxels[0], domain_size/mNumVoxels[1]};
+    mVoxelSize = mVoxelDims[0] * mVoxelDims[1];
+
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
 
@@ -86,117 +85,39 @@ Simulation_2d::Simulation_2d(Parameters params)
 
 }
 
-double Simulation_2d::GetVoxelRatio()
+double Simulation2d::GetVoxelRatio()
 {
     return mRatio;
 }
 
-void Simulation_2d::SetAlpha(double value)
-{
-    assert(value >= 0.0);
-    mAlpha = value;
-}
-
-double Simulation_2d::GetAlpha()
-{
-    return mAlpha;
-}
-
-void Simulation_2d::SetBeta(vector<double> values)
-{
-    assert(values.size() == 2);
-    for (const auto& val : values)
-    {
-        assert(val >= 0.0 and val <= 1.0);
-    }
-    mBetaX = values[0];
-    mBetaY = values[1];
-}
-
-vector<double> Simulation_2d::GetBeta()
-{
-    return {mBetaX, mBetaY};
-}
-
-void Simulation_2d::SetDiffusionRate(double diff, unsigned int species)
+void Simulation2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
 {
     // Check for sensible input
     assert(diff >= 0.0);
     assert(species < mNumSpecies);
 
-    unique_ptr<JumpRate> jump_rate;
-    if (mNumMethod == "fdm")
-    {
-        jump_rate = make_unique<FDM>(mRatio, m_h, mAlpha);
-    }
-    else if (mNumMethod == "fem")
-    {
-        jump_rate = make_unique<FEM>(mRatio, m_h);
-    }
-    else if (mNumMethod == "fvm")
-    {
-        jump_rate = make_unique<FVM>(mRatio, m_h);
-    }
-    else if (mNumMethod == "fet")
-    {
-        jump_rate = make_unique<FET>(mRatio, m_h, mBetaX, mBetaY, 1000);
-    }
-    else if (mNumMethod == "fetU")
-    {
-        jump_rate = make_unique<FETUniform>(mRatio, m_h, mBetaX, mBetaY, 1000);
-    }
-    else
-    {
-        throw runtime_error("Unknown input for numerical method from which to derive the jump coefficients!");
-    }
-
     mDiffusionCoefficients[species] = diff;
 
     vector<vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
-    if (mBC == "reflective")
-    {
-        for (auto direction : directions)
-        {
-            if (direction[1] == 0)  // Horizontal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda1(), species, direction));
-            }
-            else if (direction[0] == 0)  // Vertical jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda3(), species, direction));
-            }
-            else  // Diagonal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionReflective>(diff * jump_rate->GetLambda2(), species, direction));
-            }
-        }
-    }
-    else if (mBC == "periodic")
-    {
-        for (auto direction : directions)
-        {
-            if (direction[1] == 0)  // Horizontal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda1(), species, direction));
-            }
-            else if (direction[0] == 0)  // Vertical jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda3(), species, direction));
-            }
-            else  // Diagonal jumps
-            {
-                mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * jump_rate->GetLambda2(), species, direction));
-            }
-        }
-    }
-    else
-    {
-        throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
-    }
 
+    for (auto direction : directions)
+    {
+        if (mBC == "reflective")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "periodic")
+        {
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
+        }
+        else
+        {
+            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        }
+    }
 }
 
-void Simulation_2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
+void Simulation2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -212,7 +133,7 @@ void Simulation_2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigne
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_2d::SetInitialState(vector<vector<unsigned> > initial_state, unsigned species)
+void Simulation2d::SetInitialState(vector<vector<unsigned> > initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -237,7 +158,7 @@ void Simulation_2d::SetInitialState(vector<vector<unsigned> > initial_state, uns
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation_2d::SetInitialState(vector<vector<int> > initial_state, unsigned species)
+void Simulation2d::SetInitialState(vector<vector<int> > initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);

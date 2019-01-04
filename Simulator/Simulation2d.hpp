@@ -1,48 +1,53 @@
 //
-// Created by bartmanski on 07/04/17.
+// Created by bartosz on 05/05/17.
 //
 
-#ifndef STOSPA_SIMULATION_1D_HPP
-#define STOSPA_SIMULATION_1D_HPP
+#ifndef STOSPA_SIMULATION_2D_HPP
+#define STOSPA_SIMULATION_2D_HPP
 
 #include "AbstractSimulation.hpp"
+#include "JumpRates.hpp"
 
 using namespace std;
 
-class Simulation_1d : public AbstractSimulation
+class Simulation2d : public AbstractSimulation
 {
+protected:
+
+    /** Ratio of horizontal spacing to the vertical spacing between voxels. */
+    double mRatio=1.0;
+
 public:
 
     /**
-     * Default constructor
+     * Constructor.
      * @param num_species - number of species
-     * @param num_method - numerical method from which the jump coefficients are derived
      * @param num_voxels - number of voxels present in the simulation
      * @param domain_bounds - bounds of the domain
      * @param boundary_condition - reflective or periodic boundary condition
      */
-    Simulation_1d(unsigned num_runs,
-                  unsigned num_species,
-                  string num_method,
-                  unsigned num_voxels,
-                  vector<double> domain_bounds,
-                  string boundary_condition);
-    explicit Simulation_1d(Parameters params);
+    Simulation2d(unsigned num_runs, unsigned num_species, unsigned num_voxels, vector<double> domain_bounds,
+                  string boundary_condition, double ratio);
+    explicit Simulation2d(Parameters params);
 
-    Simulation_1d(const Simulation_1d&) = delete; //move only type
-    Simulation_1d& operator=(const Simulation_1d&) = delete; //move only type
-    Simulation_1d(Simulation_1d&&) = default;
-    Simulation_1d& operator=(Simulation_1d&&) = default;
-    ~Simulation_1d() override = default;
+    Simulation2d(const Simulation2d&) = delete; //move only type
+    Simulation2d& operator=(const Simulation2d&) = delete; //move only type
+    Simulation2d(Simulation2d&&) = default;
+    Simulation2d& operator=(Simulation2d&&) = default;
+    ~Simulation2d() override = default;
+
+    /**
+     * Returns the aspect ratio of voxels (horizontal length divided by the vertical voxel length).
+     * @return a double
+     */
+    double GetVoxelRatio();
 
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diff
-     * @param decay
-     * @param production
      * @param species
      */
-    void SetDiffusionRate(double diff, unsigned species) override;
+    void SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species) override;
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
@@ -59,8 +64,6 @@ public:
      */
     void SetInitialState(vector<vector<unsigned> > initial_state, unsigned species) override;
     void SetInitialState(vector<vector<int> > initial_state, unsigned species) override;
-
 };
 
-
-#endif //STOSPA_SIMULATION_1D_HPP
+#endif //STOSPA_SIMULATION_2D_HPP

@@ -6,7 +6,7 @@
 #include "docopt.h"
 #include "Utilities.hpp"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
+#include "Simulator.hpp"
 
 
 static const char USAGE[] =
@@ -53,12 +53,12 @@ int main(int argc, const char** argv)
     p.SetBC("Exponential");
 
     // Declare a pointer for the simulation object
-    Simulation_1d sim(p);
+    Simulation1d sim(p);
     sim.UseExtrande();
 
     sim.SetInitialNumMolecules({0}, p.GetInitialNum()[0], 0);
 
-    sim.SetDiffusionRate(p.GetDiff()[0], 0);
+    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters

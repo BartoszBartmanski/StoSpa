@@ -12,9 +12,10 @@ Options:
     --species=<species>             Index of the species [default: 0]
 """
 
-from docopt import docopt
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
+from docopt import docopt
 
 
 def get_data(filename):

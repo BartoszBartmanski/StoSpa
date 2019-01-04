@@ -27,6 +27,7 @@ build*/*
 *.exe
 *.out
 *.app
+*.sh
 
 # Dropbox files
 *dropbox.attr

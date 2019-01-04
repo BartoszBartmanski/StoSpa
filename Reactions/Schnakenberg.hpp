@@ -32,6 +32,7 @@ public:
     void CheckNumSpecies(unsigned num_species) override
     {
         assert(num_species == 2);
+        (void)num_species;
     }
 
     double GetPropensity(const Grid& grid, const int& voxel_index) override

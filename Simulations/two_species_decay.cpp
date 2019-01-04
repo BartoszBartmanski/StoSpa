@@ -1,10 +1,7 @@
 #include <iostream>
-#include <algorithm>
 #include <Production.hpp>
 #include "docopt.h"
 #include "Parameters.hpp"
-#include "Simulation_1d.hpp"
-#include "Simulation_2d.hpp"
 #include "Simulator.hpp"
 #include "TwoSpeciesDecay.hpp"
 
@@ -70,8 +67,8 @@ int main(int argc, const char** argv)
     sim->SetInitialNumMolecules({0, 0}, p.GetInitialNum()[1], 1);
 
     // Setup the reaction rates
-    sim->SetDiffusionRate(p.GetDiff()[0], 0);
-    sim->SetDiffusionRate(p.GetDiff()[1], 1);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 1);
 
     p.SetProd({k_2, 0});
     sim->AddReaction(make_unique<Production>(k_2, 0));

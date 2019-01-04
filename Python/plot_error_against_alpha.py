@@ -10,10 +10,10 @@ Options:
     -h --help                       Show this screen
 """
 
-from docopt import docopt
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
 
+from docopt import docopt
 
 if __name__ == '__main__':
 

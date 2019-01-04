@@ -13,9 +13,10 @@ Options:
     --1d                            Plots the error along beta_x = beta_y
 """
 
-from docopt import docopt
-import numpy as np
 import matplotlib.pyplot as plt
+import numpy as np
+
+from docopt import docopt
 
 
 def get_data(filename):
