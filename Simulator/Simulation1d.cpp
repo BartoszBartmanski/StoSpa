@@ -89,10 +89,6 @@ void Simulation1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, 
         {
             mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
         }
-        else if (mBC == "Exponential")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(diff * method->GetLambda(direction), species, direction, 1.0));
-        }
         else
         {
             throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
