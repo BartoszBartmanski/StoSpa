@@ -18,6 +18,9 @@ Simulation1d::Simulation1d(unsigned num_runs, unsigned num_species, unsigned num
     mDomainBounds = move(domain_bounds);
     mBC = move(boundary_condition);
 
+    // Defines the directions in which molecules can jump
+    mJumpDirections = {{-1,0}, {1,0}};
+
     // Simulation attributes that will change with each time step
     mNumJumps = vector<unsigned>(mNumRuns, 0);
     mTime = 0.0;
@@ -52,6 +55,9 @@ Simulation1d::Simulation1d(Parameters params)
     mDomainBounds = params.GetDomainBounds();
     mBC = params.GetBC();
 
+    // Defines the directions in which molecules can jump
+    mJumpDirections = {{-1,0}, {1,0}};
+
     // Simulation attributes that will change with each time step
     mNumJumps = vector<unsigned>(mNumRuns, 0);
     mTime = 0.0;
@@ -67,36 +73,6 @@ Simulation1d::Simulation1d(Parameters params)
     for (unsigned run=0; run < mNumRuns; run++)
     {
         mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
-    }
-}
-
-void Simulation1d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
-{
-    // Check for sensible input
-    assert(diff >= 0.0);
-    assert(species < mNumSpecies);
-
-    mDiffusionCoefficients[species] = diff;
-
-    vector<vector<int>> directions = {{-1,0}, {1,0}};
-    for (auto direction : directions)
-    {
-        if (mBC == "reflective")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
-        }
-        else if (mBC == "periodic")
-        {
-            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
-        }
-        else if (mBC == "Exponential")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(diff * method->GetLambda(direction), species, direction, 1.0));
-        }
-        else
-        {
-            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
-        }
     }
 }
 

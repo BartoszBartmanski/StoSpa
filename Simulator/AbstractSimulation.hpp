@@ -80,6 +80,9 @@ protected:
     /** Voxel size (not necessarily the same as the voxel spacing) */
     double mVoxelSize;
 
+    /** Vector of jump directions. */
+    vector<vector<int>> mJumpDirections;
+
     /** Total number of molecules of each species. Each entry corresponds to a species in the simulation. */
     vector<unsigned> mTotalNumMolecules;
 
@@ -145,7 +148,7 @@ public:
      * @param production
      * @param species
      */
-    virtual void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species) =0;
+    void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species);
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index

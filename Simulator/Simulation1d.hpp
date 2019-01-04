@@ -31,15 +31,6 @@ public:
     ~Simulation1d() override = default;
 
     /**
-     * Method that populates the mLambdas vector (vector of propensities).
-     * @param diff
-     * @param decay
-     * @param production
-     * @param species
-     */
-    void SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species) override;
-
-    /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
      * @param voxel_index - index of the voxel where the molecules will be placed
      * @param num_molecules - number of molecules that will be placed

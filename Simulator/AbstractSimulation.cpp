@@ -124,6 +124,31 @@ void AbstractSimulation::SetupTimeIncrements()
     }
 }
 
+void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double diff, unsigned species)
+{
+    // Check for sensible input
+    assert(diff >= 0.0);
+    assert(species < mNumSpecies);
+
+    mDiffusionCoefficients[species] = diff;
+
+    for (auto direction : mJumpDirections)
+    {
+        if (mBC == "reflective")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "periodic")
+        {
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
+        }
+        else
+        {
+            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        }
+    }
+}
+
 void AbstractSimulation::SetSeed(unsigned number)
 {
     mSeed = number;

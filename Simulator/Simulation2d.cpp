@@ -18,6 +18,9 @@ Simulation2d::Simulation2d(unsigned num_runs, unsigned num_species, unsigned num
     mDomainBounds = move(domain_bounds);
     mBC = move(boundary_condition);
 
+    // Defines the directions in which molecules can jump
+    mJumpDirections = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+
     // Correction to mRatio
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
 
@@ -62,6 +65,9 @@ Simulation2d::Simulation2d(Parameters params)
     mDomainBounds = params.GetDomainBounds();
     mBC = params.GetBC();
 
+    // Defines the directions in which molecules can jump
+    mJumpDirections = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
+
     // Additional input parameters (due to working in 2d)
     mRatio = mNumVoxels[1]/double(mNumVoxels[0]);  // correction for some values of aspect ratio not being possible
 
@@ -88,33 +94,6 @@ Simulation2d::Simulation2d(Parameters params)
 double Simulation2d::GetVoxelRatio()
 {
     return mRatio;
-}
-
-void Simulation2d::SetDiffusionRate(unique_ptr<JumpRate> &&method, double diff, unsigned species)
-{
-    // Check for sensible input
-    assert(diff >= 0.0);
-    assert(species < mNumSpecies);
-
-    mDiffusionCoefficients[species] = diff;
-
-    vector<vector<int>> directions = {{1, 0}, {1, 1}, {0, 1}, {-1, 1}, {-1, 0}, {-1, -1}, {0, -1}, {1, -1}};
-
-    for (auto direction : directions)
-    {
-        if (mBC == "reflective")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
-        }
-        else if (mBC == "periodic")
-        {
-            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
-        }
-        else
-        {
-            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
-        }
-    }
 }
 
 void Simulation2d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)

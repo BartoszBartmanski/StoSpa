@@ -30,14 +30,12 @@ JumpRate1d::JumpRate1d(vector<double> voxel_dims)
 
 double JumpRate1d::GetLambda0()
 {
-    double lambda_0 = 2.0 / pow(mH, 2);
-    return lambda_0;
+    return 2.0 / pow(mH, 2);
 }
 
 double JumpRate1d::GetLambda1()
 {
-    double lambda_1 = 1.0 / pow(mH, 2);
-    return lambda_1;
+    return 1.0 / pow(mH, 2);
 }
 
 double JumpRate1d::GetLambda2()
