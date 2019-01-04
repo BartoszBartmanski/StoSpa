@@ -22,12 +22,6 @@ public:
         mReactionName = "GrayScott_I";
     }
 
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
-    }
-
     void CheckNumSpecies(unsigned num_species) override
     {
         assert(num_species == 3);
@@ -72,12 +66,6 @@ public:
 
         mRateConstant = reaction_rate;
         mReactionName = "GrayScott_II";
-    }
-
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
     }
 
     void CheckNumSpecies(unsigned num_species) override
