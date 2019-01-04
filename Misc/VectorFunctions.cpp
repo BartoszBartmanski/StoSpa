@@ -47,28 +47,6 @@ vector<vector<unsigned>> ones(vector<unsigned> shape)
     return output;
 }
 
-double vec_sum(vector<double> vec)
-{
-    double sum = 0.0;
-    for (double elem : vec)
-    {
-        sum += elem;
-    }
-
-    return sum;
-}
-
-unsigned vec_sum(vector<unsigned> vec)
-{
-    unsigned sum = 0;
-    for (unsigned elem : vec)
-    {
-        sum += elem;
-    }
-
-    return sum;
-}
-
 bool operator==(const vector<double>& v1, const vector<double>& v2)
 {
     assert(v1.size() == v2.size());
