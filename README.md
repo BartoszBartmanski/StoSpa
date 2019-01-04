@@ -72,5 +72,7 @@ Lastly, we run the simulation using the member function Run.
 sim.Run(sim_name, end_time, time_step);
 ```
 
+After we run this simulation we get the following output
+![](http://users.ox.ac.uk/~shil4444/sim.gif)
 
 
