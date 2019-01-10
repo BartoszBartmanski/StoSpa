@@ -136,7 +136,7 @@ public:
      * Method that will invoke SSA loop
      * @param time_point
      */
-    void Advance(const double& time_point, const unsigned& threads=1);
+    void Advance(const double& time_point);
 
     /** Method to occupy the grid with the time increments at the beginning of the simulation. */
     void SetupTimeIncrements();
@@ -292,7 +292,7 @@ public:
      */
     double GetRelativeError(const vector<double>& analytic, unsigned species=0);
 
-    void Run(const string& output, const double& endtime, const double& timestep, const unsigned& threads=1);
+    void Run(const string& output, const double& endtime, const double& timestep);
 
 };
 

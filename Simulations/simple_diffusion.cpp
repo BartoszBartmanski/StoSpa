@@ -79,7 +79,7 @@ int main(int argc, const char** argv)
     // Check whether this file name already exists and alter it appropriately
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());
     p.Save(path_to_file);
-    sim->Run(path_to_file, p.GetEndTime(), p.GetTimeStep(), p.GetNumThreads());
+    sim->Run(path_to_file, p.GetEndTime(), p.GetTimeStep());
 
     return 0;
 }
