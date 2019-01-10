@@ -33,6 +33,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --start_index=<index>                         The start index of the simulations. [default: 0]
       --diff=<diff>                                 Diffusion coefficient [default: 1.0].
       --initial_num=<num>                           Initial number of molecules [default: 1000].
+      --growth_rate=<rate>                          Growth rate of the domain. [default: 1.0]
 )";
 
 int main(int argc, const char** argv)
@@ -44,7 +45,10 @@ int main(int argc, const char** argv)
     Parameters p(args);
     p.SetComments("Data for the simulation.");
     p.SetCommand(arr_to_str(argc, argv));
+    p.SetBC("Exponential");
+    p.Add("growth_rate", args["--growth_rate"].asString());
     p.Add("data_type", "molecules");
+    double growth = stod(args["--growth_rate"].asString());
 
     // Declare the simulation name
     string sim_name = "growing_domain";
@@ -58,7 +62,7 @@ int main(int argc, const char** argv)
 
     sim.SetInitialNumMolecules({0}, p.GetInitialNum()[0], 0);
 
-    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0, growth);
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters

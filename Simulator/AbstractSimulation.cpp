@@ -124,7 +124,7 @@ void AbstractSimulation::SetupTimeIncrements()
     }
 }
 
-void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double diff, unsigned species)
+void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double diff, unsigned species, double growth_rate)
 {
     // Check for sensible input
     assert(diff >= 0.0);
@@ -141,6 +141,10 @@ void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double 
         else if (mBC == "periodic")
         {
             mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
+        }
+        else if (mBC == "Exponential")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(diff * method->GetLambda(direction), species, direction, growth_rate));
         }
         else
         {

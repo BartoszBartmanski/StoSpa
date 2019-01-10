@@ -148,7 +148,7 @@ public:
      * @param production
      * @param species
      */
-    void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species);
+    void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species, double growth_rate=0.0);
 
     /**
      * Method to place the specified number of molecules of the specified species at the specified voxel index
