@@ -8,11 +8,12 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
                                            mTimesSet(false),
                                            mExtrande(false),
                                            mExtrandeIndex(0),
+                                           mGrowth(false),
                                            mNumRuns(1),
                                            mNumSpecies(1),
                                            mTotalNumVoxels(1),
                                            mTime(0),
-                                           mVoxelSize(0)
+                                           mInitialVoxelSize(0)
 {
     mNumJumps = vector<unsigned>(mNumRuns, 0);
     random_device rd;
@@ -22,15 +23,6 @@ AbstractSimulation::AbstractSimulation() : inf(numeric_limits<double>::infinity(
 
     mDiffusionCoefficients.resize(mNumSpecies);
 
-}
-
-void AbstractSimulation::AddReaction(unique_ptr<AbstractReaction>&& reaction)
-{
-    reaction->CheckNumSpecies(mNumSpecies);
-    if (reaction->GetRateConstant() > 0)
-    {
-        mReactions.emplace_back(move(reaction));
-    }
 }
 
 unsigned AbstractSimulation::NextReaction(const unsigned& run, const int& voxel_index)
@@ -124,60 +116,17 @@ void AbstractSimulation::SetupTimeIncrements()
     }
 }
 
-void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double diff, unsigned species, double growth_rate)
-{
-    // Check for sensible input
-    assert(diff >= 0.0);
-    assert(species < mNumSpecies);
-
-    mDiffusionCoefficients[species] = diff;
-
-    for (auto direction : mJumpDirections)
-    {
-        if (mBC == "reflective")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
-        }
-        else if (mBC == "periodic")
-        {
-            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
-        }
-        else if (mBC == "Exponential")
-        {
-            mReactions.emplace_back(make_unique<DiffusionReflectiveExp>(diff * method->GetLambda(direction), species, direction, growth_rate));
-        }
-        else
-        {
-            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
-        }
-    }
-}
-
-void AbstractSimulation::SetSeed(unsigned number)
-{
-    mSeed = number;
-    mGen = mt19937(number);
-}
-
-unsigned AbstractSimulation::GetSeed()
-{
-    return mSeed;
-}
-
-void AbstractSimulation::UseExtrande()
-{
-    mExtrande = true;
-    // Add the (none -> none) reaction
-    mReactions.emplace_back(make_unique<Extrande>());
-    mExtrandeIndex = unsigned(mReactions.size()) - 1;
-}
-
 void AbstractSimulation::SSA_loop(const unsigned& run)
 {
     // Find the smallest time until the next reaction
     double inv_time = mGrids[run].next_reaction_time.top().first;
     mGrids[run].time = 1.0 / inv_time;
     unsigned voxel_index = mGrids[run].next_reaction_time.top().second;
+
+    if (mGrowth)
+    {
+        mGrids[run].voxelSize = mGrowthRate->GetFunction(mGrids[run].time) * mInitialVoxelSize;
+    }
 
     if (mGrids[run].time < inf)
     {
@@ -195,7 +144,6 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
         // Update the number of jumps variable
         mNumJumps[run] += 1;
     }
-
 }
 
 
@@ -216,12 +164,76 @@ void AbstractSimulation::Advance(const double &time_point)
     mTime = time_point;
 }
 
-vector<unsigned> AbstractSimulation::GetVoxels(unsigned int species, unsigned int run)
+void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double diff, unsigned species)
+{
+    // Check for sensible input
+    assert(diff >= 0.0);
+    assert(species < mNumSpecies);
+
+    mDiffusionCoefficients[species] = diff;
+
+    for (auto direction : mJumpDirections)
+    {
+        if (mBC == "reflective")
+        {
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction, mInitialVoxelSize));
+        }
+        else if (mBC == "periodic")
+        {
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction, mInitialVoxelSize));
+        }
+        else
+        {
+            throw runtime_error("Boundary condition can only be one of the following: reflective, periodic");
+        }
+    }
+}
+
+void AbstractSimulation::AddReaction(unique_ptr<AbstractReaction>&& reaction)
+{
+    reaction->CheckNumSpecies(mNumSpecies);
+    if (reaction->GetRateConstant() > 0)
+    {
+        mReactions.emplace_back(move(reaction));
+    }
+}
+
+void AbstractSimulation::SetSeed(unsigned number)
+{
+    mSeed = number;
+    mGen = mt19937(number);
+}
+
+unsigned AbstractSimulation::GetSeed()
+{
+    return mSeed;
+}
+
+void AbstractSimulation::UseExtrande()
+{
+    if (!mExtrande)
+    {
+        // Add the (none -> none) reaction
+        mReactions.emplace_back(make_unique<Extrande>());
+        mExtrandeIndex = unsigned(mReactions.size()) - 1;
+
+        mExtrande = true;
+    }
+}
+
+void AbstractSimulation::SetGrowth(unique_ptr<GrowthRate>&& growth)
+{
+    mGrowth = true;
+    mGrowthRate = move(growth);
+    this->UseExtrande();
+}
+
+vector<unsigned> AbstractSimulation::GetVoxels(unsigned species, unsigned int run)
 {
     return mGrids[run].voxels[species];
 }
 
-vector<double> AbstractSimulation::GetConcentration(unsigned int species)
+vector<double> AbstractSimulation::GetConcentration(unsigned species)
 {
     vector<double> concentration(mTotalNumVoxels);
 
@@ -229,12 +241,12 @@ vector<double> AbstractSimulation::GetConcentration(unsigned int species)
     {
         concentration = concentration + mGrids[run].voxels[species];
     }
-    concentration = concentration / (mNumRuns * mTotalNumMolecules[species] * mVoxelSize);
+    concentration = concentration / (mNumRuns * mTotalNumMolecules[species] * mInitialVoxelSize);
 
     return concentration;
 }
 
-vector<double> AbstractSimulation::GetAverageNumMolecules(unsigned int species)
+vector<double> AbstractSimulation::GetAverageNumMolecules(unsigned species)
 {
     vector<double> molecules(mTotalNumVoxels);
     for (unsigned run=0; run < mNumRuns; run++)
@@ -247,12 +259,6 @@ vector<double> AbstractSimulation::GetAverageNumMolecules(unsigned int species)
     return molecules;
 }
 
-vector<unsigned> AbstractSimulation::GetNumMolecules(unsigned species, unsigned run)
-{
-    assert(species < mNumSpecies);
-    return mGrids[run].voxels[species];
-}
-
 double AbstractSimulation::GetCurrentTime()
 {
     return mTime;
@@ -260,7 +266,13 @@ double AbstractSimulation::GetCurrentTime()
 
 double AbstractSimulation::GetVoxelSize()
 {
-    return mVoxelSize;
+    double value = mInitialVoxelSize;
+    if (mGrowth)
+    {
+        value = mInitialVoxelSize * mGrowthRate->GetFunction(mTime);
+    }
+
+    return value;
 }
 
 vector<double> AbstractSimulation::GetVoxelDims()
@@ -330,7 +342,7 @@ double AbstractSimulation::GetError(const vector<double>& analytic, unsigned spe
         error += (u_stochastic[i] - analytic[i]) * (u_stochastic[i] - analytic[i]);
     }
 
-    error = sqrt(mVoxelSize * error);
+    error = sqrt(mInitialVoxelSize * error);
 
     return error;
 }
@@ -349,8 +361,8 @@ double AbstractSimulation::GetRelativeError(const vector<double>& analytic, unsi
         error += (u_stochastic[i] - analytic[i]) * (u_stochastic[i] - analytic[i]);
     }
 
-    mod_u = sqrt(mVoxelSize * mod_u);
-    error = sqrt(mVoxelSize * error) / mod_u;
+    mod_u = sqrt(mInitialVoxelSize * mod_u);
+    error = sqrt(mInitialVoxelSize * error) / mod_u;
 
     return error;
 }

@@ -69,7 +69,7 @@ int main(int argc, const char** argv)
 
     // Setup the number of molecules
     if (initial_pos.empty()) { initial_pos = floor_div(sim->GetNumVoxels(), 2); }
-    sim->SetInitialNumMolecules(initial_pos, p.GetInitialNum()[0], 0);
+    sim->SetVoxels(initial_pos, p.GetInitialNum()[0], 0);
 
     // Setup the reaction rates (diffusion, decay and production)
     sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);

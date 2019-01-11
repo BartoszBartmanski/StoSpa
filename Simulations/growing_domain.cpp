@@ -7,6 +7,7 @@
 #include "Utilities.hpp"
 #include "Parameters.hpp"
 #include "Simulator.hpp"
+#include "GrowthRates.hpp"
 
 
 static const char USAGE[] =
@@ -25,6 +26,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --num_runs=<num_runs>                         Number of realisations [default: 1].
       --num_voxels=<num_voxels>                     Number of voxels. [default: 21]
       --domain_bounds=<domain_bounds>               The bounds of the domain. [default: 0.0,20.0]
+      --bc=<bc>                                     The boundary condition [default: reflective].
       --kappa=<kappa>                               The voxel aspect ratio [default: 1.0].
       --alpha=<alpha>                               The value of alpha [default: 0.0].
       --beta=<beta>                                 The value of beta [default: 0.0,0.0].
@@ -45,24 +47,23 @@ int main(int argc, const char** argv)
     Parameters p(args);
     p.SetComments("Data for the simulation.");
     p.SetCommand(arr_to_str(argc, argv));
-    p.SetBC("Exponential");
-    p.Add("growth_rate", args["--growth_rate"].asString());
+    p.SetNumSpecies(1);
     p.Add("data_type", "molecules");
+    p.Add("growth_rate", args["--growth_rate"].asString());
     double growth = stod(args["--growth_rate"].asString());
 
     // Declare the simulation name
     string sim_name = "growing_domain";
     if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
 
-    p.SetBC("Exponential");
-
     // Declare a pointer for the simulation object
     Simulation1d sim(p);
-    sim.UseExtrande();
 
-    sim.SetInitialNumMolecules({0}, p.GetInitialNum()[0], 0);
+    sim.SetVoxels({0}, p.GetInitialNum()[0], 0);
 
-    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0, growth);
+    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+
+    sim.SetGrowth(make_unique<Exponential>(p.GetNumDims(), growth));
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters

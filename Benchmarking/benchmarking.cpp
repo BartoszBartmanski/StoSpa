@@ -27,7 +27,7 @@ void benchmark(unsigned num_dims, unsigned num_runs, const string& file_name)
         sim->SetDiffusionRate(make_unique<FVM>(sim->GetVoxelDims()), 1.0, 0);
     }
 
-    sim->SetInitialNumMolecules(floor_div(sim->GetNumVoxels(), 2), 1000, 0);
+    sim->SetVoxels(floor_div(sim->GetNumVoxels(), 2), 1000, 0);
 
     chrono::high_resolution_clock::time_point t1 = chrono::high_resolution_clock::now();
     sim->Advance(5.0);

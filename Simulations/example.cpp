@@ -23,7 +23,7 @@ int main(int argc, const char** argv)
     Simulation1d sim(num_runs, num_species, num_voxels, domain_bounds, bc);
 
     // Setup the number of molecules
-    sim.SetInitialNumMolecules({0}, 1000, 0);
+    sim.SetVoxels({0}, 1000, 0);
 
     // Setup the reaction rates (diffusion, decay and production)
     sim.SetDiffusionRate(get_jump_rates(sim.GetVoxelDims()), diff, 0);

@@ -29,6 +29,7 @@
 #include "Parameters.hpp"
 #include "Extrande.hpp"
 #include "JumpRates.hpp"
+#include "GrowthRates.hpp"
 
 using namespace std;
 
@@ -47,6 +48,11 @@ protected:
 
     /** Index of the Extrande reaction in the mReactions vector. */
     unsigned mExtrandeIndex;
+
+    /** Whether the domain grows. */
+    bool mGrowth;
+
+    unique_ptr<GrowthRate> mGrowthRate;
 
     /** Number of runs of this simulation */
     unsigned mNumRuns;
@@ -78,7 +84,7 @@ protected:
     vector<double> mVoxelDims;
 
     /** Voxel size (not necessarily the same as the voxel spacing) */
-    double mVoxelSize;
+    double mInitialVoxelSize;
 
     /** Vector of jump directions. */
     vector<vector<int>> mJumpDirections;
@@ -121,11 +127,8 @@ public:
     AbstractSimulation(AbstractSimulation&&) = default;
     AbstractSimulation& operator=(AbstractSimulation&&) = default;
 
-    void SetSeed(unsigned number);
-
-    unsigned GetSeed();
-
-    void UseExtrande();
+    /** Method to occupy the grid with the time increments at the beginning of the simulation. */
+    void SetupTimeIncrements();
 
     /**
      * SSA loop. A single molecule jump or a single reaction.
@@ -138,9 +141,6 @@ public:
      */
     void Advance(const double& time_point);
 
-    /** Method to occupy the grid with the time increments at the beginning of the simulation. */
-    void SetupTimeIncrements();
-
     /**
      * Method that populates the mLambdas vector (vector of propensities).
      * @param diffusion
@@ -148,23 +148,7 @@ public:
      * @param production
      * @param species
      */
-    void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species, double growth_rate=0.0);
-
-    /**
-     * Method to place the specified number of molecules of the specified species at the specified voxel index
-     * @param voxel_index - index of the voxel where the molecules will be placed
-     * @param num_molecules - number of molecules that will be placed
-     * @param species - index of the species of the molecules
-     */
-    virtual void SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)=0;
-
-    /**
-     * Another method of initialising the number of molecules in the voxels
-     * @param initial_state - state of mVoxels initially
-     * @param species - species in the give state
-     */
-    virtual void SetInitialState(vector<vector<unsigned> > initial_state, unsigned species)=0;
-    virtual void SetInitialState(vector<vector<int> > initial_state, unsigned species)=0;
+    void SetDiffusionRate(unique_ptr<JumpRate>&& method, double diffusion_coefficient, unsigned species);
 
     /**
      * Method that adds different types of reactions from diffusion, decay and production.
@@ -172,6 +156,29 @@ public:
      * @param rate_constant
      */
     void AddReaction(unique_ptr<AbstractReaction>&& reaction);
+
+    void SetSeed(unsigned number);
+
+    unsigned GetSeed();
+
+    void UseExtrande();
+
+    void SetGrowth(unique_ptr<GrowthRate>&& growth);
+
+    /**
+     * Method to place the specified number of molecules of the specified species at the specified voxel index
+     * @param voxel_index - index of the voxel where the molecules will be placed
+     * @param num_molecules - number of molecules that will be placed
+     * @param species - index of the species of the molecules
+     */
+    virtual void SetVoxels(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)=0;
+
+    /**
+     * Another method of initialising the number of molecules in the voxels
+     * @param initial_state - state of mVoxels initially
+     * @param species - species in the give state
+     */
+    virtual void SetVoxels(vector<vector<unsigned> > initial_state, unsigned species)=0;
 
     /**
      * Returns the current state of the mVoxels
@@ -192,15 +199,7 @@ public:
      * @param species - index of the species
      * @return average_molecules
      */
-    vector<double> GetAverageNumMolecules(unsigned species = 0);
-
-    /**
-     * Returns the number of molecules of specified species and in a specified run
-     * @param species - index of the species
-     * @param run - index of the run
-     * @return vector<unsigned> for number of molecules.
-     */
-    vector<unsigned> GetNumMolecules(unsigned species = 0, unsigned run = 0);
+    vector<double> GetAverageNumMolecules(unsigned species=0);
 
     /**
      * Returns current time.
@@ -209,7 +208,7 @@ public:
     double GetCurrentTime();
 
     /**
-     * Returns voxel size
+     * Returns initial voxel size
      * @return mVoxelSize
      */
     double GetVoxelSize();
@@ -230,7 +229,7 @@ public:
     /**
      * Returns the current total number of molecules for given species index and given run.
      * @param species - index of the species
-     * @param run - inde
+     * @param run - index of the run
      * @return total number of molecules of specified species in the current state of the simulation.
      */
     unsigned GetTotalMolecules(unsigned species = 0, unsigned run = 0);

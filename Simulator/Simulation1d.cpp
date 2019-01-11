@@ -26,8 +26,8 @@ Simulation1d::Simulation1d(unsigned num_runs, unsigned num_species, unsigned num
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
-    mVoxelDims = {mVoxelSize};
+    mInitialVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mInitialVoxelSize};
 
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
@@ -35,7 +35,7 @@ Simulation1d::Simulation1d(unsigned num_runs, unsigned num_species, unsigned num
     mGrids.resize(mNumRuns);
     for (unsigned run=0; run < mNumRuns; run++)
     {
-        mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
+        mGrids[run] = Grid(mNumSpecies, mInitialVoxelSize, mNumVoxels[0], mNumVoxels[1]);
     }
 }
 
@@ -63,8 +63,8 @@ Simulation1d::Simulation1d(Parameters params)
     mTime = 0.0;
 
     // Simulation attributes that will remain constant throughout the simulation
-    mVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
-    mVoxelDims = {mVoxelSize};
+    mInitialVoxelSize = (mDomainBounds[1] - mDomainBounds[0]) / double(mNumVoxels[0]);
+    mVoxelDims = {mInitialVoxelSize};
 
     mTotalNumMolecules = vector<unsigned>(mNumSpecies, 0);
     mDiffusionCoefficients.resize(mNumSpecies);
@@ -72,11 +72,11 @@ Simulation1d::Simulation1d(Parameters params)
     mGrids.resize(mNumRuns);
     for (unsigned run=0; run < mNumRuns; run++)
     {
-        mGrids[run] = Grid(mNumSpecies, mVoxelSize, mNumVoxels[0], mNumVoxels[1]);
+        mGrids[run] = Grid(mNumSpecies, mInitialVoxelSize, mNumVoxels[0], mNumVoxels[1]);
     }
 }
 
-void Simulation1d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
+void Simulation1d::SetVoxels(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -91,7 +91,7 @@ void Simulation1d::SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned
     mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
 }
 
-void Simulation1d::SetInitialState(vector<vector<unsigned>> initial_state, unsigned species)
+void Simulation1d::SetVoxels(vector<vector<unsigned>> initial_state, unsigned species)
 {
     // Check that the input is sensible
     assert(species < mNumSpecies);
@@ -102,23 +102,6 @@ void Simulation1d::SetInitialState(vector<vector<unsigned>> initial_state, unsig
         for (unsigned run=0; run < mNumRuns; run++)
         {
             mGrids[run].voxels[species][i] = initial_state[0][i];
-        }
-    }
-
-    mTotalNumMolecules[species] = vec_sum(mGrids[0].voxels[species]);
-}
-
-void Simulation1d::SetInitialState(vector<vector<int>> initial_state, unsigned species)
-{
-    // Check that the input is sensible
-    assert(species < mNumSpecies);
-    assert(initial_state[0].size() == mNumVoxels[0]);
-
-    for (unsigned i=0; i < initial_state[0].size(); i++)
-    {
-        for (unsigned run=0; run < mNumRuns; run++)
-        {
-            mGrids[run].voxels[species][i] = unsigned(initial_state[0][i]);
         }
     }
 

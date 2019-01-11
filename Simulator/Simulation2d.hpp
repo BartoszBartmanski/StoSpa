@@ -48,15 +48,14 @@ public:
      * @param num_molecules - number of molecules that will be placed
      * @param species - index of the species of the molecules
      */
-    void SetInitialNumMolecules(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species) override;
+    void SetVoxels(vector<unsigned> voxel_index, unsigned num_molecules, unsigned species) override;
 
     /**
      * Another method of initialising the number of molecules in the voxels
      * @param initial_state - state of mVoxels initially
      * @param species - species in the give state
      */
-    void SetInitialState(vector<vector<unsigned> > initial_state, unsigned species) override;
-    void SetInitialState(vector<vector<int> > initial_state, unsigned species) override;
+    void SetVoxels(vector<vector<unsigned> > initial_state, unsigned species) override;
 };
 
 #endif //STOSPA_SIMULATION_2D_HPP
