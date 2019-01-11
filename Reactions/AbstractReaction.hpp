@@ -28,29 +28,37 @@ public:
     /** Default destructor. */
     virtual ~AbstractReaction()= default;
 
+    /** Set the rate constant for this reaction. */
+    void SetRateConstant(double rate_constant)
+    {
+        assert(rate_constant >= 0);
+        mRateConstant = rate_constant;
+    }
+
     /** Get the rate constant. */
-    virtual double GetRateConstant()
+    double GetRateConstant()
     {
         return mRateConstant;
     }
 
     /** Set the reaction name. */
-    virtual void SetReactionName(string reaction_name)
+    void SetReactionName(string reaction_name)
     {
         mReactionName = move(reaction_name);
     }
 
     /** Get the reaction name. */
-    virtual string GetReactionName()
+    string GetReactionName()
     {
         return mReactionName;
     }
 
-    /** Set the rate constant for this reaction. */
-    virtual void SetRateConstant(double rate_constant)=0;
-
     /** A check that the simulation has the appropriate number of species. */
-    virtual void CheckNumSpecies(unsigned num_species)=0;
+    virtual void CheckNumSpecies(unsigned num_species)
+    {
+        assert(num_species > 0);
+        (void)num_species;
+    }
 
     /** Get the propensity (this will be used within a simulation class). */
     virtual double GetPropensity(const Grid& grid, const int& voxel_index)=0;

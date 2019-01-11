@@ -61,8 +61,8 @@ int main(int argc, const char** argv)
     auto sim = simulator(p);
 
     // Setup the number of molecules
-    sim->SetInitialState(p.GetInitialNum()[0] * ones(sim->GetNumVoxels()), 0);
-    sim->SetInitialState(p.GetInitialNum()[1] * ones(sim->GetNumVoxels()), 1);
+    sim->SetVoxels(p.GetInitialNum()[0] * ones(sim->GetNumVoxels()), 0);
+    sim->SetVoxels(p.GetInitialNum()[1] * ones(sim->GetNumVoxels()), 1);
 
     // Setup the reaction rates
     sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);

@@ -22,18 +22,6 @@ public:
         mReactionName = "Production";
     }
 
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
-    }
-
-    void CheckNumSpecies(unsigned num_species) override
-    {
-        assert(num_species > 0);
-        (void)num_species;
-    }
-
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         (void)voxel_index;

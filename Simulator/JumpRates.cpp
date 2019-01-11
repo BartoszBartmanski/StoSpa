@@ -22,37 +22,37 @@ double JumpRate::GetLambda(vector<int> direction)
     return value;
 }
 
+string JumpRate::GetMethod()
+{
+    return mMethod;
+}
+
+double JumpRate::GetLambda0()
+{
+    return mLambda0;
+}
+
+double JumpRate::GetLambda1()
+{
+    return mLambda1;
+}
+
+double JumpRate::GetLambda2()
+{
+    return mLambda2;
+}
+
+double JumpRate::GetLambda3()
+{
+    return mLambda3;
+}
+
 JumpRate1d::JumpRate1d(vector<double> voxel_dims)
 {
     assert(!voxel_dims.empty());
     mH = voxel_dims[0];
-}
-
-double JumpRate1d::GetLambda0()
-{
-    double lambda_0 = 2.0 / pow(mH, 2);
-    return lambda_0;
-}
-
-double JumpRate1d::GetLambda1()
-{
-    double lambda_1 = 1.0 / pow(mH, 2);
-    return lambda_1;
-}
-
-double JumpRate1d::GetLambda2()
-{
-    return 0.0;
-}
-
-double JumpRate1d::GetLambda3()
-{
-    return 0.0;
-}
-
-string JumpRate::GetMethod()
-{
-    return mMethod;
+    mLambda0 = 2.0 / pow(mH, 2);
+    mLambda1 = 1.0 / pow(mH, 2);
 }
 
 FDM::FDM(vector<double> voxel_dims, double alpha)
@@ -69,26 +69,11 @@ FDM::FDM(vector<double> voxel_dims, double alpha)
         throw runtime_error(message);
     }
     mAlpha = alpha;
-}
 
-double FDM::GetLambda0()
-{
-    return 2.0 * (pow(mKappa, 2) - mAlpha * mKappa + 1) / pow(mKappa * mH, 2);
-}
-
-double FDM::GetLambda1()
-{
-    return (1.0 - mKappa * mAlpha) / pow(mKappa * mH, 2);
-}
-
-double FDM::GetLambda2()
-{
-    return mAlpha / (2.0 * mKappa * pow( mH, 2));
-}
-
-double FDM::GetLambda3()
-{
-    return (pow(mKappa, 2) - mKappa * mAlpha) / pow(mKappa * mH, 2);
+    mLambda0 = 2.0 * (pow(mKappa, 2) - mAlpha * mKappa + 1) / pow(mKappa * mH, 2);
+    mLambda1 = (1.0 - mKappa * mAlpha) / pow(mKappa * mH, 2);
+    mLambda2 = mAlpha / (2.0 * mKappa * pow( mH, 2));
+    mLambda3 = (pow(mKappa, 2) - mKappa * mAlpha) / pow(mKappa * mH, 2);
 }
 
 FEM::FEM(vector<double> voxel_dims)
@@ -100,26 +85,11 @@ FEM::FEM(vector<double> voxel_dims)
     mH = voxel_dims[1];
 
     assert(mKappa >= 1.0/sqrt(2) and mKappa <= sqrt(2));
-}
 
-double FEM::GetLambda0()
-{
-    return 4.0 * (pow(mKappa, 2) + 1) / (3.0 * pow(mKappa * mH, 2));
-}
-
-double FEM::GetLambda1()
-{
-    return (2.0 - pow(mKappa, 2)) / (3.0 * pow(mKappa * mH, 2));
-}
-
-double FEM::GetLambda2()
-{
-    return (pow(mKappa, 2) + 1) / (6.0 * pow(mKappa * mH, 2));
-}
-
-double FEM::GetLambda3()
-{
-    return (2.0 * pow(mKappa, 2) - 1) / (3.0 * pow(mKappa * mH, 2));
+    mLambda0 = 4.0 * (pow(mKappa, 2) + 1) / (3.0 * pow(mKappa * mH, 2));
+    mLambda1 = (2.0 - pow(mKappa, 2)) / (3.0 * pow(mKappa * mH, 2));
+    mLambda2 = (pow(mKappa, 2) + 1) / (6.0 * pow(mKappa * mH, 2));
+    mLambda3 = (2.0 * pow(mKappa, 2) - 1) / (3.0 * pow(mKappa * mH, 2));
 }
 
 FVM::FVM(vector<double> voxel_dims)
@@ -128,26 +98,11 @@ FVM::FVM(vector<double> voxel_dims)
     mMethod = "fvm";
     mKappa = voxel_dims[0] / voxel_dims[1];
     mH = voxel_dims[1];
-}
 
-double FVM::GetLambda0()
-{
-    return 2.0 * (pow(mKappa, 2) + 1) / (pow(mKappa * mH, 2));
-}
-
-double FVM::GetLambda1()
-{
-    return 1.0 / pow(mKappa * mH, 2);
-}
-
-double FVM::GetLambda2()
-{
-    return 0.0;
-}
-
-double FVM::GetLambda3()
-{
-    return 1.0 / pow(mH, 2);
+    mLambda0 = 2.0 * (pow(mKappa, 2) + 1) / (pow(mKappa * mH, 2));
+    mLambda1 = 1.0 / pow(mKappa * mH, 2);
+    mLambda2 = 0.0;
+    mLambda3 = 1.0 / pow(mH, 2);
 }
 
 FET::FET(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order)
@@ -161,10 +116,15 @@ FET::FET(vector<double> voxel_dims, double beta_x, double beta_y, unsigned trunc
     mH = voxel_dims[1];
     mBetaX = beta_x;
     mBetaY = beta_y;
-    mLambda0 = GetLambda0();
-    mTheta1 = GetTheta1();
-    mTheta3 = GetTheta3();
+
+    mTheta1 = this->GetTheta1();
+    mTheta3 = this->GetTheta3();
     mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+
+    mLambda0 = this->GetLambda0();
+    mLambda1 = mTheta1 * mLambda0;
+    mLambda2 = mTheta2 * mLambda0;
+    mLambda3 = mTheta3 * mLambda0;
 }
 
 FET::FET(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order)
@@ -179,10 +139,15 @@ FET::FET(vector<double> voxel_dims, vector<double> beta, unsigned truncation_ord
     mH = voxel_dims[1];
     mBetaX = beta[0];
     mBetaY = beta[1];
-    mLambda0 = GetLambda0();
-    mTheta1 = GetTheta1();
-    mTheta3 = GetTheta3();
+
+    mTheta1 = this->GetTheta1();
+    mTheta3 = this->GetTheta3();
     mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+
+    mLambda0 = this->GetLambda0();
+    mLambda1 = mTheta1 * mLambda0;
+    mLambda2 = mTheta2 * mLambda0;
+    mLambda3 = mTheta3 * mLambda0;
 }
 
 double FET::GetLambda0()
@@ -260,22 +225,6 @@ double FET::GetTheta3()
     return theta3;
 }
 
-double FET::GetLambda1()
-{
-    return mTheta1 * mLambda0;
-}
-
-double FET::GetLambda2()
-{
-    return mTheta2 * mLambda0;
-}
-
-double FET::GetLambda3()
-{
-    return mTheta3 * mLambda0;
-}
-
-
 FETUniform::FETUniform(vector<double> voxel_dims, double beta_x, double beta_y, unsigned truncation_order)
 {
     assert(voxel_dims.size() == 2);
@@ -288,10 +237,15 @@ FETUniform::FETUniform(vector<double> voxel_dims, double beta_x, double beta_y, 
     mH = voxel_dims[1];
     mBetaX = beta_x;
     mBetaY = beta_y;
-    mLambda0 = GetLambda0();
-    mTheta1 = GetTheta1();
-    mTheta3 = GetTheta3();
+
+    mTheta1 = this->GetTheta1();
+    mTheta3 = this->GetTheta3();
     mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+
+    mLambda0 = this->GetLambda0();
+    mLambda1 = mTheta1 * mLambda0;
+    mLambda2 = mTheta2 * mLambda0;
+    mLambda3 = mTheta3 * mLambda0;
 }
 
 FETUniform::FETUniform(vector<double> voxel_dims, vector<double> beta, unsigned truncation_order)
@@ -307,10 +261,15 @@ FETUniform::FETUniform(vector<double> voxel_dims, vector<double> beta, unsigned 
     mH = voxel_dims[1];
     mBetaX = beta[0];
     mBetaY = beta[1];
-    mLambda0 = GetLambda0();
-    mTheta1 = GetTheta1();
-    mTheta3 = GetTheta3();
+
+    mTheta1 = this->GetTheta1();
+    mTheta3 = this->GetTheta3();
     mTheta2 = 0.25*(1.0 - 2*mTheta1 - 2*mTheta3);
+
+    mLambda0 = this->GetLambda0();
+    mLambda1 = mTheta1 * mLambda0;
+    mLambda2 = mTheta2 * mLambda0;
+    mLambda3 = mTheta3 * mLambda0;
 }
 
 double FETUniform::GetLambda0()

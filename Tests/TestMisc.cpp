@@ -185,11 +185,6 @@ TEST_CASE("Test VectorFunctions.*pp")
         REQUIRE(test_double_1 == test_unsigned_1);
         REQUIRE(test_unsigned_1 == test_double_1);
         REQUIRE(test_unsigned_1 == test_unsigned_1);
-
-        result_double = 1.0 + test_double_1;
-        REQUIRE(result_double == test_double_3);
-        result_double = test_double_1 + 1.0;
-        REQUIRE(result_double == test_double_3);
         
         result_double = test_double_1 + test_double_4;
         REQUIRE(result_double == test_double_2);
@@ -205,15 +200,15 @@ TEST_CASE("Test VectorFunctions.*pp")
         result_unsigned = test_unsigned_2 - test_unsigned_4;
         REQUIRE(result_unsigned == test_unsigned_1);
 
-        result_double = 2 * test_double_1;
+        result_double = 2.0 * test_double_1;
         REQUIRE(result_double == test_double_5);
-        result_unsigned = 2 * test_unsigned_1;
+        result_unsigned = unsigned(2) * test_unsigned_1;
         REQUIRE(result_unsigned == test_unsigned_5);
 
         vector<vector<unsigned>> matrix_1 = {{0, 1}, {2, 3}};
         vector<vector<unsigned>> matrix_2 = {{0, 2}, {4, 6}};
         vector<vector<unsigned>> matrix_result;
-        matrix_result = 2 * matrix_1;
+        matrix_result = unsigned(2) * matrix_1;
         REQUIRE(matrix_result[0][0] == matrix_2[0][0]);
         REQUIRE(matrix_result[0][1] == matrix_2[0][1]);
         REQUIRE(matrix_result[1][0] == matrix_2[1][0]);

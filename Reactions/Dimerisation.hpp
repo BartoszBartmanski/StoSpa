@@ -26,17 +26,6 @@ public:
         mReactionName = "Dimerisation";
     }
 
-    void SetRateConstant(double rate_constant) override
-    {
-        mRateConstant = rate_constant;
-    }
-
-    void CheckNumSpecies(unsigned num_species) override
-    {
-        assert(num_species > 0);
-        (void)num_species;
-    }
-
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
         double propensity = mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] * (grid.voxels[mSpeciesIndex][voxel_index] - 1) / grid.voxelSize;

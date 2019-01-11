@@ -25,12 +25,6 @@ public:
         mReactionName = "MichaelisMentin_I";
     }
 
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
-    }
-
     void CheckNumSpecies(unsigned num_species) override
     {
         assert(num_species == 4);
@@ -72,12 +66,6 @@ public:
 
         mRateConstant = reaction_rate;
         mReactionName = "MichaelisMentin_II";
-    }
-
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
     }
 
     void CheckNumSpecies(unsigned num_species) override
@@ -122,12 +110,6 @@ public:
 
         mRateConstant = reaction_rate;
         mReactionName = "MichaelisMentin_III";
-    }
-
-    void SetRateConstant(double rate_constant) override
-    {
-        assert(rate_constant > 0);
-        mRateConstant = rate_constant;
     }
 
     void CheckNumSpecies(unsigned num_species) override

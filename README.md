@@ -63,7 +63,7 @@ Simulation1d sim(num_runs, num_species, num_voxels, domain_bounds, bc);
 ```
 We can set a number of molecules in the first compartment as follows
 ```
-sim.SetInitialNumMolecules({0}, 1000, 0);
+sim.SetVoxels({0}, 1000, 0);
 ```
 where we place a thousand molecules (second argument) of first species (third argument) 
 into the first voxel (first argument).

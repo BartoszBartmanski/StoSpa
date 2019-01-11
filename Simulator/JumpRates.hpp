@@ -24,6 +24,14 @@ protected:
     double mKappa = 1.0;
 
     double mH = 1.0;
+
+    double mLambda0 = 0.0;
+
+    double mLambda1 = 0.0;
+
+    double mLambda2 = 0.0;
+
+    double mLambda3 = 0.0;
 public:
     JumpRate() = default;
 
@@ -33,13 +41,13 @@ public:
 
     string GetMethod();
 
-    virtual double GetLambda0()=0;
+    virtual double GetLambda0();
 
-    virtual double GetLambda1()=0;
+    virtual double GetLambda1();
 
-    virtual double GetLambda2()=0;
+    virtual double GetLambda2();
 
-    virtual double GetLambda3()=0;
+    virtual double GetLambda3();
 
 };
 
@@ -47,15 +55,6 @@ class JumpRate1d : public JumpRate
 {
 public:
     explicit JumpRate1d(vector<double> voxel_dims);
-
-    double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
-
 };
 
 class FDM : public JumpRate
@@ -65,45 +64,18 @@ private:
 
 public:
     FDM(vector<double> voxel_dims, double alpha);
-
-    double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
-
 };
 
 class FEM : public JumpRate
 {
 public:
     explicit FEM(vector<double> voxel_dims);
-
-    double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
-
 };
 
 class FVM : public JumpRate
 {
 public:
     explicit FVM(vector<double> voxel_dims);
-
-    double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
-
 };
 
 class FET : public JumpRate
@@ -136,13 +108,6 @@ public:
     virtual double GetTheta3();
 
     double GetLambda0() override;
-
-    double GetLambda1() override;
-
-    double GetLambda2() override;
-
-    double GetLambda3() override;
-
 };
 
 class FETUniform : public FET

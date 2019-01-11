@@ -108,7 +108,7 @@ int main(int argc, const char** argv)
             sim.SetDiffusionRate(move(jump_rate), p.GetDiff()[0], 0);
             sim.AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
             sim.AddReaction(make_unique<Production>(p.GetProd()[0], 0));
-            sim.SetInitialNumMolecules(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
+            sim.SetVoxels(floor_div(sim.GetNumVoxels(), 2), p.GetInitialNum()[0], 0);
             sim.Advance(p.GetEndTime());
             error[method][i] = sim.GetError(sol);
         }

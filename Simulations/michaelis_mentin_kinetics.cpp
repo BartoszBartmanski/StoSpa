@@ -89,7 +89,7 @@ int main(int argc, const char** argv)
     for (unsigned i=0; i < p.GetNumSpecies(); i++)
     {
         // Setup the number of molecules
-        sim_full->SetInitialState(p.GetInitialNum()[i] * ones(sim_full->GetNumVoxels()), i);
+        sim_full->SetVoxels(p.GetInitialNum()[i] * ones(sim_full->GetNumVoxels()), i);
         // Setup the reaction rates
         sim_full->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[i], i);
     }
@@ -114,8 +114,8 @@ int main(int argc, const char** argv)
     auto sim_reduced = simulator(p);
 
     // Setup the number of molecules
-    sim_reduced->SetInitialState(p.GetInitialNum()[1] * ones(sim_reduced->GetNumVoxels()), 0);
-    sim_reduced->SetInitialState(p.GetInitialNum()[3] * ones(sim_reduced->GetNumVoxels()), 1);
+    sim_reduced->SetVoxels(p.GetInitialNum()[1] * ones(sim_reduced->GetNumVoxels()), 0);
+    sim_reduced->SetVoxels(p.GetInitialNum()[3] * ones(sim_reduced->GetNumVoxels()), 1);
     // Setup the reaction rates
     sim_reduced->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[1], 0);
     sim_reduced->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[3], 1);
