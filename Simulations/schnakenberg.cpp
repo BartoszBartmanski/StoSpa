@@ -38,7 +38,7 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --prod=<prod>                                 Rate of production [default: 1.0,3.0].
       --rate=<rate>                                 Rate of schnakenberg reaction [default: 0.000001]
       --initial_num=<num>                           Initial number of molecules [default: 200,75].
-
+      --growth_rate=<rate>                          Growth rate of the domain. [default: 0.0]
 )";
 
 
@@ -76,6 +76,13 @@ int main(int argc, const char** argv)
     unique_ptr<AbstractReaction> schnakenberg = make_unique<Schnakenberg>(rate * pow(sim->GetVoxelSize(), 2));
     p.AddReaction(schnakenberg);
     sim->AddReaction(move(schnakenberg));
+
+    double growth = stod(args["--growth_rate"].asString());
+    if (growth > 0)
+    {
+        p.Add("growth_rate", args["--growth_rate"].asString());
+        sim->SetGrowth(make_unique<Exponential>(p.GetNumDims(), growth));
+    }
 
     // Check whether this file name already exists and alter it appropriately
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());
