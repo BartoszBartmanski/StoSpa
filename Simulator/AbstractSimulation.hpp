@@ -22,7 +22,6 @@
 #include "AbstractReaction.hpp"
 #include "DiffusionReflective.hpp"
 #include "DiffusionPeriodic.hpp"
-#include "DiffusionReflectiveExp.hpp"
 #include "VectorFunctions.hpp"
 #include "Grid.hpp"
 #include "Utilities.hpp"
