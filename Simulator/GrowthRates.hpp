@@ -11,8 +11,6 @@
 class GrowthRate
 {
 protected:
-    unsigned mDims=1;
-
     double mRateConstant=0;
 
 public:
@@ -26,7 +24,7 @@ public:
 class Exponential : public GrowthRate
 {
 public:
-    Exponential(unsigned dims, double rate);
+    explicit Exponential(double rate);
 
     double GetFunction(const double& time) override;
 };

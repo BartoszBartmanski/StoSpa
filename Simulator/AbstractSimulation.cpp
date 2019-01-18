@@ -125,7 +125,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 
     if (mGrowth)
     {
-        mGrids[run].voxelSize = mGrowthRate->GetFunction(mGrids[run].time) * mInitialVoxelSize;
+        mGrids[run].scale = pow(mGrowthRate->GetFunction(mGrids[run].time), 2);
     }
 
     if (mGrids[run].time < inf)
@@ -176,11 +176,11 @@ void AbstractSimulation::SetDiffusionRate(unique_ptr<JumpRate>&& method, double 
     {
         if (mBC == "reflective")
         {
-            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction, mInitialVoxelSize));
+            mReactions.emplace_back(make_unique<DiffusionReflective>(diff * method->GetLambda(direction), species, direction));
         }
         else if (mBC == "periodic")
         {
-            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction, mInitialVoxelSize));
+            mReactions.emplace_back(make_unique<DiffusionPeriodic>(diff * method->GetLambda(direction), species, direction));
         }
         else
         {

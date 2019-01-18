@@ -81,7 +81,7 @@ int main(int argc, const char** argv)
     if (growth > 0)
     {
         p.Add("growth_rate", args["--growth_rate"].asString());
-        sim->SetGrowth(make_unique<Exponential>(p.GetNumDims(), growth));
+        sim->SetGrowth(make_unique<Exponential>(growth));
     }
 
     // Check whether this file name already exists and alter it appropriately

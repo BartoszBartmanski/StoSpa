@@ -15,17 +15,14 @@ class DiffusionReflective : public AbstractReaction
 
     vector<int> mDirection;
 
-    double mInitialVoxelSize;
-
 public:
-    DiffusionReflective(double reaction_rate, unsigned species, vector<int> direction, double initial_voxel_size)
+    DiffusionReflective(double reaction_rate, unsigned species, vector<int> direction)
     {
         assert(reaction_rate >= 0);
         mReactionName = "DiffusionReflective";
 
         mRateConstant = reaction_rate;
         mSpeciesIndex = species;
-        mInitialVoxelSize = initial_voxel_size;
 
         if (direction.size() == 1)
         {
@@ -37,14 +34,12 @@ public:
 
     double GetPropensity(const Grid& grid, const int& voxel_index) override
     {
-        double scale = mInitialVoxelSize / grid.voxelSize;
-        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] * scale;
+        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] / grid.scale;
     }
 
     double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
-        double scale = mInitialVoxelSize / grid.voxelSize;
-        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] * scale;
+        return mRateConstant * grid.voxels[mSpeciesIndex][voxel_index] / grid.scale;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
