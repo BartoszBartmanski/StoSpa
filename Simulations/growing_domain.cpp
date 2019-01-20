@@ -54,7 +54,7 @@ int main(int argc, const char** argv)
 
     // Declare the simulation name
     string sim_name = "growing_domain";
-    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
+    if (args["--append"]) { sim_name += "_" + args["--append"].asString(); }
 
     // Declare a pointer for the simulation object
     Simulation1d sim(p);

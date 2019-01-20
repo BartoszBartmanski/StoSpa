@@ -54,7 +54,7 @@ int main(int argc, const char** argv)
 
     // Declare the simulation name
     string sim_name = "sim_" + to_string(p.GetNumDims()) + "d";
-    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
+    if (args["--append"]) { sim_name += "_" + args["--append"].asString(); }
 
     // Get the initial position of the molecules
     vector<unsigned> initial_pos;

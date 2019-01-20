@@ -55,7 +55,7 @@ int main(int argc, const char** argv)
 
     // Declare the simulation name
     string sim_name = "schnakenberg_" + to_string(p.GetNumDims()) + "d";
-    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
+    if (args["--append"]) { sim_name += "_" + args["--append"].asString(); }
 
     // Initialise the simulation object
     auto sim = simulator(p);
