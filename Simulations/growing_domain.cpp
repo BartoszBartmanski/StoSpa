@@ -54,7 +54,7 @@ int main(int argc, const char** argv)
 
     // Declare the simulation name
     string sim_name = "growing_domain";
-    if (args["--append"]) { sim_name = "_" + args["--append"].asString(); }
+    if (args["--append"]) { sim_name += "_" + args["--append"].asString(); }
 
     // Declare a pointer for the simulation object
     Simulation1d sim(p);
@@ -63,7 +63,7 @@ int main(int argc, const char** argv)
 
     sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
 
-    sim.SetGrowth(make_unique<Exponential>(p.GetNumDims(), growth));
+    sim.SetGrowth(make_unique<Exponential>(growth));
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters

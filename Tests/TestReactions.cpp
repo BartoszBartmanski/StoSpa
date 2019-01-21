@@ -19,7 +19,7 @@ TEST_CASE("Test DiffusionReflective class")
     int voxel_index = 0;
     Grid g = Grid(1, voxel_size, 5);
     g.voxels[0] = {2, 0, 0, 0, 1};
-    auto test = DiffusionReflective(reaction_rate, 0, {1}, voxel_size);
+    auto test = DiffusionReflective(reaction_rate, 0, {1});
 
     SECTION("Check the constructor")
     {
@@ -67,7 +67,7 @@ TEST_CASE("Test DiffusionPeriodic class")
     int voxel_index = 0;
     Grid g = Grid(1, voxel_size, 5);
     g.voxels[0] = {2, 0, 0, 0, 1};
-    auto test = DiffusionPeriodic(reaction_rate, 0, {1}, voxel_size);
+    auto test = DiffusionPeriodic(reaction_rate, 0, {1});
 
     SECTION("Check the constructor")
     {
