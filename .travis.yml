@@ -1,0 +1,18 @@
+language: cpp
+dist: xenial
+compiler:
+- clang
+- gcc
+os:
+- linux
+before_install:
+- echo $LANG
+- echo $LC_ALL
+- if [ $TRAVIS_OS_NAME == linux ]; then mkdir build; cd build; cmake ../; make all; fi
+script:
+- if [ $TRAVIS_OS_NAME == linux ]; then ./unittest; fi
+branches:
+  only:
+  - master
+notifications:
+  email: false
