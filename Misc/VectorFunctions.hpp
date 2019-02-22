@@ -59,7 +59,15 @@ void print_array(vector<vector<T>> matrix, const string& name="matrix")
  * @param path_to_file - path to the file
  */
 template<typename T>
-void save_vector(const vector<T>& vec, const string& path_to_file)
+void save(const T& val, const string &path_to_file)
+{
+    ofstream vec_file(path_to_file, ios_base::app);
+    vec_file << val << endl;
+    vec_file.close();
+}
+
+template<typename T>
+void save(const vector<T> &vec, const string &path_to_file)
 {
     ofstream vec_file(path_to_file, ios_base::app);
     ostream_iterator<T> output_iterator(vec_file, " ");
@@ -69,11 +77,18 @@ void save_vector(const vector<T>& vec, const string& path_to_file)
 }
 
 template<typename T>
-void save_vector(const vector<T>& vec, const unique_ptr<ofstream>& handle)
+void save(const vector<T> &vec, const unique_ptr<ofstream> &handle)
 {
     ostream_iterator<T> output_iterator(*handle, " ");
     copy(vec.begin(), vec.end(), output_iterator);
     *handle << endl;
+}
+
+template<typename T>
+void save(const T& val, const unique_ptr<ofstream> &handle)
+{
+    ostream_iterator<T> output_iterator(*handle, " ");
+    *handle << val << endl;
 }
 
 /**

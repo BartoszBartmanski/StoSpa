@@ -86,10 +86,10 @@ TEST_CASE("Test VectorFunctions.*pp")
 {
     string ans;
 
-    SECTION("Check save_vector functions")
+    SECTION("Check save functions")
     {
         vector<double> test = {0, 1, 2, 3};
-        save_vector(test, "./test.dat");
+        save(test, "./test.dat");
 
         ifstream test_file ("./test.dat");
         REQUIRE(test_file.is_open());

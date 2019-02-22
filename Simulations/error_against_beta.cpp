@@ -112,9 +112,9 @@ int main(int argc, const char** argv)
     p.Save(path_to_file);
 
     // Save the data
-    save_vector(beta_x, path_to_file);
-    save_vector(beta_y, path_to_file);
-    save_vector(error, path_to_file);
+    save(beta_x, path_to_file);
+    save(beta_y, path_to_file);
+    save(error, path_to_file);
 
     // Add the simulation name to the log file
     prog.End(path_to_file);

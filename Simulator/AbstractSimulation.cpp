@@ -384,7 +384,7 @@ void AbstractSimulation::Run(const string &output, const double &endtime, const 
         for (unsigned species=0; species < mNumSpecies; species++)
         {
             // Save the stochastic simulation state
-            save_vector(this->GetAverageNumMolecules(species), p_output);
+            save(this->GetAverageNumMolecules(species), p_output);
         }
         prog.Show();
     }

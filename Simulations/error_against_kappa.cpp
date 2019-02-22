@@ -129,11 +129,11 @@ int main(int argc, const char** argv)
     p.Save(path_to_file);
 
     // Save the data
-    save_vector(kappa, path_to_file);
-    save_vector(error["fem"], path_to_file);
-    save_vector(error["fdm"], path_to_file);
-    save_vector(error["fvm"], path_to_file);
-    save_vector(error["fet"], path_to_file);
+    save(kappa, path_to_file);
+    save(error["fem"], path_to_file);
+    save(error["fdm"], path_to_file);
+    save(error["fvm"], path_to_file);
+    save(error["fet"], path_to_file);
 
     // Add the simulation name to the log file
     prog.End(path_to_file);

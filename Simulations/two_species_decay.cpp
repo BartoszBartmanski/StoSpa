@@ -79,22 +79,7 @@ int main(int argc, const char** argv)
 
     // Initialise progress object
     auto num_steps = unsigned(p.GetEndTime() / p.GetTimeStep());
-    vector<unsigned> vec_of_totals(num_steps-1);
-    Progress prog(num_steps);
-
-    for (unsigned i = 1; i < num_steps; i++)
-    {
-        sim->Advance(i*p.GetTimeStep());
-        unsigned total = sim->GetTotalMolecules();
-        vec_of_totals[i-1] = total;
-        if (total < stationary_dist.size())
-        {
-            stationary_dist[total] += 1;
-        }
-
-        // Show progress of the simulation
-        prog.Show();
-    }
+    Progress prog(num_steps-1);
 
     // Check that the directory exists and that the no file is being over-written.
     string path_to_file = update_path(p.GetSaveDir(), file_name, p.GetStartIndex());
@@ -105,9 +90,22 @@ int main(int argc, const char** argv)
     p.Add("row 1", "Number of times that the system has been in the state given by the index");
     p.Save(path_to_file);
 
+    for (unsigned i = 1; i < num_steps; i++)
+    {
+        sim->Advance(i*p.GetTimeStep());
+        unsigned total = sim->GetTotalMolecules();
+        save(total, path_to_raw_data);
+        if (total < stationary_dist.size())
+        {
+            stationary_dist[total] += 1;
+        }
+
+        // Show progress of the simulation
+        prog.Show();
+    }
+
     // Save the data
-    save_vector(vec_of_totals, path_to_raw_data);
-    save_vector(stationary_dist, path_to_file);
+    save(stationary_dist, path_to_file);
 
     // Add the simulation name to the log file
     prog.End(path_to_file);
