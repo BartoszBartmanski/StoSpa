@@ -97,6 +97,23 @@ void AbstractSimulation::UpdateTime(const unsigned& run, const int& voxel_index)
     mGrids[run].next_reaction_time.update(mGrids[run].handles[voxel_index]);
 }
 
+void AbstractSimulation::UpdateVoxelSize(const unsigned& run)
+{
+    double growth = mGrowthRate->GetFunction(mGrids[run].time);
+
+    if (mDim == 1)
+    {
+        mGrids[run].voxelSize = mInitialVoxelSize * growth;
+        mGrids[run].diffScaleFactor = growth * growth;
+    }
+    else
+    {
+        growth *= growth;
+        mGrids[run].voxelSize = mInitialVoxelSize * growth;
+        mGrids[run].diffScaleFactor = growth;
+    }
+}
+
 void AbstractSimulation::SetupTimeIncrements()
 {
     if (!mTimesSet)
@@ -125,7 +142,7 @@ void AbstractSimulation::SSA_loop(const unsigned& run)
 
     if (mGrowth)
     {
-        mGrids[run].scale = pow(mGrowthRate->GetFunction(mGrids[run].time), 2);
+        this->UpdateVoxelSize(run);
     }
 
     if (mGrids[run].time < inf)
@@ -277,7 +294,12 @@ double AbstractSimulation::GetVoxelSize()
 
 vector<double> AbstractSimulation::GetVoxelDims()
 {
-    return mVoxelDims;
+    auto vec = mVoxelDims;
+    if (mGrowth)
+    {
+        auto vec = mGrowthRate->GetFunction(mTime) * mVoxelDims;
+    }
+    return vec;
 }
 
 unsigned AbstractSimulation::GetInitialTotalMolecules(unsigned int species)
@@ -384,7 +406,7 @@ void AbstractSimulation::Run(const string &output, const double &endtime, const 
         for (unsigned species=0; species < mNumSpecies; species++)
         {
             // Save the stochastic simulation state
-            save_vector(this->GetAverageNumMolecules(species), p_output);
+            save(this->GetAverageNumMolecules(species), p_output);
         }
         prog.Show();
     }

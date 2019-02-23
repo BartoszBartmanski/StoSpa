@@ -11,6 +11,7 @@ Simulation1d::Simulation1d(unsigned num_runs, unsigned num_species, unsigned num
     assert(domain_bounds.size() == 2);
 
     // Input parameters
+    mDim = 1;
     mNumRuns = num_runs;
     mNumSpecies = num_species;
     mNumVoxels = {num_voxels, 1};
@@ -48,6 +49,7 @@ Simulation1d::Simulation1d(Parameters params)
     assert(params.GetDomainBounds().size() == 2);
 
     // Input parameters
+    mDim = 1;
     mNumRuns = params.GetNumRuns();
     mNumSpecies = params.GetNumSpecies();
     mNumVoxels = {params.GetNumVoxels(), 1};

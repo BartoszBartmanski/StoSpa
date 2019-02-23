@@ -169,10 +169,6 @@ void Progress::Show()
 {
     mCurrentStep++;
     cout << setprecision(2) << fixed << "\rProgress: " << 100.0 * mCurrentStep / double(mNumSteps) << "%" << flush;
-    if (mCurrentStep >= mNumSteps)
-    {
-        cout << endl;
-    }
 }
 
 void Progress::Reset()
@@ -182,5 +178,5 @@ void Progress::Reset()
 
 void Progress::End(string path_to_file)
 {
-    cout << "Data saved in " << path_to_file << endl;
+    cout << endl << "Data saved in " << path_to_file << endl;
 }

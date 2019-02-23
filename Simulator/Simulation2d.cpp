@@ -11,6 +11,7 @@ Simulation2d::Simulation2d(unsigned num_runs, unsigned num_species, unsigned num
     assert(ratio > 0.0);
 
     // Input parameters
+    mDim = 2;
     mNumRuns = num_runs;
     mNumSpecies = num_species;
     mNumVoxels = {num_voxels, unsigned(ratio * num_voxels)};
@@ -58,6 +59,7 @@ Simulation2d::Simulation2d(Parameters params)
     assert(params.GetBeta()[1] >= 0.0 and params.GetBeta()[1] <= 1.0);
 
     // Input parameters
+    mDim = 2;
     mNumRuns = params.GetNumRuns();
     mNumSpecies = params.GetNumSpecies();
     mNumVoxels = {params.GetNumVoxels(), unsigned(params.GetKappa() * params.GetNumVoxels())};
