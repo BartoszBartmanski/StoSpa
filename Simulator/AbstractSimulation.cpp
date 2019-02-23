@@ -110,7 +110,7 @@ void AbstractSimulation::UpdateVoxelSize(const unsigned& run)
     {
         growth *= growth;
         mGrids[run].voxelSize = mInitialVoxelSize * growth;
-        mGrids[run].voxelSize = mInitialVoxelSize * growth;
+        mGrids[run].diffScaleFactor = growth;
     }
 }
 
