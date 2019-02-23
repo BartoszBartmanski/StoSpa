@@ -16,7 +16,7 @@ class Grid
 {
 public:
 
-    double scale=1.0;
+    double diffScaleFactor=1.0;
 
     double voxelSize=1.0;
 

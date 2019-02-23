@@ -53,6 +53,9 @@ protected:
 
     unique_ptr<GrowthRate> mGrowthRate;
 
+    /** Dimensionality of the system */
+    unsigned mDim;
+
     /** Number of runs of this simulation */
     unsigned mNumRuns;
 
@@ -113,6 +116,8 @@ protected:
     inline void UpdateTotalPropensity(const unsigned& run, const int& voxel_index);
 
     inline void UpdateTime(const unsigned& run, const int& voxel_index);
+
+    inline void UpdateVoxelSize(const unsigned& run);
 
 public:
 
