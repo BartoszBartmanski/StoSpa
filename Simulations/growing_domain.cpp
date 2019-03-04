@@ -9,7 +9,6 @@
 #include "Simulator.hpp"
 #include "Decay.hpp"
 #include "Production.hpp"
-#include "GrowthRates.hpp"
 
 
 static const char USAGE[] =
