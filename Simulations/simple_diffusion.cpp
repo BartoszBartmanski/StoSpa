@@ -37,7 +37,6 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --prod=<prod>                                 Rate of production [default: 0.0].
       --initial_num=<num>                           Initial number of molecules [default: 1000].
       --initial_pos=<pos>                           Initial position (in indices) of the molecules.
-      -j --num_threads=<num>                        Number of threads for parallelisation [default: 1].
 
 )";
 

@@ -6,7 +6,6 @@
 #define STOSPA_SIMULATION_2D_HPP
 
 #include "AbstractSimulation.hpp"
-#include "JumpRates.hpp"
 
 using namespace std;
 

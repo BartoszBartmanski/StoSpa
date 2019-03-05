@@ -13,7 +13,6 @@
 #include <chrono>
 #include <unistd.h>
 #include <dirent.h>
-#include "Version.hpp"
 
 using namespace std;
 

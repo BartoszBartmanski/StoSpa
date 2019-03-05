@@ -7,7 +7,8 @@
 #include "Utilities.hpp"
 #include "Parameters.hpp"
 #include "Simulator.hpp"
-#include "GrowthRates.hpp"
+#include "Decay.hpp"
+#include "Production.hpp"
 
 
 static const char USAGE[] =
@@ -34,6 +35,8 @@ If couple of inputs are necessary for one argument, separate them by a comma.
       --append=<append>                             Append filename.
       --start_index=<index>                         The start index of the simulations. [default: 0]
       --diff=<diff>                                 Diffusion coefficient [default: 1.0].
+      --decay=<decay>                               Rate of decay [default: 0.0].
+      --prod=<prod>                                 Rate of production [default: 0.0].
       --initial_num=<num>                           Initial number of molecules [default: 1000].
       --growth_rate=<rate>                          Growth rate of the domain. [default: 1.0]
 )";
@@ -53,21 +56,23 @@ int main(int argc, const char** argv)
     double growth = stod(args["--growth_rate"].asString());
 
     // Declare the simulation name
-    string sim_name = "growing_domain";
+    string sim_name = "growing_domain_" + to_string(p.GetNumDims()) + "d";
     if (args["--append"]) { sim_name += "_" + args["--append"].asString(); }
 
     // Declare a pointer for the simulation object
-    Simulation1d sim(p);
+    auto sim = simulator(p);
 
-    sim.SetVoxels({0}, p.GetInitialNum()[0], 0);
+    sim->SetVoxels(vector<unsigned>(p.GetNumDims(), 0), p.GetInitialNum()[0], 0);
 
-    sim.SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->SetDiffusionRate(get_jump_rates(p), p.GetDiff()[0], 0);
+    sim->AddReaction(make_unique<Decay>(p.GetDecay()[0], 0));
+    sim->AddReaction(make_unique<Production>(p.GetProd()[0], 0));
 
-    sim.SetGrowth(make_unique<Exponential>(growth));
+    sim->SetGrowth(make_unique<Exponential>(growth));
 
     string path_to_file = update_path(p.GetSaveDir(), sim_name, p.GetStartIndex());  // Get appropriate filename
     p.Save(path_to_file);  // Save parameters
-    sim.Run(path_to_file, p.GetEndTime(), p.GetTimeStep());
+    sim->Run(path_to_file, p.GetEndTime(), p.GetTimeStep());
 
     return 0;
 }
