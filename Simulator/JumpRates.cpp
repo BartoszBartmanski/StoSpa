@@ -65,7 +65,7 @@ FDM::FDM(vector<double> voxel_dims, double alpha)
     double upper_bound = min(mKappa, 1.0/mKappa);
     if (alpha < 0.0 or alpha > upper_bound)
     {
-        string message = "Parameter alpha is not within a suitable range!\nalpha = " + to_string(alpha);
+        string message = "\nParameter alpha is not within a suitable range!\nalpha = " + to_string(alpha);
         throw runtime_error(message);
     }
     mAlpha = alpha;
@@ -84,7 +84,12 @@ FEM::FEM(vector<double> voxel_dims)
     mKappa = voxel_dims[0] / voxel_dims[1];
     mH = voxel_dims[1];
 
-    assert(mKappa >= 1.0/sqrt(2) and mKappa <= sqrt(2));
+    if (mKappa <= 1.0/sqrt(2) or mKappa >= sqrt(2))
+    {
+        string message = "\nParameter kappa is not within a suitable range!\nkappa = " + to_string(mKappa);
+        message += "\nkappa should be within [" + to_string(1.0/sqrt(2)) + ", " + to_string(sqrt(2)) + "]\n";
+        throw runtime_error(message);
+    }
 
     mLambda0 = 4.0 * (pow(mKappa, 2) + 1) / (3.0 * pow(mKappa * mH, 2));
     mLambda1 = (2.0 - pow(mKappa, 2)) / (3.0 * pow(mKappa * mH, 2));
