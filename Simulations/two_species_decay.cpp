@@ -26,7 +26,7 @@ static const char USAGE[] =
       --diff=<diff>                                 The diffusion coefficient for species A [default: 1.0,1.0].
       --k_1=<k_1>                                   The rate constant for the two species decay reaction. [default: 0.2]
       --k_2=<k_2>                                   The production rate of species A. [default: 1.0]
-      --initial_num=<val>                           Initial number of molecules.
+      --initial_num=<val>                           Initial number of molecules. [default: 5,1]
       --dir_name=<dir_name>                         The name of save dir.
       --append=<append>                             Append filename.
       --start_index=<index>                         The start index of the simulations. [default: 0]
@@ -48,22 +48,20 @@ int main(int argc, const char** argv)
     double k_2 = stod(args["--k_2"].asString());                        // production of species 0
     double k_1 = stod(args["--k_1"].asString());                        // decay of species 0
 
-    auto mean_a = unsigned(k_2 * pow(p.GetDomainBounds()[1] - p.GetDomainBounds()[0], 2) / k_1);
-    p.Add("means", to_string(mean_a));
-
-    if (p.GetInitialNum().empty())
-    {
-        p.SetInitailNum({mean_a/p.GetNumVoxels(), 1});
-    }
-
-    // Create a vector to store the values
-    vector<unsigned> stationary_dist(5 * mean_a, 0);
+    vector<unsigned> stationary_dist(100 * p.GetInitialNum()[0], 0);
 
     // Point the pointer to the object
     auto sim = simulator(p);
 
     // Setup the number of molecules
-    sim->SetVoxels(p.GetInitialNum()[0] * ones(sim->GetNumVoxels()), 0);
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_int_distribution<unsigned> rand_x(0, p.GetNumVoxels() - 1);
+    uniform_int_distribution<unsigned> rand_y(0, unsigned(p.GetNumVoxels()/p.GetKappa()) - 1);
+    for (unsigned i=0; i < p.GetInitialNum()[0]; i++)
+    {
+        sim->SetVoxels({rand_x(gen), rand_y(gen)}, 1, 0);
+    }
     sim->SetVoxels({0, 0}, p.GetInitialNum()[1], 1);
 
     // Setup the reaction rates
