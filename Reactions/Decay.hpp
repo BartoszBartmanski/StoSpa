@@ -28,7 +28,9 @@ public:
 
     double GetFuturePropensity(const Grid& grid, const int& voxel_index) override
     {
-        return mRateConstant * (grid.voxels[mSpeciesIndex][voxel_index] - 1);
+	unsigned num = grid.voxels[mSpeciesIndex][voxel_index];
+	if (num > 0) { num -= 1; }
+	return mRateConstant * num;
     }
 
     int UpdateGrid(Grid& grid, const int& voxel_index) override
