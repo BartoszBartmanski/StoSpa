@@ -14,13 +14,12 @@ addons:
     update: true
     sources:
       - ubuntu-toolchain-r-test
-      - boost-latest
     packages:
       - cmake
       - git
-      - gcc-7.4
-      - g++-7.4
-      - libboost-all-dev
+      - gcc-7
+      - g++-7
+      - libboost-dev
 
 before_script:
   - mkdir build
