@@ -1,29 +1,72 @@
+# will build a C++ programme
 language: cpp
 
-os:
-  - linux
+matrix:
+  include:
+    # works on Precise and Trusty
+    - os: linux
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-4.9
+      env:
+         - MATRIX_EVAL="CC=gcc-4.9 && CXX=g++-4.9"
 
-dist: bionic
+    # works on Precise and Trusty
+    - os: linux
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-5
+      env:
+         - MATRIX_EVAL="CC=gcc-5 && CXX=g++-5"
 
-compiler:
-  - clang
-  - gcc
+    # works on Precise and Trusty
+    - os: linux
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-6
+      env:
+        - MATRIX_EVAL="CC=gcc-6 && CXX=g++-6"
 
-addons:
-  apt:
-    update: true
-    sources:
-      - ubuntu-toolchain-r-test
-    packages:
-      - cmake
-      - git
-      - gcc-7
-      - g++-7
-      - libboost-dev
+    # works on Precise and Trusty
+    - os: linux
+      sudo: required
+      addons:
+        apt:
+          sources:
+            - ubuntu-toolchain-r-test
+          packages:
+            - g++-7
+      env:
+        - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
 
+before_install:
+    - eval "${MATRIX_EVAL}"
+
+# install dependencies
+install:
+    - sudo apt-get install -y libboost-all-dev
+
+
+# prepare build process
 before_script:
-  - mkdir build
-  - cd build
-  - cmake ..
+    - mkdir ${TRAVIS_BUILD_DIR}/build
+    - cd ${TRAVIS_BUILD_DIR}/build
 
-script: make
+# build and test
+script:
+    - cmake ../ -DCMAKE_BUILD_TYPE=Debug
+    - make -j2
+    - make all
+    - ./unittest
